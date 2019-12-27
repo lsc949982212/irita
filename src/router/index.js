@@ -1,27 +1,56 @@
-import Vue from 'vue'
-import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
+import Vue from 'vue';
+import VueRouter from 'vue-router';
+import Login from '../views/Login';
+import AssetList from '../views/AssetList';
+import AssetAdd from '../views/AssetAdd';
+import AssetDetails from '../views/AssetDetails';
+import AssetEdit from '../views/AssetEdit';
 
-Vue.use(VueRouter)
+Vue.use(VueRouter);
 
 const routes = [
-  {
-    path: '/',
-    name: 'home',
-    component: Home
-  },
-  {
-    path: '/about',
-    name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
-  }
-]
+    {
+        path : '/login',
+        name : 'login',
+        //redirect:'/login',
+        component : Login
+    },
+    {
+        path : '/',
+        redirect:'/login',
+    },
+
+    {
+        path : '/asset_list',
+        name : 'asset_list',
+        /* component: () => import('../views/AssetList.vue')*/
+        component : AssetList
+    },
+    {
+        path : '/asset_add',
+        name : 'asset_add',
+        component : AssetAdd
+    },
+    {
+        path : '/asset_detail',
+        name : 'asset_detail',
+        component : AssetDetails
+    },
+    {
+        path : '/asset_edit',
+        name : 'asset_edit',
+        component : AssetEdit
+    }
+];
 
 const router = new VueRouter({
-  routes
+    routes
+});
+
+router.beforeEach((to, from, next) => {
+    console.log(to)
+    console.log(from)
+    next();
 });
 
 export default router
