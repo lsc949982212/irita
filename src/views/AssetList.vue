@@ -13,7 +13,6 @@
             <div class="table_container">
                 <el-table
                         :data="tableData"
-                        :header-row-class-name="getHeaderClassName"
                         style="width: 100%">
                     <el-table-column
                             fixed
@@ -138,14 +137,7 @@
         },
         methods:{
             add(){
-
-            },
-            getHeaderClassName(row, index){
-                console.log('-----',row)
-                console.log('-----',index)
-                return {
-                    background:'table_header'
-                }
+                this.$router.push('/asset_add');
             },
             handleClick(row){
                 console.log(row)
@@ -168,7 +160,8 @@
             border-radius:4px;
             margin-top:30px;
             padding:24px 30px 30px 30px;
-
+            background: #ffffff;
+            box-sizing: border-box;
             .asset_list_title_container{
                 .flexRow;
                 justify-content: space-between;

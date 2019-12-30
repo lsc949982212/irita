@@ -32,7 +32,7 @@
        <!--<login-dialog />-->
         <el-dialog
                 :visible.sync="centerDialogVisible"
-                width="30%"
+                width="400px"
                 top="35vh"
                 center>
             <div class="login_dialog_container">
@@ -64,6 +64,7 @@
 
 <script>
     import { Message } from 'element-ui';
+    import LoginHelper from './helper/LoginHelper';
 
     export default {
         name : "app",
@@ -81,6 +82,15 @@
                 psd:'',
             }
         },
+        watch:{
+            $route(to){
+                if(to.path === '/login'){
+                    this.activeTab = 0
+                }else{
+                    this.activeTab = 1
+                }
+            }
+        },
         components:{
 
         },
@@ -92,7 +102,7 @@
         },
         methods:{
             handleTabClick(tab){
-                this.activeTab = tab;
+                //this.activeTab = tab;
                 if(tab === 0){
                     this.$router.replace('/login')
                 }else{
@@ -104,14 +114,31 @@
             },
             login(){
                 //this.$refs.login.setDialogVisible(true);
-                Message({
-                    message: '登录成功',
-                    type: 'success'
+                if(!this.username){
+                    this.$message.error('请输入账号');
+                    return;
+                }else if(!this.psd){
+                    this.$message.error('请输入密码');
+                    return;
+                }
+                const isSuccess = LoginHelper.login({
+                    username:this.username,
+                    psd:this.psd,
+                    ctx:this
                 });
 
-                //this.$message.error('密码错误');
-                this.centerDialogVisible = false;
-                this.$router.push('/asset_list')
+                if(isSuccess){
+                    Message({
+                        message: '登录成功',
+                        type: 'success'
+                    });
+                    this.centerDialogVisible = false;
+                    this.$router.replace('/asset_list')
+                }else{
+                    this.$message.error('账号或者密码错误');
+                }
+
+
             },
 
         }
@@ -222,6 +249,12 @@
 
                 }
 
+                .fade-enter-active, .fade-leave-active {
+                    transition: opacity .28s;
+                }
+                .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+                    opacity: 0;
+                }
 
 
 
@@ -235,6 +268,15 @@
                 }
                 .el-button{
                     font-weight:400;
+                }
+                .el-table th, .el-table tr{
+                    background-color: #F8F8F8;
+                }
+                tr{
+                    border:none;
+                }
+                .el-table--enable-row-transition .el-table__body td{
+                    border:none;
                 }
             }
         }
