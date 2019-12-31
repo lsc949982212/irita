@@ -21,26 +21,8 @@
                 </el-select>
             </div>
             <div class="content_container step_second" v-show="step === 2">
-                <div class="content_item">
-                    <p class="content_item_title">
-                        基本信息
-                    </p>
-                    <div class="content_item_wrap" id="json_schema_node">
-
-                    </div>
-                </div>
+                <div class="content_item" id="json_schema_node"></div>
             </div>
-            <div class="content_container step_second" v-show="step === 2">
-                <div class="content_item">
-                    <p class="content_item_title">
-                        资产详情
-                    </p>
-                    <div class="content_item_wrap">
-
-                    </div>
-                </div>
-            </div>
-
             <div class="content_container step_third" v-show="step === 3">
                 <div class="content_item">
                     <p class="content_item_title">
@@ -48,8 +30,8 @@
                     </p>
                     <div class="content_item_wrap step_third_wrap">
                         <div class="content_visibility_item"
-                             :key="info.title"
-                             v-for="(info, index) in dataList">
+
+                             v-for="(info, index) in authList">
                             <span class="content_visibility_title">
                                 {{ info.title }}
                             </span>
@@ -74,7 +56,7 @@
             <div class="btn_container" v-show="step === 2">
                 <el-button class="btn" size="medium" @click="changeStep(1)">上一步</el-button>
                 <el-button size="medium"
-                           @click="changeStep(3)"
+                           @click="checkData"
                            class="btn" type="primary">下一步</el-button>
                 <el-button class="btn" size="medium" @click="handleCancelClick">取消</el-button>
             </div>
@@ -93,6 +75,8 @@
 <script>
     import Select from '../components/Select';
     import schema from './schema';
+    import jsonData from './data';
+    import {Dictionary} from '../constant/Dictionary';
 
     export default {
         name : 'AssetAdd',
@@ -108,31 +92,8 @@
                 }],
                 value: '1',
                 step:1,
-                dataList:[{
-                    title:'资产详细信息',
-                    data:[{
-                        value: '1',
-                        label: '公开信息'
-                    }, {
-                        value: '2',
-                        label: '授权查看',
-                    }, {
-                        value: '3',
-                        label: '仅自己可见',
-                    },]
-                },{
-                    title:'货物名称',
-                    data:[{
-                        value: '1',
-                        label: '公开信息'
-                    }, {
-                        value: '2',
-                        label: '授权查看',
-                    }, {
-                        value: '3',
-                        label: '仅自己可见',
-                    },]
-                }]
+                authList:[],
+                jsonData:null,
             }
         },
         components : {
@@ -140,7 +101,8 @@
         },
         mounted(){
             $("#json_schema_node").alpaca({
-                "schema": schema
+                "schemaSource": schema,
+                "dataSource":jsonData
             });
         },
         methods:{
@@ -156,16 +118,85 @@
             changeStep(step){
                 this.step = step;
             },
+            checkData(){
+                let jsonData = $("#json_schema_node").alpaca().getValue();
+                console.log(jsonData);
+                if(!jsonData.basicInfo.assetNo || !jsonData.basicInfo.assetType || !jsonData.basicInfo.assetName){
+                    return;
+                }
+                jsonData.authorizationProperties = [];
+                jsonData.secretProperties = [];
+                this.jsonData = jsonData;
+                this.changeStep(3);
+                this.setAuth();
+            },
             save(){
+                console.log(this.authList)
+                let authorization = this.authList.filter((a)=>a.value === '1');
+                let secret = this.authList.filter((a)=>a.value === '2');
+                if(this.authList.detailedInfo.payments.length){
+                    for(let i = 0; i < authorization.length; i++){
+                        if(Object.keys(this.authList.detailedInfo.payments[0]).includes(authorization[i])){
+                            this.authList.authorizationProperties.push(`detailedInfo.payments.${authorization[i]}`)
+                        }
+                    }
+
+                }
+                if(this.authList.detailedInfo.contracts.length){
+                    for(let i = 0; i < authorization.length; i++){
+                        if(Object.keys(this.authList.detailedInfo.contracts[0]).includes(authorization[i])){
+                            this.authList.authorizationProperties.push(`detailedInfo.contracts.${authorization[i]}`)
+                        }
+                    }
+
+
+                }
+                if(this.authList.detailedInfo.invoices.length){
+                    for(let i = 0; i < authorization.length; i++){
+                        if(Object.keys(this.authList.detailedInfo.invoices[0]).includes(authorization[i])){
+                            this.authList.authorizationProperties.push(`detailedInfo.invoices.${authorization[i]}`)
+                        }
+                    }
+
+                }
 
             },
             changeAuth(res){
                 console.log(res)
+                this.authList[res.index].value = res.auth;
+            },
+            setAuth(){
+                let authList = [];
+                this.setFormatDataList('payments',authList);
+                this.setFormatDataList('contracts',authList);
+                this.setFormatDataList('invoices',authList);
+                console.log('====',authList);
+                this.authList = authList;
+            },
+            setFormatDataList(field, authList){
+                if(this.jsonData.detailedInfo[field].length){
+                    for(let key in this.jsonData.detailedInfo[field][0]){
+                        authList.push({
+                            title:Dictionary.get(key),
+                            data:[{
+                                value: '1',
+                                label: '公开信息'
+                            }, {
+                                value: '2',
+                                label: '授权查看',
+                            }, {
+                                value: '3',
+                                label: '仅自己可见',
+                            }],
+                            value:'1',
+                            titleKey:key,
+                        })
+                    }
+                }
             },
             closeOtherOps(index){
-                for(let i = 0; i < this.dataList.length; i++){
+                for(let i = 0; i < this.authList.length; i++){
                     if(index !== i && this.$refs[`select_${index}`][0].getSelectOpsShow()){
-                        console.log('-=-=-=-=');
                         this.$refs[`select_${i}`][0].setSelectOpsShow(false);
                     }
                 }
@@ -203,10 +234,10 @@
             .step_first{
                 .flexRow;
             }
-            .step_second{
+            /*.step_second{
                 .flexColumn;
                 margin-bottom:10px;
-            }
+            }*/
 
             .content_container{
                 background:rgba(248,248,248,1);

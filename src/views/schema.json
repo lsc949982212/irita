@@ -3,13 +3,12 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "http://example.com/root.json",
   "type": "object",
-  "title": "receivableSchema",
+  "title": "",
   "properties": {
-    "required": ["basicInfo", "detailedInfo","authorizationProperties","secretProperties"],
     "basicInfo":{
       "$id": "#/properties/basicInfo",
       "type": "object",
-      "title": "The receivable Schema",
+      "title": "基本信息",
       "required": ["assetNo", "assetType","assetName"],
       "properties": {
         "assetNo": {
@@ -41,12 +40,12 @@
     "detailedInfo":{
       "$id": "#/properties/detailedInfo",
       "type": "object",
-      "title": "The detailedInfo Schema",
+      "title": "资产详情",
       "properties": {
         "receivable": {
           "$id": "#/properties/detailedInfo/properties/receivable",
           "type": "object",
-          "title": "The receivable Schema",
+          "title": "",
           "properties": {
             "cargoName": {
               "$id": "#/properties/detailedInfo/properties/receivable/properties/cargoName",
@@ -150,7 +149,7 @@
           "items": {
             "$id": "#/properties/detailedInfo/properties/payments/items",
             "type": "object",
-            "title": "The Items Schema",
+            "title": "",
             "properties": {
               "paymentDate": {
                 "$id": "#/properties/detailedInfo/properties/payments/items/properties/paymentDate",
@@ -186,7 +185,7 @@
           "items": {
             "$id": "#/properties/detailedInfo/properties/contracts/items",
             "type": "object",
-            "title": "The Items Schema",
+            "title": "",
             "properties": {
               "contractNo": {
                 "$id": "#/properties/detailedInfo/properties/contracts/items/properties/contractNo",
@@ -325,7 +324,7 @@
           "items": {
             "$id": "#/properties/detailedInfo/properties/invoices/items",
             "type": "object",
-            "title": "The Items Schema",
+            "title": "",
             "properties": {
               "invoiceNo": {
                 "$id": "#/properties/detailedInfo/properties/invoices/items/properties/invoiceNo",
@@ -401,66 +400,6 @@
             }
           }
         }
-      }
-    },
-
-    "dataInteract":{
-      "$id": "#/properties/dataInteract",
-      "type": "array",
-      "title": "The dataInteract Schema",
-      "items": {
-        "$id": "#/properties/dataInteract/items",
-        "type": "object",
-        "title": "The Items Schema",
-        "required": [
-          "xPath",
-          "interactType"
-        ],
-        "properties": {
-          "xPath": {
-            "$id": "#/properties/dataInteract/items/properties/xPath",
-            "type": "string",
-            "title": "The Xpath Schema",
-            "default": "",
-            "examples": ["x.receivable.payerCode"],
-            "pattern": "^(.*)$"
-          },
-          "interactType": {
-            "$id": "#/properties/dataInteract/items/properties/interactType",
-            "type": "integer",
-            "title": "The Interacttype Schema",
-            "default": 0,
-            "examples": [ 1]
-          }
-        }
-      }
-    },
-
-
-    "authorizationProperties":{
-      "$id": "#/properties/authorizationProperties",
-      "type": "array",
-      "title": "授权查看",
-      "items": {
-        "$id": "#/properties/authorizationProperties/items",
-        "type": "string",
-        "title": "每一项",
-        "default": "",
-        "examples": ["x.receivable.payerCode","x.receivable.payerName"],
-        "pattern": "^(.*)$"
-      }
-    },
-    "secretProperties":{
-      "$id": "#/properties/secretProperties",
-      "type": "array",
-      "title": "仅用户自己可见",
-      "items": {
-        "$id": "#/properties/secretProperties/items",
-        "type": "string",
-        "title": "每一项",
-        "default": "",
-        "examples": ["x.receivable.receiverCode","x.receivable.receiverName"],
-        "pattern": "^(.*)$"
       }
     }
   }
