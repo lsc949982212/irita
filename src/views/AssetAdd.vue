@@ -30,8 +30,11 @@
                     </p>
                     <div class="content_item_wrap step_third_wrap">
                         <div class="content_visibility_item"
-
+                             :class="info.type ? 'first_item' : ''"
                              v-for="(info, index) in authList">
+                            <span class="content_visibility_type" v-if="info.type">
+                                {{ getDisplayType(info.type) }}
+                            </span>
                             <span class="content_visibility_title">
                                 {{ info.title }}
                             </span>
@@ -61,7 +64,7 @@
                 <el-button class="btn" size="medium" @click="handleCancelClick">取消</el-button>
             </div>
             <div class="btn_container" v-show="step === 3">
-                <el-button class="btn" size="medium" @click="changeStep(2)">上一步</el-button>
+                <el-button class="btn" size="medium" @click="handleThirdStepPre">上一步</el-button>
                 <el-button size="medium"
                            @click="save"
                            class="btn" type="primary">保存</el-button>
@@ -102,7 +105,7 @@
         mounted(){
             $("#json_schema_node").alpaca({
                 "schemaSource": schema,
-                "dataSource":jsonData
+                //"dataSource":jsonData
             });
         },
         methods:{
@@ -131,51 +134,100 @@
                 this.setAuth();
             },
             save(){
-                console.log(this.authList)
-                let authorization = this.authList.filter((a)=>a.value === '1');
-                let secret = this.authList.filter((a)=>a.value === '2');
-                if(this.authList.detailedInfo.payments.length){
+                let authorization = this.authList.filter((a)=>a.value === '2');
+                let secret = this.authList.filter((a)=>a.value === '3');
+                this.jsonData.authorizationProperties = [];
+                this.jsonData.secretProperties = [];
+                if(this.jsonData.detailedInfo.payments.length){
                     for(let i = 0; i < authorization.length; i++){
-                        if(Object.keys(this.authList.detailedInfo.payments[0]).includes(authorization[i])){
-                            this.authList.authorizationProperties.push(`detailedInfo.payments.${authorization[i]}`)
+                        if(Object.keys(this.jsonData.detailedInfo.payments[0]).includes(authorization[i].titleKey) && authorization[i].prefix === 'payments'){
+                            this.jsonData.authorizationProperties.push(`detailedInfo.payments.${authorization[i].titleKey}`)
                         }
                     }
-
-                }
-                if(this.authList.detailedInfo.contracts.length){
-                    for(let i = 0; i < authorization.length; i++){
-                        if(Object.keys(this.authList.detailedInfo.contracts[0]).includes(authorization[i])){
-                            this.authList.authorizationProperties.push(`detailedInfo.contracts.${authorization[i]}`)
+                    for(let i = 0; i < secret.length; i++){
+                        if(Object.keys(this.jsonData.detailedInfo.payments[0]).includes(secret[i].titleKey) && secret[i].prefix === 'payments'){
+                            this.jsonData.secretProperties.push(`detailedInfo.payments.${secret[i].titleKey}`)
                         }
                     }
-
-
                 }
-                if(this.authList.detailedInfo.invoices.length){
+                if(this.jsonData.detailedInfo.contracts.length){
                     for(let i = 0; i < authorization.length; i++){
-                        if(Object.keys(this.authList.detailedInfo.invoices[0]).includes(authorization[i])){
-                            this.authList.authorizationProperties.push(`detailedInfo.invoices.${authorization[i]}`)
+                        if(Object.keys(this.jsonData.detailedInfo.contracts[0]).includes(authorization[i].titleKey) && authorization[i].prefix === 'contracts'){
+                            this.jsonData.authorizationProperties.push(`detailedInfo.contracts.${authorization[i].titleKey}`)
                         }
                     }
-
+                    for(let i = 0; i < secret.length; i++){
+                        if(Object.keys(this.jsonData.detailedInfo.contracts[0]).includes(secret[i].titleKey) && secret[i].prefix === 'contracts'){
+                            this.jsonData.secretProperties.push(`detailedInfo.contracts.${secret[i].titleKey}`)
+                        }
+                    }
                 }
-
+                if(this.jsonData.detailedInfo.invoices.length){
+                    for(let i = 0; i < authorization.length; i++){
+                        if(Object.keys(this.jsonData.detailedInfo.invoices[0]).includes(authorization[i].titleKey) && authorization[i].prefix === 'invoices'){
+                            this.jsonData.authorizationProperties.push(`detailedInfo.invoices.${authorization[i].titleKey}`)
+                        }
+                    }
+                    for(let i = 0; i < secret.length; i++){
+                        if(Object.keys(this.jsonData.detailedInfo.invoices[0]).includes(secret[i].titleKey) && secret[i].prefix === 'invoices'){
+                            this.jsonData.secretProperties.push(`detailedInfo.invoices.${secret[i].titleKey}`)
+                        }
+                    }
+                }
+                this.postData();
+            },
+            postData(){
+                console.log('-=-=-=-=-=-=',this.jsonData)
             },
             changeAuth(res){
-                console.log(res)
                 this.authList[res.index].value = res.auth;
+            },
+            getDisplayType(type){
+                if(type === 'payments'){
+                    return '款项信息'
+                }else if(type === 'contracts'){
+                    return '合同信息'
+                }else if(type === 'invoices'){
+                    return '发票信息'
+                }
             },
             setAuth(){
                 let authList = [];
                 this.setFormatDataList('payments',authList);
                 this.setFormatDataList('contracts',authList);
                 this.setFormatDataList('invoices',authList);
-                console.log('====',authList);
+                authList.sort((a,b)=>{
+                    if(a > b) {
+                        return -1
+                    }else{
+                        return 1
+                    }
+                });
+                if(authList.filter((i)=>i.index === 1).length){
+                    authList.filter((i)=>i.index === 1)[0].type = 'payments';
+                }
+                if(authList.filter((i)=>i.index === 2).length){
+                    authList.filter((i)=>i.index === 2)[0].type = 'contracts';
+                }
+                if(authList.filter((i)=>i.index === 3).length){
+                    authList.filter((i)=>i.index === 3)[0].type = 'invoices';
+                }
+
                 this.authList = authList;
+            },
+            handleThirdStepPre(){
+                this.authList = [];
+                this.changeStep(2);
             },
             setFormatDataList(field, authList){
                 if(this.jsonData.detailedInfo[field].length){
                     for(let key in this.jsonData.detailedInfo[field][0]){
+                        let index = 1;
+                        if(field === 'contracts'){
+                            index = 2;
+                        }else if(field === 'invoices'){
+                            index = 3;
+                        }
                         authList.push({
                             title:Dictionary.get(key),
                             data:[{
@@ -190,6 +242,8 @@
                             }],
                             value:'1',
                             titleKey:key,
+                            index,
+                            prefix:field,
                         })
                     }
                 }
@@ -263,13 +317,26 @@
                         padding-top:12px;
                         .content_visibility_item{
                             .flexRow;
-                            width:240px;
+                            width:400px;
                             justify-content: space-between;
                             margin-bottom:10px;
+                            position:relative;
                             .content_visibility_title{
                                 font-size:14px;
                                 color: @mainFontColor;
                             }
+                            padding-left:40px;
+                            .content_visibility_type{
+                                position:absolute;
+                                left:0;
+                                top:-40px;
+                                width:100%;
+                                border-top:1px solid #cccccc;
+                                padding-top:10px;
+                            }
+                        }
+                        .first_item{
+                            margin-top:60px;
                         }
                     }
                 }
