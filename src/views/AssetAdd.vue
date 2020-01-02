@@ -269,7 +269,8 @@
         align-items: center;
         background:rgba(250,250,250,1);
         .asset_add_wrap{
-            width: 63%;
+            width: 69%;
+            min-width:994px;
             box-shadow:0 2px 7px 0 rgba(3,44,65,0.12);
             border-radius:4px;
             margin-top:30px;
@@ -288,11 +289,6 @@
             .step_first{
                 .flexRow;
             }
-            /*.step_second{
-                .flexColumn;
-                margin-bottom:10px;
-            }*/
-
             .content_container{
                 background:rgba(248,248,248,1);
                 border-radius:4px;

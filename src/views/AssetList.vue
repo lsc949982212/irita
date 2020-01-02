@@ -59,6 +59,17 @@
                     </el-table-column>
                 </el-table>
             </div>
+            <div class="pagination_container" v-show="totalTxCount > 10">
+                    <span class="total_page">
+                        共{{ totalTxCount }}条
+                    </span>
+                <el-pagination
+                        background
+                        @current-change="onPageChange"
+                        layout="prev, pager, next"
+                        :total="1000">
+                </el-pagination>
+            </div>
         </div>
     </div>
 </template>
@@ -126,7 +137,8 @@
                     owner: '暴力服务商B',
                     status: '已查验',
                     txStatus: '已授权待转让'
-                },]
+                },],
+                totalTxCount:100
             }
         },
         components : {
@@ -141,6 +153,10 @@
             },
             handleClick(row){
                 console.log(row)
+                this.$router.push('/asset_detail');
+            },
+            onPageChange(page){
+
             }
         }
     }
@@ -155,7 +171,8 @@
         align-items: center;
         background:rgba(250,250,250,1);
         .asset_list_wrap{
-            width: 63%;
+            width: 69%;
+            min-width:994px;
             box-shadow:0 2px 7px 0 rgba(3,44,65,0.12);
             border-radius:4px;
             margin-top:30px;
@@ -181,6 +198,18 @@
                 .el-table th, .el-table tr{
                     background: yellow;
                 }
+            }
+            .pagination_container{
+                .flexRow;
+                justify-content: flex-end;
+                align-items: flex-end;
+                margin-top:10px;
+                .total_page{
+                    margin-right:10px;
+                    font-size:14px;
+                    color:@mainFontColor;
+                }
+
             }
         }
 

@@ -1,27 +1,333 @@
 <template>
-    <div class="login_container">
+    <div class="asset_edit_container">
+        <div class="asset_edit_wrap">
+            <div class="asset_edit_title_container">
+                <span class="asset_edit_title">
+                    资产信息
+                </span>
+            </div>
+            
+            <div class="content_container" @click="handleAuthContainerClick">
+                <div class="content_item" id="edit_json_schema_node"></div>
+            </div>
+            <div class="content_container">
+                <div class="content_item">
+                    <div class="auth_title_container">
+                        <span class="auth_title">
+                            设置数据可见范围
+                        </span>
+                    </div>
+                    <div class="content_item_wrap step_third_wrap">
+                        <div class="content_visibility_item"
+                             :class="info.type ? 'first_item' : ''"
+                             v-for="(info, index) in authList">
+                            <span class="content_visibility_type" v-if="info.type">
+                                {{ getDisplayType(info.type) }}
+                            </span>
+                            <span class="content_visibility_title">
+                                {{ info.title }}
+                            </span>
+                            <Select :options="info.data" :index="index"
+                                    @closeOtherOps="closeOtherOps"
+                                    :ref="`select_${index}`"
+                                    @changeAuth="changeAuth"/>
+                        </div>
+                    </div>
+                </div>
 
+            </div>
+            <div class="btn_container">
+                <el-button size="medium"
+                           @click="save"
+                           class="btn" type="primary">保存</el-button>
+                <el-button class="btn" size="medium" @click="handleCancelClick">取消</el-button>
+            </div>
+
+        </div>
     </div>
 </template>
 
 <script>
-
+    import Select from '../components/Select';
+    import schema from './schema';
+    import jsonData from './data';
+    import {Dictionary} from '../constant/Dictionary';
 
     export default {
-        name : 'Login',
+        name : 'AssetAdd',
         data(){
             return {
-
+                options: [{
+                    value: '1',
+                    label: '应收账款'
+                }, {
+                    value: '2',
+                    label: '非标资产',
+                    disabled: true
+                }],
+                value: '1',
+                step:1,
+                authList:[],
+                jsonData:null,
             }
         },
         components : {
-
+            Select
         },
         mounted(){
+            $("#edit_json_schema_node").alpaca({
+                "schemaSource": schema,
+                "dataSource":jsonData
+            });
+            setTimeout(()=>{
+                this.checkData();
+            },1000)
 
         },
-        methods(){
+        methods:{
+            handleCancelClick(){
+                this.$router.go(-1);
+            },
+            handleAuthContainerClick(){
+                this.checkData();
+            },
+            checkData(){
+                let jsonData = $("#edit_json_schema_node").alpaca().getValue();
+                console.log(jsonData);
+                jsonData.authorizationProperties = [];
+                jsonData.secretProperties = [];
+                this.jsonData = jsonData;
+                this.setAuth();
+            },
+            save(){
+                let authorization = this.authList.filter((a)=>a.value === '2');
+                let secret = this.authList.filter((a)=>a.value === '3');
+                this.jsonData.authorizationProperties = [];
+                this.jsonData.secretProperties = [];
+                if(this.jsonData.detailedInfo.payments.length){
+                    for(let i = 0; i < authorization.length; i++){
+                        if(Object.keys(this.jsonData.detailedInfo.payments[0]).includes(authorization[i].titleKey) && authorization[i].prefix === 'payments'){
+                            this.jsonData.authorizationProperties.push(`detailedInfo.payments.${authorization[i].titleKey}`)
+                        }
+                    }
+                    for(let i = 0; i < secret.length; i++){
+                        if(Object.keys(this.jsonData.detailedInfo.payments[0]).includes(secret[i].titleKey) && secret[i].prefix === 'payments'){
+                            this.jsonData.secretProperties.push(`detailedInfo.payments.${secret[i].titleKey}`)
+                        }
+                    }
+                }
+                if(this.jsonData.detailedInfo.contracts.length){
+                    for(let i = 0; i < authorization.length; i++){
+                        if(Object.keys(this.jsonData.detailedInfo.contracts[0]).includes(authorization[i].titleKey) && authorization[i].prefix === 'contracts'){
+                            this.jsonData.authorizationProperties.push(`detailedInfo.contracts.${authorization[i].titleKey}`)
+                        }
+                    }
+                    for(let i = 0; i < secret.length; i++){
+                        if(Object.keys(this.jsonData.detailedInfo.contracts[0]).includes(secret[i].titleKey) && secret[i].prefix === 'contracts'){
+                            this.jsonData.secretProperties.push(`detailedInfo.contracts.${secret[i].titleKey}`)
+                        }
+                    }
+                }
+                if(this.jsonData.detailedInfo.invoices.length){
+                    for(let i = 0; i < authorization.length; i++){
+                        if(Object.keys(this.jsonData.detailedInfo.invoices[0]).includes(authorization[i].titleKey) && authorization[i].prefix === 'invoices'){
+                            this.jsonData.authorizationProperties.push(`detailedInfo.invoices.${authorization[i].titleKey}`)
+                        }
+                    }
+                    for(let i = 0; i < secret.length; i++){
+                        if(Object.keys(this.jsonData.detailedInfo.invoices[0]).includes(secret[i].titleKey) && secret[i].prefix === 'invoices'){
+                            this.jsonData.secretProperties.push(`detailedInfo.invoices.${secret[i].titleKey}`)
+                        }
+                    }
+                }
+                this.postData();
+            },
+            postData(){
+                console.log('-=-=-=-=-=-=',this.jsonData)
+            },
+            changeAuth(res){
+                this.authList[res.index].value = res.auth;
+            },
+            getDisplayType(type){
+                if(type === 'payments'){
+                    return '款项信息'
+                }else if(type === 'contracts'){
+                    return '合同信息'
+                }else if(type === 'invoices'){
+                    return '发票信息'
+                }
+            },
+            setAuth(){
+                let authList = [];
+                this.authList = [];
+                this.setFormatDataList('payments',authList);
+                this.setFormatDataList('contracts',authList);
+                this.setFormatDataList('invoices',authList);
+                authList.sort((a,b)=>{
+                    if(a > b) {
+                        return -1
+                    }else{
+                        return 1
+                    }
+                });
+                if(authList.filter((i)=>i.index === 1).length){
+                    authList.filter((i)=>i.index === 1)[0].type = 'payments';
+                }
+                if(authList.filter((i)=>i.index === 2).length){
+                    authList.filter((i)=>i.index === 2)[0].type = 'contracts';
+                }
+                if(authList.filter((i)=>i.index === 3).length){
+                    authList.filter((i)=>i.index === 3)[0].type = 'invoices';
+                }
 
+                this.$nextTick(()=>{
+                    this.authList = authList;
+                })
+
+            },
+            setFormatDataList(field, authList){
+                if(this.jsonData.detailedInfo[field].length){
+                    for(let key in this.jsonData.detailedInfo[field][0]){
+                        let index = 1;
+                        if(field === 'contracts'){
+                            index = 2;
+                        }else if(field === 'invoices'){
+                            index = 3;
+                        }
+                        authList.push({
+                            title:Dictionary.get(key),
+                            data:[{
+                                value: '1',
+                                label: '公开信息'
+                            }, {
+                                value: '2',
+                                label: '授权查看',
+                            }, {
+                                value: '3',
+                                label: '仅自己可见',
+                            }],
+                            value:'1',
+                            titleKey:key,
+                            index,
+                            prefix:field,
+                        })
+                    }
+                }
+            },
+            closeOtherOps(index){
+                for(let i = 0; i < this.authList.length; i++){
+                    if(index !== i && this.$refs[`select_${index}`][0].getSelectOpsShow()){
+                        this.$refs[`select_${i}`][0].setSelectOpsShow(false);
+                    }
+                }
+
+            }
         }
     }
 </script>
+<style lang="less" scoped>
+    @import "../style/mixin";
+
+    .asset_edit_container {
+        width: 100%;
+        height: 100%;
+        .flexColumn;
+        align-items: center;
+        background:rgba(250,250,250,1);
+        .asset_edit_wrap{
+            width: 69%;
+            min-width:994px;
+            box-shadow:0 2px 7px 0 rgba(3,44,65,0.12);
+            border-radius:4px;
+            margin-top:30px;
+            padding:24px 30px 30px 30px;
+            background: #ffffff;
+            box-sizing: border-box;
+            .asset_edit_title_container{
+                .flexRow;
+                justify-content: space-between;
+                margin-bottom:20px;
+                .asset_edit_title{
+                    font-size:20px;
+                    color:@mainFontColor;
+                }
+            }
+            .step_first{
+                .flexRow;
+            }
+            /*.step_second{
+                .flexColumn;
+                margin-bottom:10px;
+            }*/
+
+            .content_container{
+                background:rgba(248,248,248,1);
+                border-radius:4px;
+                padding:20px;
+                margin-bottom:20px;
+                .content_title{
+                    font-size:14px;
+                    color:@mainFontColor;
+                    margin-right:20px;
+                    line-height:32px;
+                }
+                .content_item{
+                    width:100%;
+                    .auth_title_container{
+                        border-bottom:1px solid #EDEDED;
+                        padding-bottom:10px;
+                        width:100%;
+                        .flexRow;
+                        justify-content: space-between;
+                        .auth_title{
+                            font-size:14px;
+                            color:@mainFontColor;
+                        }
+                        .auth_update{
+
+                        }
+                    }
+                    .step_third_wrap{
+                        padding-top:12px;
+                        .content_visibility_item{
+                            .flexRow;
+                            width:400px;
+                            justify-content: space-between;
+                            margin-bottom:10px;
+                            position:relative;
+                            .content_visibility_title{
+                                font-size:14px;
+                                color: @mainFontColor;
+                            }
+                            padding-left:40px;
+                            .content_visibility_type{
+                                position:absolute;
+                                left:0;
+                                top:-40px;
+                                width:100%;
+                                border-top:1px solid #cccccc;
+                                padding-top:10px;
+                            }
+                        }
+                        .first_item{
+                            margin-top:60px;
+                        }
+                    }
+                }
+
+            }
+            .btn_container{
+                .flexRow;
+                justify-content: flex-end;
+                .btn{
+                    width:136px;
+                    &:first-child{
+                        margin-right:20px;
+                    }
+                }
+            }
+        }
+
+    }
+
+</style>
