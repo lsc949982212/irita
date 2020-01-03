@@ -177,7 +177,7 @@
                 this.postData();
             },
             postData(){
-                console.log('-=-=-=-=-=-=',this.jsonData)
+                console.log('-=-=-=-=-=-',this.jsonData)
             },
             changeAuth(res){
                 this.authList[res.index].value = res.auth;

@@ -75,7 +75,7 @@
 </template>
 
 <script>
-
+    import axios from '../helper/httpHelper';
 
     export default {
         name : 'AssetList',
@@ -145,7 +145,9 @@
 
         },
         mounted(){
-
+            setTimeout(()=>{
+                axios.get({url:'',ctx:this});
+            },3000)
         },
         methods:{
             add(){

@@ -11,6 +11,7 @@
                             首页
                         </span>
                         <span class="tab"
+                              v-show="!expired"
                               @click="handleTabClick(1)"
                               :class="activeTab === 1 ? 'active' : ''">
                             资产列表
@@ -18,9 +19,21 @@
                     </div>
 
                     <div class="login_container"
+                         v-show="expired"
                          @click="handleLoginClick">
                         登录
                     </div>
+                    <div class="login_account_container"
+                         v-show="!expired">
+                        <span class="login_account">
+                            {{ displayUserName }}
+                        </span>
+                        <span class="exit" @click="handleExitClick">
+                            退出
+                        </span>
+
+                    </div>
+
                 </div>
 
             </div>
@@ -81,6 +94,8 @@
                 centerDialogVisible : false,
                 username : '',
                 psd : '',
+                displayUserName:'供应商A',
+                showToast:true,
             }
         },
         watch : {
@@ -90,6 +105,19 @@
                 } else {
                     this.activeTab = 1
                 }
+            },
+            expired(expired){
+                if(expired){
+                    if(this.showToast){
+                        this.$message.error('登录过期,请重新登录');
+                    }
+                    this.$router.push('/login');
+                }
+            }
+        },
+        computed:{
+            expired(){
+                return this.$store.state.expired;
             }
         },
         components : {},
@@ -106,11 +134,18 @@
         },
         methods : {
             handleTabClick(tab){
-                //this.activeTab = tab;
                 if(tab === 0){
+                    if(this.$route.path === '/login'){
+                        return;
+                    }
                     this.$router.replace('/login')
                 } else {
-                    this.$router.replace('/asset_list')
+                    if(this.$route.path === '/login'){
+                        this.$router.replace('/asset_list')
+                    }else if(this.$route.path !== '/asset_list'){
+                        this.$router.push('/asset_list')
+                    }
+
                 }
             },
             handleLoginClick(){
@@ -141,9 +176,14 @@
                 } else {
                     this.$message.error('账号或者密码错误');
                 }
-
-
             },
+            handleExitClick(){
+                this.showToast = false;
+                LoginHelper.exit(this);
+                setTimeout(()=>{
+                    this.showToast = true;
+                },3000)
+            }
 
         }
     }
@@ -226,6 +266,20 @@
                                 color: rgba(255, 255, 255, 0.5);
                                 line-height: 80px;
                                 cursor: pointer;
+                            }
+                            .login_account_container{
+                                .flexRow;
+                                align-items: center;
+                                .login_account{
+                                    color: #ffffff;
+                                    padding:2px 20px 2px 20px;
+                                }
+                                .exit{
+                                    color: rgba(255, 255, 255, 0.5);
+                                    border-left:1px solid rgba(255, 255, 255, 0.5);
+                                    padding:0 20px 0 20px;
+                                    cursor:pointer;
+                                }
                             }
                         }
 

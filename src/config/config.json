@@ -1,7 +1,9 @@
 {
   "account":{
     "username": "admin",
-    "psd": "qqqqqqqqq1"
+    "psd": "qqqqqqqqq1",
+    "publicKey":"",
+    "address":""
   },
   "expired":1800000
 }

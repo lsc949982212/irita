@@ -4,7 +4,7 @@
             <div class="login_wrap_left">
                 <span class="login_left_chain">IRITA</span>
                 <span class="login_left_content">具有数据隐私保护的数字资产管理平台</span>
-                <el-button type="primary" class="btn" @click="login">登录</el-button>
+                <el-button type="primary" class="btn" @click="login" v-show="expired">登录</el-button>
             </div>
             <img class="login_wrap_right" src="../assets/protect.png"/>
 
@@ -24,6 +24,11 @@
         components : {},
         mounted(){
 
+        },
+        computed:{
+            expired(){
+                return this.$store.state.expired;
+            }
         },
         methods : {
             login(){

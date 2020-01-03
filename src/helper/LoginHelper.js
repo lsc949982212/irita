@@ -9,6 +9,7 @@ export default class LoginHelper {
         const {username, psd, ctx} = params;
         if(username === cfg.account.username && psd === cfg.account.psd){
             LoginHelper.setSession(ctx);
+            ctx.$store.commit('SET_EXPIRED_STATUS',false);
             return true;
         } else {
             return false;
@@ -35,7 +36,7 @@ export default class LoginHelper {
             return constant.ERROR.NOT_LOGIN.code;
         }else{
             const savedToken = JSON.parse(token);
-            if(savedToken.random !== random || savedToken.timeStamp !== loginTime){
+            if(savedToken.random !== random || savedToken.timestamp !== loginTime){
                 return constant.ERROR.ERROR_LOGIN.code;
             }else if(loginTime + cfg.expired < new Date().getTime()){
                 return constant.ERROR.ERROR_LOGIN.code;
@@ -43,6 +44,11 @@ export default class LoginHelper {
                 return constant.SUCCESS.code
             }
         }
+    }
+
+    static exit(ctx){
+        sessionStorage.removeItem('token');
+        ctx.$store.commit('SET_EXPIRED_STATUS',true);
     }
 
 }

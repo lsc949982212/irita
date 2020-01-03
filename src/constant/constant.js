@@ -15,6 +15,7 @@ export const constant = {
     },
     SUCCESS:{
         code:10001
-    }
+    },
+    TIME_OUT:5000,
 
 };
