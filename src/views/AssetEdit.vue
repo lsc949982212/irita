@@ -104,42 +104,8 @@
                 let secret = this.authList.filter((a)=>a.value === '3');
                 this.jsonData.authorizationProperties = [];
                 this.jsonData.secretProperties = [];
-                if(this.jsonData.detailedInfo.payments.length){
-                    for(let i = 0; i < authorization.length; i++){
-                        if(Object.keys(this.jsonData.detailedInfo.payments[0]).includes(authorization[i].titleKey) && authorization[i].prefix === 'payments'){
-                            this.jsonData.authorizationProperties.push(`detailedInfo.payments.${authorization[i].titleKey}`)
-                        }
-                    }
-                    for(let i = 0; i < secret.length; i++){
-                        if(Object.keys(this.jsonData.detailedInfo.payments[0]).includes(secret[i].titleKey) && secret[i].prefix === 'payments'){
-                            this.jsonData.secretProperties.push(`detailedInfo.payments.${secret[i].titleKey}`)
-                        }
-                    }
-                }
-                if(this.jsonData.detailedInfo.contracts.length){
-                    for(let i = 0; i < authorization.length; i++){
-                        if(Object.keys(this.jsonData.detailedInfo.contracts[0]).includes(authorization[i].titleKey) && authorization[i].prefix === 'contracts'){
-                            this.jsonData.authorizationProperties.push(`detailedInfo.contracts.${authorization[i].titleKey}`)
-                        }
-                    }
-                    for(let i = 0; i < secret.length; i++){
-                        if(Object.keys(this.jsonData.detailedInfo.contracts[0]).includes(secret[i].titleKey) && secret[i].prefix === 'contracts'){
-                            this.jsonData.secretProperties.push(`detailedInfo.contracts.${secret[i].titleKey}`)
-                        }
-                    }
-                }
-                if(this.jsonData.detailedInfo.invoices.length){
-                    for(let i = 0; i < authorization.length; i++){
-                        if(Object.keys(this.jsonData.detailedInfo.invoices[0]).includes(authorization[i].titleKey) && authorization[i].prefix === 'invoices'){
-                            this.jsonData.authorizationProperties.push(`detailedInfo.invoices.${authorization[i].titleKey}`)
-                        }
-                    }
-                    for(let i = 0; i < secret.length; i++){
-                        if(Object.keys(this.jsonData.detailedInfo.invoices[0]).includes(secret[i].titleKey) && secret[i].prefix === 'invoices'){
-                            this.jsonData.secretProperties.push(`detailedInfo.invoices.${secret[i].titleKey}`)
-                        }
-                    }
-                }
+                authorization.forEach((a)=>this.jsonData.authorizationProperties.push(a.prefix));
+                secret.forEach((a)=>this.jsonData.secretProperties.push(a.prefix));
                 this.postData();
             },
             postData(){
@@ -155,44 +121,43 @@
                     return '合同信息'
                 }else if(type === 'invoices'){
                     return '发票信息'
+                }else if(type === 'receivable'){
+                    return '资产详情'
+                }else if(type === 'basicInfo'){
+                    return '基本信息'
                 }
             },
             setAuth(){
                 let authList = [];
-                this.authList = [];
                 this.setFormatDataList('payments',authList);
                 this.setFormatDataList('contracts',authList);
                 this.setFormatDataList('invoices',authList);
+                this.setFormatDetailData(authList);
+
                 authList.sort((a,b)=>{
-                    if(a > b) {
-                        return -1
-                    }else{
-                        return 1
-                    }
+                    return a.index-b.index;
                 });
-                if(authList.filter((i)=>i.index === 1).length){
-                    authList.filter((i)=>i.index === 1)[0].type = 'payments';
-                }
-                if(authList.filter((i)=>i.index === 2).length){
-                    authList.filter((i)=>i.index === 2)[0].type = 'contracts';
-                }
+                authList.filter((i)=>i.index === 1)[0].type = 'basicInfo';
+                authList.filter((i)=>i.index === 2)[0].type = 'receivable';
                 if(authList.filter((i)=>i.index === 3).length){
                     authList.filter((i)=>i.index === 3)[0].type = 'invoices';
                 }
-
-                this.$nextTick(()=>{
-                    this.authList = authList;
-                })
-
+                if(authList.filter((i)=>i.index === 4).length){
+                    authList.filter((i)=>i.index === 4)[0].type = 'contracts';
+                }
+                if(authList.filter((i)=>i.index === 5).length){
+                    authList.filter((i)=>i.index === 5)[0].type = 'invoices';
+                }
+                this.authList = authList;
             },
             setFormatDataList(field, authList){
                 if(this.jsonData.detailedInfo[field].length){
                     for(let key in this.jsonData.detailedInfo[field][0]){
-                        let index = 1;
+                        let index = 3;
                         if(field === 'contracts'){
-                            index = 2;
+                            index = 4;
                         }else if(field === 'invoices'){
-                            index = 3;
+                            index = 5;
                         }
                         authList.push({
                             title:Dictionary.get(key),
@@ -209,10 +174,51 @@
                             value:'1',
                             titleKey:key,
                             index,
-                            prefix:field,
+                            prefix:`detailedInfo.${field}.${key}`,
                         })
                     }
                 }
+            },
+            setFormatDetailData(authList){
+                for(let key in this.jsonData.basicInfo){
+                    authList.push({
+                        title:Dictionary.get(key),
+                        data:[{
+                            value: '1',
+                            label: '公开信息'
+                        }, {
+                            value: '2',
+                            label: '授权查看',
+                        }, {
+                            value: '3',
+                            label: '仅自己可见',
+                        }],
+                        value:'1',
+                        titleKey:key,
+                        index:1,
+                        prefix:`basicInfo.${key}`,
+                    })
+                }
+                for(let key in this.jsonData.detailedInfo.receivable){
+                    authList.push({
+                        title:Dictionary.get(key),
+                        data:[{
+                            value: '1',
+                            label: '公开信息'
+                        }, {
+                            value: '2',
+                            label: '授权查看',
+                        }, {
+                            value: '3',
+                            label: '仅自己可见',
+                        }],
+                        value:'1',
+                        titleKey:key,
+                        index:2,
+                        prefix:`detailedInfo.receivable.${key}`,
+                    })
+                }
+
             },
             closeOtherOps(index){
                 for(let i = 0; i < this.authList.length; i++){
