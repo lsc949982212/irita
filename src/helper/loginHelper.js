@@ -1,14 +1,14 @@
 import cfg from '../config/config';
 import {constant} from '../constant/constant';
 
-export default class LoginHelper {
+export default class loginHelper {
     constructor(){
     }
 
     static login(params){
         const {username, psd, ctx} = params;
         if(username === cfg.account.username && psd === cfg.account.psd){
-            LoginHelper.setSession(ctx);
+            loginHelper.setSession(ctx);
             ctx.$store.commit('SET_EXPIRED_STATUS',false);
             return true;
         } else {

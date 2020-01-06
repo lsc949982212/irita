@@ -1,12 +1,12 @@
 import axios from 'axios';
 import {constant} from '../constant/constant';
-import LoginHelper from '../helper/LoginHelper';
+import loginHelper from '../helper/loginHelper';
 
 export default {
     get(params) {
         const{url, ctx} = params;
-        if(LoginHelper.checkLoginStatus(ctx) !== constant.SUCCESS.code){
-            LoginHelper.exit(ctx);
+        if(loginHelper.checkLoginStatus(ctx) !== constant.SUCCESS.code){
+            loginHelper.exit(ctx);
             return;
         }
         return new Promise((res,rej)=>{
@@ -16,8 +16,8 @@ export default {
     },
     post(params) {
         const {url,body,ctx} = params;
-        if(LoginHelper.checkLoginStatus(ctx) !== constant.SUCCESS.code){
-            LoginHelper.exit(ctx);
+        if(loginHelper.checkLoginStatus(ctx) !== constant.SUCCESS.code){
+            loginHelper.exit(ctx);
             return;
         }
         return new Promise((res,rej)=>{
@@ -32,8 +32,8 @@ export default {
     },
     put(params) {
         const {url,body,ctx,} = params;
-        if(LoginHelper.checkLoginStatus(ctx) !== constant.SUCCESS.code){
-            LoginHelper.exit(ctx);
+        if(loginHelper.checkLoginStatus(ctx) !== constant.SUCCESS.code){
+            loginHelper.exit(ctx);
             return;
         }
         return new Promise((res,rej)=>{

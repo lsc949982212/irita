@@ -22,7 +22,7 @@
                              :class="info.type ? 'first_item' : ''"
                              v-for="(info, index) in authList">
                             <span class="content_visibility_type" v-if="info.type">
-                                {{ getDisplayType(info.type) }}
+                                {{ dictionary.get(info.type) }}
                             </span>
                             <span class="content_visibility_title">
                                 {{ info.title }}
@@ -51,7 +51,8 @@
     import Select from '../components/Select';
     import schema from './schema';
     import jsonData from './data';
-    import {Dictionary} from '../constant/Dictionary';
+    import {dictionary} from '../constant/dictionary';
+    import JsonSchema from '../helper/JsonSchemaHelper';
 
     export default {
         name : 'AssetAdd',
@@ -69,6 +70,7 @@
                 step:1,
                 authList:[],
                 jsonData:null,
+                dictionary,
             }
         },
         components : {
@@ -94,10 +96,11 @@
             checkData(){
                 let jsonData = $("#edit_json_schema_node").alpaca().getValue();
                 console.log(jsonData);
+                this.authList = new JsonSchema(jsonData).getFormatAuthData();
                 jsonData.authorizationProperties = [];
                 jsonData.secretProperties = [];
                 this.jsonData = jsonData;
-                this.setAuth();
+
             },
             save(){
                 let authorization = this.authList.filter((a)=>a.value === '2');
@@ -109,116 +112,10 @@
                 this.postData();
             },
             postData(){
-                console.log('-=-=-=-=-=-=',this.jsonData)
+                console.log(this.jsonData)
             },
             changeAuth(res){
                 this.authList[res.index].value = res.auth;
-            },
-            getDisplayType(type){
-                if(type === 'payments'){
-                    return '款项信息'
-                }else if(type === 'contracts'){
-                    return '合同信息'
-                }else if(type === 'invoices'){
-                    return '发票信息'
-                }else if(type === 'receivable'){
-                    return '资产详情'
-                }else if(type === 'basicInfo'){
-                    return '基本信息'
-                }
-            },
-            setAuth(){
-                let authList = [];
-                this.setFormatDataList('payments',authList);
-                this.setFormatDataList('contracts',authList);
-                this.setFormatDataList('invoices',authList);
-                this.setFormatDetailData(authList);
-
-                authList.sort((a,b)=>{
-                    return a.index-b.index;
-                });
-                authList.filter((i)=>i.index === 1)[0].type = 'basicInfo';
-                authList.filter((i)=>i.index === 2)[0].type = 'receivable';
-                if(authList.filter((i)=>i.index === 3).length){
-                    authList.filter((i)=>i.index === 3)[0].type = 'invoices';
-                }
-                if(authList.filter((i)=>i.index === 4).length){
-                    authList.filter((i)=>i.index === 4)[0].type = 'contracts';
-                }
-                if(authList.filter((i)=>i.index === 5).length){
-                    authList.filter((i)=>i.index === 5)[0].type = 'invoices';
-                }
-                this.authList = authList;
-            },
-            setFormatDataList(field, authList){
-                if(this.jsonData.detailedInfo[field].length){
-                    for(let key in this.jsonData.detailedInfo[field][0]){
-                        let index = 3;
-                        if(field === 'contracts'){
-                            index = 4;
-                        }else if(field === 'invoices'){
-                            index = 5;
-                        }
-                        authList.push({
-                            title:Dictionary.get(key),
-                            data:[{
-                                value: '1',
-                                label: '公开信息'
-                            }, {
-                                value: '2',
-                                label: '授权查看',
-                            }, {
-                                value: '3',
-                                label: '仅自己可见',
-                            }],
-                            value:'1',
-                            titleKey:key,
-                            index,
-                            prefix:`detailedInfo.${field}.${key}`,
-                        })
-                    }
-                }
-            },
-            setFormatDetailData(authList){
-                for(let key in this.jsonData.basicInfo){
-                    authList.push({
-                        title:Dictionary.get(key),
-                        data:[{
-                            value: '1',
-                            label: '公开信息'
-                        }, {
-                            value: '2',
-                            label: '授权查看',
-                        }, {
-                            value: '3',
-                            label: '仅自己可见',
-                        }],
-                        value:'1',
-                        titleKey:key,
-                        index:1,
-                        prefix:`basicInfo.${key}`,
-                    })
-                }
-                for(let key in this.jsonData.detailedInfo.receivable){
-                    authList.push({
-                        title:Dictionary.get(key),
-                        data:[{
-                            value: '1',
-                            label: '公开信息'
-                        }, {
-                            value: '2',
-                            label: '授权查看',
-                        }, {
-                            value: '3',
-                            label: '仅自己可见',
-                        }],
-                        value:'1',
-                        titleKey:key,
-                        index:2,
-                        prefix:`detailedInfo.receivable.${key}`,
-                    })
-                }
-
             },
             closeOtherOps(index){
                 for(let i = 0; i < this.authList.length; i++){

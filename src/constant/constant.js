@@ -17,5 +17,7 @@ export const constant = {
         code:10001
     },
     TIME_OUT:5000,
+    AUTHORIZATION_PROPERTIES:'authorizationProperties',
+    SECRET_PROPERTIES:'secretProperties',
 
 };

@@ -78,7 +78,7 @@
 
 <script>
     import { Message } from 'element-ui';
-    import LoginHelper from './helper/LoginHelper';
+    import loginHelper from './helper/loginHelper';
 
     export default {
         name : "app",
@@ -160,7 +160,7 @@
                     this.$message.error('请输入密码');
                     return;
                 }
-                const isSuccess = LoginHelper.login({
+                const isSuccess = loginHelper.login({
                     username : this.username,
                     psd : this.psd,
                     ctx : this
@@ -179,7 +179,7 @@
             },
             handleExitClick(){
                 this.showToast = false;
-                LoginHelper.exit(this);
+                loginHelper.exit(this);
                 setTimeout(()=>{
                     this.showToast = true;
                 },3000)

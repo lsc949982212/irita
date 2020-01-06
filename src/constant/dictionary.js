@@ -1,4 +1,4 @@
-export const Dictionary = new Map([
+export const dictionary = new Map([
     ['assetNo','资产编码'],
     ['assetType','资产分类代码'],
     ['assetName','资产名称'],
@@ -44,4 +44,9 @@ export const Dictionary = new Map([
     ['invoiceDate','开票日期'],
     ['invoiceAmount','发票金额'],
     ['invoiceAttachment','发票附件'],
+    ['payments','款项信息'],
+    ['contracts','合同信息'],
+    ['invoices','发票信息'],
+    ['receivable','资产详情'],
+    ['basicInfo','基本信息'],
 ]);
