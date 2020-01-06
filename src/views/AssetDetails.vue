@@ -8,7 +8,8 @@
                 <el-button size="small"
                            @click="edit"
                            v-show="editBtnShow"
-                           class="btn" type="primary">编辑</el-button>
+                           class="btn" type="primary">编辑
+                </el-button>
             </div>
             <div class="asset_details_trans_container" v-if="$route.query.type === 'trans'">
                 <span class="asset_details_trans_title">
@@ -25,7 +26,8 @@
                 </el-select>
                 <el-button size="small"
                            @click="handleTransBtnClick"
-                           class="asset_details_trans_btn" type="primary">转让申请</el-button>
+                           class="asset_details_trans_btn" type="primary">转让申请
+                </el-button>
             </div>
             <div class="content_container">
                 <div class="content_item" id="detail_json_schema_node"></div>
@@ -123,7 +125,8 @@ https://www.taobao.com
 
                                 <el-button type="text" size="small"
                                            @click="refused(scope.row)"
-                                           v-show="getTransDisplayShow(scope.row,1)">拒绝</el-button>
+                                           v-show="getTransDisplayShow(scope.row,1)">拒绝
+                                </el-button>
                             </template>
                         </el-table-column>
                     </el-table>
@@ -175,7 +178,8 @@ https://www.taobao.com
                                 </el-button>
                                 <el-button type="text" size="small"
                                            v-show="getAuthShow(scope.row)"
-                                           @click="handleRefusedClick(scope.row)">拒绝</el-button>
+                                           @click="handleRefusedClick(scope.row)">拒绝
+                                </el-button>
                             </template>
                         </el-table-column>
                     </el-table>
@@ -320,7 +324,7 @@ https://www.taobao.com
             <div class="asset_details_dialog_container">
                 <span class="asset_details_dialog_title">dialogTitle</span>
                 <div slot="footer" class="dialog-footer">
-                    <el-button  @click="handleCancelBtnClick"
+                    <el-button @click="handleCancelBtnClick"
                                size="medium"
                                class="asset_details_cancel_btn">取消
                     </el-button>
@@ -340,75 +344,73 @@ https://www.taobao.com
 <script>
     import schema from './schema';
     import jsonData from './data';
-    import {constant} from '../constant/constant';
+    import { constant } from '../constant/constant';
 
     export default {
         name : 'AssetAdd',
         data(){
             return {
-                jsonData:null,
-                transferData:[{
-                    id: '金属送吧膜回收,知否知否',
-                    time: 'A公司的应收账款',
-                    receiver: '应收账款',
-                    txStatus: '暴力服务商B',
+                jsonData : null,
+                transferData : [{
+                    id : '金属送吧膜回收,知否知否',
+                    time : 'A公司的应收账款',
+                    receiver : '应收账款',
+                    txStatus : '暴力服务商B',
                 }],
-                applyAndAuthDataList:[{
-                    id: '金属送吧膜回收,知否知否',
-                    time: 'A公司的应收账款',
-                    applicant: '应收账款',
-                    applyStatus: '暴力服务商B',
+                applyAndAuthDataList : [{
+                    id : '金属送吧膜回收,知否知否',
+                    time : 'A公司的应收账款',
+                    applicant : '应收账款',
+                    applyStatus : '暴力服务商B',
                 }],
-                assetListData:[{
-                    id: '金属送吧膜回收,知否知否',
-                    txType: 'A公司的应收账款',
-                    txHash: '应收账款',
-                    time: '暴力服务商B',
-                    senderAddr: 'A公司的应收账款',
-                    receiverAddr: '应收账款',
-                    height: '暴力服务商B',
+                assetListData : [{
+                    id : '金属送吧膜回收,知否知否',
+                    txType : 'A公司的应收账款',
+                    txHash : '应收账款',
+                    time : '暴力服务商B',
+                    senderAddr : 'A公司的应收账款',
+                    receiverAddr : '应收账款',
+                    height : '暴力服务商B',
                 }],
-                serviceListData:[{
-                    id: '金属送吧膜回收,知否知否',
-                    serviceName: 'A公司的应收账款',
-                    serviceType: '应收账款',
-                    serviceHash: '暴力服务商B',
-                    time: 'A公司的应收账款',
-                    providerAddr: '应收账款',
-                    consumeAddr: '应收账款',
-                    height: '暴力服务商B',
+                serviceListData : [{
+                    id : '金属送吧膜回收,知否知否',
+                    serviceName : 'A公司的应收账款',
+                    serviceType : '应收账款',
+                    serviceHash : '暴力服务商B',
+                    time : 'A公司的应收账款',
+                    providerAddr : '应收账款',
+                    consumeAddr : '应收账款',
+                    height : '暴力服务商B',
                 }],
-                tab:0,
-                totalTransCount:100,
-                totalApplyCount:100,
-                totalTxListCount:100,
-                totalServiceListCount:100,
-                options: [{
-                    value: '1',
-                    label: '应收账款'//todo 受让方的账号名称
+                tab : 0,
+                totalTransCount : 100,
+                totalApplyCount : 100,
+                totalTxListCount : 100,
+                totalServiceListCount : 100,
+                options : [{
+                    value : '1',
+                    label : '应收账款'//todo 受让方的账号名称
                 }, {
-                    value: '2',
-                    label: '非标资产',
-                    disabled: true
+                    value : '2',
+                    label : '非标资产',
+                    disabled : true
                 }],
-                value: '1',
-                centerDialogVisible:false,
-                dialogTitle:'确认转让?',
-                dialogType:1,
+                value : '1',
+                centerDialogVisible : false,
+                dialogTitle : '确认转让?',
+                dialogType : 1,
             }
         },
-        components : {
-
-        },
+        components : {},
         mounted(){
             $("#detail_json_schema_node").alpaca({
-                "schemaSource": schema,
-                "dataSource":jsonData,
-                "view": "bootstrap-display"
+                "schemaSource" : schema,
+                "dataSource" : jsonData,
+                "view" : "bootstrap-display"
             });
             console.log(this.$route)
         },
-        computed:{
+        computed : {
             editBtnShow(){
                 //todo 资产拥有者,并且状态是正常
                 return this.$route.query.type === 'check'
@@ -418,7 +420,7 @@ https://www.taobao.com
                 return true
             }
         },
-        methods:{
+        methods : {
             edit(){
                 this.$router.push('/asset_edit');
             },
@@ -451,13 +453,13 @@ https://www.taobao.com
                 if(type === 0){
                     if(this.isOwner && row.status === constant.ASSET_LIST_STATUS.ACCEPT){
                         return true;
-                    }else{
+                    } else {
                         return false;
                     }
-                }else{
+                } else {
                     if(!this.isOwner && row.status === constant.ASSET_LIST_STATUS.APPLYING){
                         return true;
-                    }else{
+                    } else {
                         return false;
                     }
                 }
@@ -466,7 +468,7 @@ https://www.taobao.com
             getAuthShow(row){
                 if(this.isOwner && row.status === constant.AUTHORIZATION_STATUS.APPLYING){
                     return true;
-                }else{
+                } else {
                     return false;
                 }
             },
@@ -525,99 +527,98 @@ https://www.taobao.com
 <style lang="less" scoped>
     @import "../style/mixin";
 
-
     .asset_details_container {
         width: 100%;
         height: 100%;
         .flexColumn;
         align-items: center;
-        background:rgba(250,250,250,1);
-        .asset_details_wrap{
+        background: rgba(250, 250, 250, 1);
+        .asset_details_wrap {
             width: 69%;
-            min-width:994px;
-            box-shadow:0 2px 7px 0 rgba(3,44,65,0.12);
-            border-radius:4px;
-            margin-top:30px;
-            padding:24px 30px 30px 30px;
+            min-width: 994px;
+            box-shadow: 0 2px 7px 0 rgba(3, 44, 65, 0.12);
+            border-radius: 4px;
+            margin-top: 30px;
+            padding: 24px 30px 30px 30px;
             background: #ffffff;
             box-sizing: border-box;
-            .asset_details_title_container{
+            .asset_details_title_container {
                 .flexRow;
                 justify-content: space-between;
-                margin-bottom:20px;
-                .asset_details_title{
-                    font-size:20px;
-                    color:@mainFontColor;
+                margin-bottom: 20px;
+                .asset_details_title {
+                    font-size: 20px;
+                    color: @mainFontColor;
                 }
-                .btn{
-                    width:136px;
+                .btn {
+                    width: 136px;
                 }
             }
-            .asset_details_trans_container{
+            .asset_details_trans_container {
                 .flexRow;
                 align-items: center;
-                margin-bottom:20px;
-                .asset_details_trans_title{
-                    font-size:14px;
-                    color:@mainFontColor;
-                    margin-right:10px;
+                margin-bottom: 20px;
+                .asset_details_trans_title {
+                    font-size: 14px;
+                    color: @mainFontColor;
+                    margin-right: 10px;
                 }
-                .asset_details_trans_btn{
-                    margin-left:20px;
-                    width:136px;
+                .asset_details_trans_btn {
+                    margin-left: 20px;
+                    width: 136px;
                 }
             }
 
-            .content_container{
-                background:rgba(248,248,248,1);
-                border-radius:4px;
-                padding:20px;
-                margin-bottom:20px;
-                .content_chain_info{
-                    font-size:14px;
+            .content_container {
+                background: rgba(248, 248, 248, 1);
+                border-radius: 4px;
+                padding: 20px;
+                margin-bottom: 20px;
+                .content_chain_info {
+                    font-size: 14px;
                     color: @mainFontColor;
-                    padding-bottom:10px;
-                    border-bottom:1px solid #EDEDED
+                    padding-bottom: 10px;
+                    border-bottom: 1px solid #EDEDED
                 }
-                .content_chain_info_wrap{
+                .content_chain_info_wrap {
                     .flexRow;
-                    width:100%;
-                    .content_chain_info_item{
-                        flex:1;
+                    width: 100%;
+                    .content_chain_info_item {
+                        flex: 1;
 
-                        .content_chain_info_item_wrap{
+                        .content_chain_info_item_wrap {
                             .flexRow;
-                            margin-top:17px;
-                            .content_chain_info_item_title{
-                                font-size:14px;
-                                color:#9E9E9E;
-                                width:80px;
+                            margin-top: 17px;
+                            .content_chain_info_item_title {
+                                font-size: 14px;
+                                color: #9E9E9E;
+                                width: 80px;
                             }
-                            .content_chain_info_item_content{
-                                font-size:14px;
-                                color:@mainFontColor;
+                            .content_chain_info_item_content {
+                                font-size: 14px;
+                                color: @mainFontColor;
                             }
-                            .link{
-                                color:@themeColor;
-                                cursor:pointer;
+                            .link {
+                                color: @themeColor;
+                                cursor: pointer;
                             }
                         }
                     }
 
                 }
-                .content_tab_container{
+                .content_tab_container {
                     .flexRow;
 
-                    .content_tab_item{
-                        padding-bottom:10px;
-                        border-bottom:2px solid transparent;
-                        box-sizing:border-box;
-                        font-size:14px;
-                        font-weight:600;
-                        margin-right:40px;
+                    .content_tab_item {
+                        padding-bottom: 10px;
+                        border-bottom: 2px solid transparent;
+                        box-sizing: border-box;
+                        font-size: 14px;
+                        font-weight: 600;
+                        margin-right: 40px;
                         cursor: pointer;
                     }
-                    .active_tab{
+                    .active_tab {
                         color: @themeColor;
                         border-color: @themeColor;
                     }
@@ -625,42 +626,41 @@ https://www.taobao.com
                 }
 
             }
-            .pagination_container{
+            .pagination_container {
                 .flexRow;
                 justify-content: flex-end;
                 align-items: flex-end;
-                margin-bottom:20px;
-                .total_page{
-                    margin-right:10px;
-                    font-size:14px;
-                    color:@mainFontColor;
+                margin-bottom: 20px;
+                .total_page {
+                    margin-right: 10px;
+                    font-size: 14px;
+                    color: @mainFontColor;
                 }
 
             }
         }
-        .asset_details_dialog_container{
+        .asset_details_dialog_container {
 
-            .asset_details_dialog_title{
-                font-size:20px;
-                color:@mainFontColor;
-                font-weight:600;
-                margin-bottom:40px;
+            .asset_details_dialog_title {
+                font-size: 20px;
+                color: @mainFontColor;
+                font-weight: 600;
+                margin-bottom: 40px;
                 text-align: center;
-                display:inline-block;
-                width:100%;
+                display: inline-block;
+                width: 100%;
             }
-            .dialog-footer{
+            .dialog-footer {
                 .flexRow;
                 justify-content: center;
-                .asset_details_cancel_btn{
-                    width:136px;
-                    margin-right:20px;
+                .asset_details_cancel_btn {
+                    width: 136px;
+                    margin-right: 20px;
                 }
-                .asset_details_confirm_btn{
-                    width:136px;
+                .asset_details_confirm_btn {
+                    width: 136px;
                 }
             }
-
 
         }
     }
