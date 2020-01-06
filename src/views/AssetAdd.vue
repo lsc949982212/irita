@@ -141,8 +141,8 @@
                 let secret = this.authList.filter((a)=>a.value === '3');
                 this.jsonData.authorizationProperties = [];
                 this.jsonData.secretProperties = [];
-                authorization.forEach((a)=>this.jsonData.authorizationProperties.push(a.prefix));
-                secret.forEach((a)=>this.jsonData.secretProperties.push(a.prefix));
+                authorization.forEach((a)=>this.jsonData.authorizationProperties.push(a.str));
+                secret.forEach((a)=>this.jsonData.secretProperties.push(a.str));
                 this.postData();
             },
             postData(){

@@ -3,11 +3,29 @@
         <div class="asset_details_wrap">
             <div class="asset_details_title_container">
                 <span class="asset_details_title">
-                    资产信息
+                    {{ $route.query.type === 'check'? '资产信息' : '资产转让详情' }}
                 </span>
                 <el-button size="small"
                            @click="edit"
+                           v-show="editBtnShow"
                            class="btn" type="primary">编辑</el-button>
+            </div>
+            <div class="asset_details_trans_container" v-if="$route.query.type === 'trans'">
+                <span class="asset_details_trans_title">
+                    受让方 :
+                </span>
+                <el-select v-model="value" placeholder="请选择" size="small">
+                    <el-option
+                            v-for="item in options"
+                            :key="item.value"
+                            :label="item.label"
+                            :disabled="item.disabled"
+                            :value="item.value">
+                    </el-option>
+                </el-select>
+                <el-button size="small"
+                           @click="handleTransBtnClick"
+                           class="asset_details_trans_btn" type="primary">转让申请</el-button>
             </div>
             <div class="content_container">
                 <div class="content_item" id="detail_json_schema_node"></div>
@@ -39,8 +57,8 @@
                             <span class="content_chain_info_item_title">
                                 详情:
                             </span>
-                            <span class="content_chain_info_item_content">
-3
+                            <span class="content_chain_info_item_content link" @click="handleTokenDetailClick">
+https://www.taobao.com
                             </span>
                         </div>
                     </div>
@@ -58,7 +76,7 @@
                                 token_uri:
                             </span>
                             <span class="content_chain_info_item_content">
-5
+
                             </span>
                         </div>
                     </div>
@@ -92,12 +110,20 @@
                                 label="操作"
                                 min-width="80">
                             <template slot-scope="scope">
-                                <el-button @click="acceptTrans(scope.row)" type="text" size="small">
-                                    接受转让
-                                    <i style="position:relative;width:5px;height:5px;top:-8px;left:-3px;
-                                background:rgba(254,47,93,1);border-radius:50%;display:inline-block;"></i>
+                                <el-button @click="trans(scope.row)"
+                                           v-show="getTransDisplayShow(scope.row,0)"
+                                           type="text" size="small">
+                                    转让
                                 </el-button>
-                                <el-button type="text" size="small">拒绝</el-button>
+                                <el-button @click="acceptTrans(scope.row)"
+                                           v-show="getTransDisplayShow(scope.row,1)"
+                                           type="text" size="small">
+                                    接受转让
+                                </el-button>
+
+                                <el-button type="text" size="small"
+                                           @click="refused(scope.row)"
+                                           v-show="getTransDisplayShow(scope.row,1)">拒绝</el-button>
                             </template>
                         </el-table-column>
                     </el-table>
@@ -142,12 +168,14 @@
                                 label="操作"
                                 min-width="80">
                             <template slot-scope="scope">
-                                <el-button @click="acceptTrans(scope.row)" type="text" size="small">
-                                    接受转让
-                                    <i style="position:relative;width:5px;height:5px;top:-8px;left:-3px;
-                                background:rgba(254,47,93,1);border-radius:50%;display:inline-block;"></i>
+                                <el-button @click="handleAuthClick(scope.row)"
+                                           v-show="getAuthShow(scope.row)"
+                                           type="text" size="small">
+                                    授权
                                 </el-button>
-                                <el-button type="text" size="small">拒绝</el-button>
+                                <el-button type="text" size="small"
+                                           v-show="getAuthShow(scope.row)"
+                                           @click="handleRefusedClick(scope.row)">拒绝</el-button>
                             </template>
                         </el-table-column>
                     </el-table>
@@ -284,12 +312,35 @@
                 </el-pagination>
             </div>
         </div>
+        <el-dialog
+                :visible.sync="centerDialogVisible"
+                width="400px"
+                top="35vh"
+                center>
+            <div class="asset_details_dialog_container">
+                <span class="asset_details_dialog_title">dialogTitle</span>
+                <div slot="footer" class="dialog-footer">
+                    <el-button  @click="handleCancelBtnClick"
+                               size="medium"
+                               class="asset_details_cancel_btn">取消
+                    </el-button>
+                    <el-button type="primary"
+                               size="medium"
+                               class="asset_details_confirm_btn"
+                               @click="handleConfirmBtnClick">确定
+                    </el-button>
+
+                </div>
+            </div>
+
+        </el-dialog>
     </div>
 </template>
 
 <script>
     import schema from './schema';
     import jsonData from './data';
+    import {constant} from '../constant/constant';
 
     export default {
         name : 'AssetAdd',
@@ -332,6 +383,18 @@
                 totalApplyCount:100,
                 totalTxListCount:100,
                 totalServiceListCount:100,
+                options: [{
+                    value: '1',
+                    label: '应收账款'//todo 受让方的账号名称
+                }, {
+                    value: '2',
+                    label: '非标资产',
+                    disabled: true
+                }],
+                value: '1',
+                centerDialogVisible:false,
+                dialogTitle:'确认转让?',
+                dialogType:1,
             }
         },
         components : {
@@ -343,19 +406,118 @@
                 "dataSource":jsonData,
                 "view": "bootstrap-display"
             });
+            console.log(this.$route)
+        },
+        computed:{
+            editBtnShow(){
+                //todo 资产拥有者,并且状态是正常
+                return this.$route.query.type === 'check'
+            },
+            isOwner(){
+                //todo
+                return true
+            }
         },
         methods:{
             edit(){
                 this.$router.push('/asset_edit');
             },
             acceptTrans(row){
+                this.centerDialogVisible = true;
+                this.dialogTitle = '确认接受转让?';
+                this.dialogType = 2;
+            },
+            trans(row){
+                this.centerDialogVisible = true;
+                this.dialogTitle = '确认转让?';
+                this.dialogType = 1;
+            },
+            refused(row){
+                this.centerDialogVisible = true;
+                this.dialogTitle = '确认拒绝接受转让?';
+                this.dialogType = 3;
+            },
+            handleAuthClick(row){
+                this.centerDialogVisible = true;
+                this.dialogTitle = '确认授权?';
+                this.dialogType = 4;
+            },
+            handleRefusedClick(row){
+                this.centerDialogVisible = true;
+                this.dialogTitle = '确认拒绝转让?';
+                this.dialogType = 5;
+            },
+            getTransDisplayShow(row, type){
+                if(type === 0){
+                    if(this.isOwner && row.status === constant.ASSET_LIST_STATUS.ACCEPT){
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }else{
+                    if(!this.isOwner && row.status === constant.ASSET_LIST_STATUS.APPLYING){
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
 
             },
+            getAuthShow(row){
+                if(this.isOwner && row.status === constant.AUTHORIZATION_STATUS.APPLYING){
+                    return true;
+                }else{
+                    return false;
+                }
+            },
+            getDisplayAssetTransStatus(status){
+                switch (status){
+                    case constant.ASSET_LIST_STATUS.APPLYING:
+                        return '转让申请中';
+                    case constant.ASSET_LIST_STATUS.ACCEPT:
+                        return '已接受待转让';
+                    case constant.ASSET_LIST_STATUS.TRANSFERED:
+                        return '已转让';
+                    case constant.ASSET_LIST_STATUS.REFUSED:
+                        return '已拒绝';
+                    case constant.ASSET_LIST_STATUS.INVALID:
+                        return '已失效';
+
+                }
+            },
+            getDisplayAssetAuthStatus(status){
+                switch (status){
+                    case constant.AUTHORIZATION_STATUS.APPLYING:
+                        return '申请中';
+                    case constant.AUTHORIZATION_STATUS.AUTH:
+                        return '已授权';
+                    case constant.AUTHORIZATION_STATUS.REFUSED:
+                        return '已拒绝';
+                    case constant.AUTHORIZATION_STATUS.INVALID:
+                        return '已失效';
+
+                }
+            },
+
             handleTabClick(tab){
                 this.tab = tab;
             },
             onTxTransPaginationClick(page){
                 console.log(page)
+            },
+            handleTransBtnClick(){
+                this.centerDialogVisible = true;
+                this.dialogTitle = '确认转让?';
+                this.dialogType = 0;
+            },
+            handleConfirmBtnClick(){
+
+            },
+            handleCancelBtnClick(){
+                this.centerDialogVisible = false;
+            },
+            handleTokenDetailClick(){
+                window.open('https://www.baidu.com')
             }
         }
     }
@@ -391,6 +553,20 @@
                     width:136px;
                 }
             }
+            .asset_details_trans_container{
+                .flexRow;
+                align-items: center;
+                margin-bottom:20px;
+                .asset_details_trans_title{
+                    font-size:14px;
+                    color:@mainFontColor;
+                    margin-right:10px;
+                }
+                .asset_details_trans_btn{
+                    margin-left:20px;
+                    width:136px;
+                }
+            }
 
             .content_container{
                 background:rgba(248,248,248,1);
@@ -420,6 +596,10 @@
                             .content_chain_info_item_content{
                                 font-size:14px;
                                 color:@mainFontColor;
+                            }
+                            .link{
+                                color:@themeColor;
+                                cursor:pointer;
                             }
                         }
                     }
@@ -458,7 +638,31 @@
 
             }
         }
+        .asset_details_dialog_container{
 
+            .asset_details_dialog_title{
+                font-size:20px;
+                color:@mainFontColor;
+                font-weight:600;
+                margin-bottom:40px;
+                text-align: center;
+                display:inline-block;
+                width:100%;
+            }
+            .dialog-footer{
+                .flexRow;
+                justify-content: center;
+                .asset_details_cancel_btn{
+                    width:136px;
+                    margin-right:20px;
+                }
+                .asset_details_confirm_btn{
+                    width:136px;
+                }
+            }
+
+
+        }
     }
 
 </style>

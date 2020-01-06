@@ -19,7 +19,7 @@ export default class JsonSchemaHelper {
                     if(prop){
                         str = `${prop}.${key}`
                     }
-                    this.setFormatAuthData(data[key][0], str)
+                    this.setFormatAuthData(data[key][0], `${str}[*]`)
                 }
             } else if(typeof data[key] === 'object'){
                 let str = key;
@@ -45,12 +45,15 @@ export default class JsonSchemaHelper {
                         label : '仅自己可见',
                     }],
                     value : '1',
-                    str,
+                    str:`$.${str}`,
                 };
                 if(key === Object.keys(data)[0]){
-                    authData.type = Object.keys(data)[0];
                     const nodeLevelStrList = str.split('.');
-                    authData.type = nodeLevelStrList[nodeLevelStrList.findIndex((n)=>n === Object.keys(data)[0]) - 1]
+                    let type = nodeLevelStrList[nodeLevelStrList.findIndex((n)=>n === Object.keys(data)[0] || `${n}[0]` === Object.keys(data)[0]) - 1]
+                    if(type.includes('[*]')){
+                        type = type.split('[*]')[0]
+                    }
+                    authData.type = type;
                 }
                 this.authDataList.push(authData)
             }

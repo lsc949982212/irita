@@ -19,5 +19,23 @@ export const constant = {
     TIME_OUT:5000,
     AUTHORIZATION_PROPERTIES:'authorizationProperties',
     SECRET_PROPERTIES:'secretProperties',
+    ASSET_STATUS:{
+        NORMAL:0,
+        APPLyING:1,
+        ACCEPT:2
+    },
+    ASSET_LIST_STATUS:{
+        APPLYING:0,
+        ACCEPT:1,
+        TRANSFERED:2,
+        REFUSED:3,
+        INVALID:4,
+    },
+    AUTHORIZATION_STATUS:{
+        APPLYING:0,
+        AUTH:1,
+        REFUSED:2,
+        INVALID:3
+    }
 
 };

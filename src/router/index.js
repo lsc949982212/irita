@@ -34,7 +34,8 @@ const routes = [
     {
         path : '/asset_detail',
         name : 'asset_detail',
-        component : AssetDetails
+        component : AssetDetails,
+        props: (route) => ({ type: route.query.type })
     },
     {
         path : '/asset_edit',

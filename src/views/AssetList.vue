@@ -20,11 +20,11 @@
                             label="资产编号"
                             min-width="150">
                     </el-table-column>
-                    <el-table-column
+                    <!--<el-table-column
                             prop="assetName"
                             label="资产名称"
                             min-width="120">
-                    </el-table-column>
+                    </el-table-column>-->
                     <el-table-column
                             prop="assetType"
                             label="资产类型"
@@ -49,12 +49,12 @@
                             label="操作"
                             min-width="90">
                         <template slot-scope="scope">
-                            <el-button @click="handleClick(scope.row)" type="text" size="small">
+                            <el-button @click="handleCheckClick(scope.row)" type="text" size="small">
                                 查看
                                 <i style="position:relative;width:5px;height:5px;top:-8px;left:-3px;
                                 background:rgba(254,47,93,1);border-radius:50%;display:inline-block;"></i>
                             </el-button>
-                            <el-button type="text" size="small">转让</el-button>
+                            <el-button type="text" size="small" @click="handleTransClick(scope.row)">转让</el-button>
                         </template>
                     </el-table-column>
                 </el-table>
@@ -153,9 +153,13 @@
             add(){
                 this.$router.push('/asset_add');
             },
-            handleClick(row){
+            handleCheckClick(row){
                 console.log(row)
-                this.$router.push('/asset_detail');
+                this.$router.push('/asset_detail?type=check');
+            },
+            handleTransClick(row){
+                console.log(row)
+                this.$router.push('/asset_detail?type=trans');
             },
             onPageChange(page){
 
