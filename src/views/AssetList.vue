@@ -54,7 +54,9 @@
                                 <i style="position:relative;width:5px;height:5px;top:-8px;left:-3px;
                                 background:rgba(254,47,93,1);border-radius:50%;display:inline-block;"></i>
                             </el-button>
-                            <el-button type="text" size="small" @click="handleTransClick(scope.row)">转让</el-button>
+                            <el-button type="text" size="small"
+                                       v-show="true"
+                                       @click="handleTransClick(scope.row)">转让</el-button>
                         </template>
                     </el-table-column>
                 </el-table>
@@ -117,6 +119,17 @@
                         return '已拒绝';
                     case constant.ASSET_LIST_STATUS.INVALID:
                         return '已失效';
+
+                }
+            },
+            getDisplayCheckStatus(status){
+                switch (status){
+                    case constant.CHECK_STATUS.NOT_CHECK:
+                        return '未查验';
+                    case constant.CHECK_STATUS.CHECKED:
+                        return '已查验';
+                    case constant.CHECK_STATUS.CHECK_FAILED:
+                        return '查验失败';
 
                 }
             },

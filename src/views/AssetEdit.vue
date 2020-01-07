@@ -6,8 +6,8 @@
                     资产信息
                 </span>
             </div>
-            
-            <div class="content_container" @click="handleAuthContainerClick">
+
+            <div class="edit_schema_container" @click="handleAuthContainerClick">
                 <div class="content_item" id="edit_json_schema_node"></div>
             </div>
             <div class="content_container">
@@ -39,7 +39,8 @@
             <div class="btn_container">
                 <el-button size="medium"
                            @click="save"
-                           class="btn" type="primary">保存</el-button>
+                           class="btn" type="primary">保存
+                </el-button>
                 <el-button class="btn" size="medium" @click="handleCancelClick">取消</el-button>
             </div>
 
@@ -51,25 +52,25 @@
     import Select from '../components/Select';
     import schema from './schema';
     import jsonData from './data';
-    import {dictionary} from '../constant/dictionary';
+    import { dictionary } from '../constant/dictionary';
     import JsonSchema from '../helper/JsonSchemaHelper';
 
     export default {
         name : 'AssetAdd',
         data(){
             return {
-                options: [{
-                    value: '1',
-                    label: '应收账款'
+                options : [{
+                    value : '1',
+                    label : '应收账款'
                 }, {
-                    value: '2',
-                    label: '非标资产',
-                    disabled: true
+                    value : '2',
+                    label : '非标资产',
+                    disabled : true
                 }],
-                value: '1',
-                step:1,
-                authList:[],
-                jsonData:null,
+                value : '1',
+                step : 1,
+                authList : [],
+                jsonData : null,
                 dictionary,
             }
         },
@@ -78,15 +79,15 @@
         },
         mounted(){
             $("#edit_json_schema_node").alpaca({
-                "schemaSource": schema,
-                "dataSource":jsonData
+                "schemaSource" : schema,
+                "dataSource" : jsonData
             });
-            setTimeout(()=>{
+            setTimeout(() =>{
                 this.checkData();
-            },1000)
+            }, 1000)
 
         },
-        methods:{
+        methods : {
             handleCancelClick(){
                 this.$router.go(-1);
             },
@@ -103,12 +104,12 @@
 
             },
             save(){
-                let authorization = this.authList.filter((a)=>a.value === '2');
-                let secret = this.authList.filter((a)=>a.value === '3');
+                let authorization = this.authList.filter((a) => a.value === '2');
+                let secret = this.authList.filter((a) => a.value === '3');
                 this.jsonData.authorizationProperties = [];
                 this.jsonData.secretProperties = [];
-                authorization.forEach((a)=>this.jsonData.authorizationProperties.push(a.str));
-                secret.forEach((a)=>this.jsonData.secretProperties.push(a.str));
+                authorization.forEach((a) => this.jsonData.authorizationProperties.push(a.str));
+                secret.forEach((a) => this.jsonData.secretProperties.push(a.str));
                 this.postData();
             },
             postData(){
@@ -118,7 +119,7 @@
                 this.authList[res.index].value = res.auth;
             },
             closeOtherOps(index){
-                for(let i = 0; i < this.authList.length; i++){
+                for(let i = 0 ; i < this.authList.length ; i++){
                     if(index !== i && this.$refs[`select_${index}`][0].getSelectOpsShow()){
                         this.$refs[`select_${i}`][0].setSelectOpsShow(false);
                     }
@@ -128,7 +129,7 @@
         }
     }
 </script>
-<style lang="less" scoped>
+<style lang="less">
     @import "../style/mixin";
 
     .asset_edit_container {
@@ -136,26 +137,26 @@
         height: 100%;
         .flexColumn;
         align-items: center;
-        background:rgba(250,250,250,1);
-        .asset_edit_wrap{
+        background: rgba(250, 250, 250, 1);
+        .asset_edit_wrap {
             width: 69%;
-            min-width:994px;
-            box-shadow:0 2px 7px 0 rgba(3,44,65,0.12);
-            border-radius:4px;
-            margin-top:30px;
-            padding:24px 30px 30px 30px;
+            min-width: 994px;
+            box-shadow: 0 2px 7px 0 rgba(3, 44, 65, 0.12);
+            border-radius: 4px;
+            margin-top: 30px;
+            padding: 24px 30px 30px 30px;
             background: #ffffff;
             box-sizing: border-box;
-            .asset_edit_title_container{
+            .asset_edit_title_container {
                 .flexRow;
                 justify-content: space-between;
-                margin-bottom:20px;
-                .asset_edit_title{
-                    font-size:20px;
-                    color:@mainFontColor;
+                margin-bottom: 20px;
+                .asset_edit_title {
+                    font-size: 20px;
+                    color: @mainFontColor;
                 }
             }
-            .step_first{
+            .step_first {
                 .flexRow;
             }
             /*.step_second{
@@ -163,69 +164,117 @@
                 margin-bottom:10px;
             }*/
 
-            .content_container{
-                background:rgba(248,248,248,1);
-                border-radius:4px;
-                padding:20px;
-                margin-bottom:20px;
-                .content_title{
-                    font-size:14px;
-                    color:@mainFontColor;
-                    margin-right:20px;
-                    line-height:32px;
+            .content_container {
+                background: rgba(248, 248, 248, 1);
+                border-radius: 4px;
+                padding: 20px;
+                margin-bottom: 20px;
+                .content_title {
+                    font-size: 14px;
+                    color: @mainFontColor;
+                    margin-right: 20px;
+                    line-height: 32px;
                 }
-                .content_item{
-                    width:100%;
-                    .auth_title_container{
-                        border-bottom:1px solid #EDEDED;
-                        padding-bottom:10px;
-                        width:100%;
+                .content_item {
+                    width: 100%;
+                    .auth_title_container {
+                        border-bottom: 1px solid #EDEDED;
+                        padding-bottom: 10px;
+                        width: 100%;
                         .flexRow;
                         justify-content: space-between;
-                        .auth_title{
-                            font-size:14px;
-                            color:@mainFontColor;
+                        .auth_title {
+                            font-size: 14px;
+                            color: @mainFontColor;
                         }
-                        .auth_update{
+                        .auth_update {
 
                         }
                     }
-                    .step_third_wrap{
-                        padding-top:12px;
-                        .content_visibility_item{
+                    .step_third_wrap {
+                        padding-top: 12px;
+                        .content_visibility_item {
                             .flexRow;
-                            width:400px;
+                            width: 400px;
                             justify-content: space-between;
-                            margin-bottom:10px;
-                            position:relative;
-                            .content_visibility_title{
-                                font-size:14px;
+                            margin-bottom: 10px;
+                            position: relative;
+                            .content_visibility_title {
+                                font-size: 14px;
                                 color: @mainFontColor;
                             }
-                            padding-left:40px;
-                            .content_visibility_type{
-                                position:absolute;
-                                left:0;
-                                top:-40px;
-                                width:100%;
-                                border-top:1px solid #cccccc;
-                                padding-top:10px;
+                            padding-left: 40px;
+                            .content_visibility_type {
+                                position: absolute;
+                                left: 0;
+                                top: -40px;
+                                width: 100%;
+                                border-top: 1px solid #cccccc;
+                                padding-top: 10px;
                             }
                         }
-                        .first_item{
-                            margin-top:60px;
+                        .first_item {
+                            margin-top: 60px;
                         }
                     }
                 }
 
             }
-            .btn_container{
+            .edit_schema_container {
+                .alpaca-container-item {
+                    background: rgba(248, 248, 248, 1) !important;
+                }
+                .alpaca-container-label {
+                    font-size: 14px;
+                    font-weight: 400;
+                    color: @mainFontColor;
+                    padding-bottom: 10px;
+                    border-color: #EDEDED;
+                }
+                .form-group {
+                    .flexRow;
+                    align-items: center;
+                    .alpaca-control-label {
+                        font-size: 14px;
+                        font-weight: 400;
+                        color: #9E9E9E;
+                        margin-right: 10px;
+                        min-width: 150px;
+                        margin-bottom: 0;
+                    }
+                    .alpaca-required-indicator {
+                        display: none;
+                    }
+                    .alpaca-control {
+                        font-size: 14px;
+                        color: @mainFontColor;
+                        width: 250px;
+                        height: 26px;
+
+                    }
+                    .radio {
+                        width: 150px;
+                        margin-top: 0;
+                        margin-bottom: 0;
+                        margin-left: 0;
+                        label {
+                            height: 26px;
+                            display: inline-block;
+                        }
+                    }
+                    .form-control:focus {
+                        box-shadow: 0 0 3px @themeColor;
+                        border-color: @themeColor;
+                    }
+                }
+            }
+            .btn_container {
                 .flexRow;
                 justify-content: flex-end;
-                .btn{
-                    width:136px;
-                    &:first-child{
-                        margin-right:20px;
+                .btn {
+                    width: 136px;
+                    &:first-child {
+                        margin-right: 20px;
                     }
                 }
             }

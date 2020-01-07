@@ -36,6 +36,11 @@ export const constant = {
         AUTH:1,
         REFUSED:2,
         INVALID:3
+    },
+    CHECK_STATUS:{
+        NOT_CHECK:0,
+        CHECKED:1,
+        CHECK_FAILED:2
     }
 
 };

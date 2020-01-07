@@ -2,6 +2,7 @@ export const dictionary = new Map([
     ['assetNo','资产编码'],
     ['assetType','资产分类代码'],
     ['assetName','资产名称'],
+    ['assetOwner','所有者'],
     ['cargoName','交易货物名称'],
     ['firstPaymentDate','首次收款日期'],
     ['endPaymentDate','末次收款日期'],
