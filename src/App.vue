@@ -89,12 +89,17 @@
             } else {
                 activeTab = 0;
             }
+            let token = sessionStorage.getItem('token');
+            let displayUserName = '';
+            if(token){
+                displayUserName = JSON.parse(token).name;
+            }
             return {
                 activeTab : activeTab,
                 centerDialogVisible : false,
                 username : '',
                 psd : '',
-                displayUserName:'供应商A',
+                displayUserName,
                 showToast:true,
             }
         },
@@ -108,9 +113,9 @@
             },
             expired(expired){
                 if(expired){
-                    if(this.showToast){
+                    /*if(this.showToast){
                         this.$message.error('登录过期,请重新登录');
-                    }
+                    }*/
                     this.$router.push('/login');
                 }
             }
@@ -130,6 +135,9 @@
                 this.activeTab = 0
             } else {
                 this.activeTab = 1
+            }
+            if(this.expired){
+                this.$router.push('/login');
             }
         },
         methods : {
@@ -217,6 +225,7 @@
                 .header_container {
                     width: 100%;
                     height: 80px;
+                    flex:0 0 80px;
                     background: linear-gradient(139deg, rgba(52, 73, 110, 1) 0%, rgba(29, 46, 77, 1) 100%);
                     position: relative;
                     .flexRow;
@@ -290,6 +299,8 @@
                     width: 100%;
                     flex: 1;
                     box-sizing: border-box;
+                    padding-bottom:40px;
+                    overflow-y: auto;
                 }
                 .login_dialog_container {
                     .flexColumn;

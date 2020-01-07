@@ -16,17 +16,17 @@
                         style="width: 100%">
                     <el-table-column
                             fixed
-                            prop="id"
+                            prop="number"
                             label="资产编号"
-                            min-width="150">
+                            min-width="100">
                     </el-table-column>
-                    <!--<el-table-column
-                            prop="assetName"
+                    <el-table-column
+                            prop="name"
                             label="资产名称"
                             min-width="120">
-                    </el-table-column>-->
+                    </el-table-column>
                     <el-table-column
-                            prop="assetType"
+                            prop="type"
                             label="资产类型"
                             min-width="60">
                     </el-table-column>
@@ -36,12 +36,12 @@
                             min-width="70">
                     </el-table-column>
                     <el-table-column
-                            prop="status"
+                            prop="displayCheckStatus"
                             label="查验状态"
                             min-width="50">
                     </el-table-column>
                     <el-table-column
-                            prop="txStatus"
+                            prop="displayTransStatus"
                             label="转让状态"
                             min-width="70">
                     </el-table-column>
@@ -55,7 +55,7 @@
                                 background:rgba(254,47,93,1);border-radius:50%;display:inline-block;"></i>
                             </el-button>
                             <el-button type="text" size="small"
-                                       v-show="true"
+                                       v-show="getTransShow(scope.row)"
                                        @click="handleTransClick(scope.row)">转让</el-button>
                         </template>
                     </el-table-column>
@@ -87,11 +87,11 @@
             return {
                 tableData: [{
                     id: '金属送吧膜回收,知否知否',
-                    assetName: 'A公司的应收账款',
-                    assetType: '应收账款',
+                    name: 'A公司的应收账款',
+                    type: '应收账款',
                     owner: '暴力服务商B',
-                    status: '已查验',
-                    txStatus: '已授权待转让'
+                    displayCheckStatus: '已查验',
+                    displayTransStatus: '已授权待转让'
                 }],
                 totalTxCount:100,
                 txListCurrentPage:1,
@@ -101,7 +101,7 @@
 
         },
         mounted(){
-            //this.onPageChange(1);
+            this.onPageChange(1);
         },
         methods:{
             add(){
@@ -121,6 +121,9 @@
                         return '已失效';
 
                 }
+            },
+            getTransShow(row){
+                
             },
             getDisplayCheckStatus(status){
                 switch (status){
@@ -146,7 +149,25 @@
                 this.getDataList(page);
             },
             getDataList(page){
-                axios.get({url:'',ctx:this});
+                axios.get({url:`/assets?pageNum=${page}&pageSize=10`,ctx:this}).then((data)=>{
+                    this.handleData(data);
+                });
+            },
+            handleData(data){
+                console.log(data)
+                this.totalTxCount = data.total;
+                this.tableData = data.data.map((asset)=>{
+                    let o = {
+                        number:asset.number,
+                        id:asset.nft_id,
+                        name:asset.asset_name,
+                        type:asset.type,
+                        owner:asset.owner,
+                        displayCheckStatus:this.getDisplayCheckStatus(asset.check_status),
+                        displayTransStatus:this.getDisplayCheckStatus(asset.transfer_status),
+                    };
+                    return o;
+                })
             }
         }
     }

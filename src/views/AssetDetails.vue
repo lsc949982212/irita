@@ -450,6 +450,7 @@ https://www.taobao.com
             },
             applyBtnShow(){
                 //todo 非资产拥有者,并且有加密的数据
+                //转让申请中或者是已接收待转让
                 return this.$route.query.type === 'check' && !this.isOwner
             },
             isOwner(){

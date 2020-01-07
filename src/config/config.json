@@ -1,9 +1,18 @@
 {
   "account":{
-    "username": "admin",
-    "psd": "qqqqqqqqq1",
-    "publicKey":"",
-    "address":""
+    "admin":{
+      "psd": "qqqqqqqqq1",
+      "publicKey":"",
+      "address":"faa16act4xnvf2tdjhpyxch2rm0sl6ka0r620raq5m",
+      "name":"供应商A"
+    },
+    "test":{
+      "psd": "qqqqqqqqq2",
+      "publicKey":"",
+      "address":"faa1yf736jstzf9spzd3qjm3j8sahpjen90yrxnpcp",
+      "name":"保理服务商B"
+    }
+
   },
   "expired":1800000,
   "app":{

@@ -8,10 +8,10 @@ export default {
         const{url, ctx} = params;
         if(loginHelper.checkLoginStatus(ctx) !== constant.SUCCESS.code){
             loginHelper.exit(ctx);
-            return;
+            return new Promise(()=>{});
         }
         return new Promise((res,rej)=>{
-            axios.get(`${cfg.app.address}${url}`, {timeout:constant.TIME_OUT}).then(result => res(result)).catch((e)=>rej(e));
+            axios.get(`${cfg.app.address}${url}`, {timeout:constant.TIME_OUT}).then(result => res(result.data)).catch((e)=>rej(e));
         })
 
     },
@@ -19,7 +19,7 @@ export default {
         const {url,body,ctx} = params;
         if(loginHelper.checkLoginStatus(ctx) !== constant.SUCCESS.code){
             loginHelper.exit(ctx);
-            return;
+            return new Promise(()=>{});
         }
         return new Promise((res,rej)=>{
             axios.post(url, body, {timeout: constant.TIME_OUT}).then(result => {
@@ -35,7 +35,7 @@ export default {
         const {url,body,ctx,} = params;
         if(loginHelper.checkLoginStatus(ctx) !== constant.SUCCESS.code){
             loginHelper.exit(ctx);
-            return;
+            return new Promise(()=>{});
         }
         return new Promise((res,rej)=>{
             axios.put(url, body, {timeout: constant.TIME_OUT}).then(result => {
