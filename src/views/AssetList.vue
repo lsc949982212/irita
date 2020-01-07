@@ -66,6 +66,7 @@
                 <el-pagination
                         background
                         @current-change="onPageChange"
+                        :current-page="txListCurrentPage"
                         layout="prev, pager, next"
                         :total="1000">
                 </el-pagination>
@@ -76,6 +77,7 @@
 
 <script>
     import axios from '../helper/httpHelper';
+    import { constant } from '../constant/constant';
 
     export default {
         name : 'AssetList',
@@ -88,70 +90,35 @@
                     owner: '暴力服务商B',
                     status: '已查验',
                     txStatus: '已授权待转让'
-                },{
-                    id: '金属送吧膜回收,知否知否',
-                    assetName: 'A公司的应收账款',
-                    assetType: '应收账款',
-                    owner: '暴力服务商B',
-                    status: '已查验',
-                    txStatus: '已授权待转让'
-                },{
-                    id: '金属送吧膜回收,知否知否',
-                    assetName: 'A公司的应收账款',
-                    assetType: '应收账款',
-                    owner: '暴力服务商B',
-                    status: '已查验',
-                    txStatus: '已授权待转让'
-                },{
-                    id: '金属送吧膜回收,知否知否',
-                    assetName: 'A公司的应收账款',
-                    assetType: '应收账款',
-                    owner: '暴力服务商B',
-                    status: '已查验',
-                    txStatus: '已授权待转让'
-                },{
-                    id: '金属送吧膜回收,知否知否',
-                    assetName: 'A公司的应收账款',
-                    assetType: '应收账款',
-                    owner: '暴力服务商B',
-                    status: '已查验',
-                    txStatus: '已授权待转让'
-                },{
-                    id: '金属送吧膜回收,知否知否',
-                    assetName: 'A公司的应收账款',
-                    assetType: '应收账款',
-                    owner: '暴力服务商B',
-                    status: '已查验',
-                    txStatus: '已授权待转让'
-                },{
-                    id: '金属送吧膜回收,知否知否',
-                    assetName: 'A公司的应收账款',
-                    assetType: '应收账款',
-                    owner: '暴力服务商B',
-                    status: '已查验',
-                    txStatus: '已授权待转让'
-                },{
-                    id: '金属送吧膜回收,知否知否',
-                    assetName: 'A公司的应收账款',
-                    assetType: '应收账款',
-                    owner: '暴力服务商B',
-                    status: '已查验',
-                    txStatus: '已授权待转让'
-                },],
-                totalTxCount:100
+                }],
+                totalTxCount:100,
+                txListCurrentPage:1,
             }
         },
         components : {
 
         },
         mounted(){
-            setTimeout(()=>{
-                axios.get({url:'',ctx:this});
-            },3000)
+            //this.onPageChange(1);
         },
         methods:{
             add(){
                 this.$router.push('/asset_add');
+            },
+            getDisplayAssetTransStatus(status){
+                switch (status){
+                    case constant.ASSET_LIST_STATUS.APPLYING:
+                        return '转让申请中';
+                    case constant.ASSET_LIST_STATUS.ACCEPT:
+                        return '已接受待转让';
+                    case constant.ASSET_LIST_STATUS.TRANSFERED:
+                        return '已转让';
+                    case constant.ASSET_LIST_STATUS.REFUSED:
+                        return '已拒绝';
+                    case constant.ASSET_LIST_STATUS.INVALID:
+                        return '已失效';
+
+                }
             },
             handleCheckClick(row){
                 console.log(row)
@@ -162,7 +129,11 @@
                 this.$router.push('/asset_detail?type=trans');
             },
             onPageChange(page){
-
+                this.txListCurrentPage = page;
+                this.getDataList(page);
+            },
+            getDataList(page){
+                axios.get({url:'',ctx:this});
             }
         }
     }

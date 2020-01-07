@@ -5,5 +5,8 @@
     "publicKey":"",
     "address":""
   },
-  "expired":1800000
+  "expired":1800000,
+  "app":{
+    "address":"http://10.1.4.50:8080"
+  }
 }

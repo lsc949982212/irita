@@ -1,6 +1,7 @@
 import axios from 'axios';
 import {constant} from '../constant/constant';
 import loginHelper from '../helper/loginHelper';
+import cfg from '../config/config';
 
 export default {
     get(params) {
@@ -10,7 +11,7 @@ export default {
             return;
         }
         return new Promise((res,rej)=>{
-            axios.get(url, {timeout:constant.TIME_OUT}).then(result => res(result)).catch((e)=>rej(e));
+            axios.get(`${cfg.app.address}${url}`, {timeout:constant.TIME_OUT}).then(result => res(result)).catch((e)=>rej(e));
         })
 
     },

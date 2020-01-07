@@ -139,6 +139,7 @@ https://www.taobao.com
                 <el-pagination
                         background
                         @current-change="onTxTransPaginationClick"
+                        :current-page="transCurrentPage"
                         layout="prev, pager, next"
                         :total="1000">
                 </el-pagination>
@@ -191,7 +192,8 @@ https://www.taobao.com
                 </span>
                 <el-pagination
                         background
-                        @current-change="onTxTransPaginationClick"
+                        @current-change="onAuthPaginationClick"
+                        :current-page="authCurrentPage"
                         layout="prev, pager, next"
                         :total="1000">
                 </el-pagination>
@@ -299,7 +301,8 @@ https://www.taobao.com
                     </span>
                 <el-pagination
                         background
-                        @current-change="onTxTransPaginationClick"
+                        @current-change="onAssetTxPaginationClick"
+                        :current-page="assetTxCurrentPage"
                         layout="prev, pager, next"
                         :total="1000">
                 </el-pagination>
@@ -310,7 +313,8 @@ https://www.taobao.com
                     </span>
                 <el-pagination
                         background
-                        @current-change="onTxTransPaginationClick"
+                        @current-change="onServiceTxPaginationClick"
+                        :current-page="serviceTxCurrentPage"
                         layout="prev, pager, next"
                         :total="1000">
                 </el-pagination>
@@ -345,6 +349,7 @@ https://www.taobao.com
     import schema from './schema';
     import jsonData from './data';
     import { constant } from '../constant/constant';
+    import axios from '../helper/httpHelper';
 
     export default {
         name : 'AssetAdd',
@@ -399,6 +404,10 @@ https://www.taobao.com
                 centerDialogVisible : false,
                 dialogTitle : '确认转让?',
                 dialogType : 1,
+                transCurrentPage : 1,
+                authCurrentPage : 1,
+                assetTxCurrentPage : 1,
+                serviceTxCurrentPage : 1,
             }
         },
         components : {},
@@ -506,6 +515,28 @@ https://www.taobao.com
             },
             onTxTransPaginationClick(page){
                 console.log(page)
+                this.transCurrentPage = page
+            },
+            onAuthPaginationClick(page){
+                console.log(page)
+                this.authCurrentPage = page
+            },
+            onAssetTxPaginationClick(page){
+                console.log(page)
+                this.assetTxCurrentPage = page
+            },
+            onServiceTxPaginationClick(page){
+                console.log(page)
+                this.serviceTxCurrentPage = page
+            },
+            getDataList(page, url, index){
+                axios.get({url, ctx:this}).then((data)=>{
+                    this.handleData(data,index)
+                });
+
+            },
+            handleData(data, index){
+
             },
             handleTransBtnClick(){
                 this.centerDialogVisible = true;
