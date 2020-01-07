@@ -22,7 +22,7 @@
         "assetType": {
           "$id": "#/properties/basicInfo/properties/assetType",
           "type": "string",
-          "title": "资产分类代码",
+          "title": "资产分类",
           "default": "",
           "examples": ["receivableSchema"],
           "pattern": "^(.*)$"
@@ -33,6 +33,14 @@
           "title": "资产名称",
           "default": "",
           "examples": ["应收账款1"],
+          "pattern": "^(.*)$"
+        },
+        "assetOwner": {
+          "$id": "#/properties/basicInfo/properties/assetOwner",
+          "type": "string",
+          "title": "所有者",
+          "default": "",
+          "examples": ["A公司"],
           "pattern": "^(.*)$"
         }
       }

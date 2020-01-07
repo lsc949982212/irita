@@ -10,6 +10,12 @@
                            v-show="editBtnShow"
                            class="btn" type="primary">编辑
                 </el-button>
+                <el-button size="small"
+                           @click="applyCheck"
+                           v-show="applyBtnShow"
+                           class="btn" type="primary">申请查看
+                </el-button>
+
             </div>
             <div class="asset_details_trans_container" v-if="$route.query.type === 'trans'">
                 <span class="asset_details_trans_title">
@@ -29,7 +35,7 @@
                            class="asset_details_trans_btn" type="primary">转让申请
                 </el-button>
             </div>
-            <div class="content_container">
+            <div class="schema_container" id="schema_container">
                 <div class="content_item" id="detail_json_schema_node"></div>
             </div>
 
@@ -418,11 +424,33 @@ https://www.taobao.com
                 "view" : "bootstrap-display"
             });
             console.log(this.$route)
+
+
+            setTimeout(()=>{
+                let node = this.getElementByAttr('div','data-alpaca-field-path', /^\//);
+                for(let item of node){
+                    const path = item.getAttribute('data-alpaca-field-path')
+                    let status = document.createElement('span');
+                    status.className = 'check_status';
+                    status.innerHTML = '未查验';
+                    item.appendChild(status);
+                    let btn = document.createElement('span');
+                    btn.className = 'check_btn';
+                    btn.innerHTML = '查验';
+                    btn.onclick = this.handleCheck.bind(this, path);
+                    item.appendChild(btn);
+
+                }
+            },300)
         },
         computed : {
             editBtnShow(){
                 //todo 资产拥有者,并且状态是正常
                 return this.$route.query.type === 'check'
+            },
+            applyBtnShow(){
+                //todo 非资产拥有者,并且有加密的数据
+                return this.$route.query.type === 'check' && !this.isOwner
             },
             isOwner(){
                 //todo
@@ -432,6 +460,9 @@ https://www.taobao.com
         methods : {
             edit(){
                 this.$router.push('/asset_edit');
+            },
+            applyCheck(){
+
             },
             acceptTrans(row){
                 this.centerDialogVisible = true;
@@ -530,8 +561,8 @@ https://www.taobao.com
                 this.serviceTxCurrentPage = page
             },
             getDataList(page, url, index){
-                axios.get({url, ctx:this}).then((data)=>{
-                    this.handleData(data,index)
+                axios.get({url, ctx : this}).then((data) =>{
+                    this.handleData(data, index)
                 });
 
             },
@@ -551,11 +582,26 @@ https://www.taobao.com
             },
             handleTokenDetailClick(){
                 window.open('https://www.baidu.com')
+            },
+            getElementByAttr(tag, dataAttr, reg){
+                let aElements = document.getElementById('schema_container').getElementsByTagName(tag);
+                let aEle = [];
+                for(let i = 0 ; i < aElements.length ; i++){
+                    let ele = aElements[i].getAttribute(dataAttr);
+                    if(ele && ele.startsWith('/') && ele !== '/'){
+                        aEle.push(aElements[i]);
+                    }
+                }
+                return aEle;
+            },
+            handleCheck(path){
+                console.log(path)
             }
+
         }
     }
 </script>
-<style lang="less" scoped>
+<style lang="less">
     @import "../style/mixin";
 
     .asset_details_container {
@@ -599,7 +645,48 @@ https://www.taobao.com
                     width: 136px;
                 }
             }
+            .schema_container {
 
+                .alpaca-container-item {
+                    background: rgba(248, 248, 248, 1) !important;
+                }
+                .alpaca-container-label {
+                    font-size: 14px;
+                    font-weight: 400;
+                    color: @mainFontColor;
+                    padding-bottom: 10px;
+                    border-color: #EDEDED;
+                }
+                .form-group {
+                    .flexRow;
+
+                    .alpaca-control-label {
+                        font-size: 14px;
+                        font-weight: 400;
+                        color: #9E9E9E;
+                        margin-right: 10px;
+                    }
+                    .alpaca-required-indicator {
+                        display: none;
+                    }
+                    .alpaca-control {
+                        font-size: 14px;
+                        color: @mainFontColor;
+                    }
+                    .check_status{
+                        font-size:14px;
+                        color:@mainFontColor;
+                        margin-left:30px;
+                    }
+                    .check_btn{
+                        cursor:pointer;
+                        color:@themeColor;
+                        font-weight:400;
+                        font-size:14px;
+                        margin-left:30px;
+                    }
+                }
+            }
             .content_container {
                 background: rgba(248, 248, 248, 1);
                 border-radius: 4px;
