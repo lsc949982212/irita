@@ -31,7 +31,7 @@
                             min-width="60">
                     </el-table-column>
                     <el-table-column
-                            prop="owner"
+                            prop="displayOwner"
                             label="所有者"
                             min-width="70">
                     </el-table-column>
@@ -80,6 +80,7 @@
 <script>
     import axios from '../helper/httpHelper';
     import { constant } from '../constant/constant';
+    import {accountHelper} from '../helper/accountHelper';
 
     export default {
         name : 'AssetList',
@@ -89,7 +90,7 @@
                     id: '金属送吧膜回收,知否知否',
                     name: 'A公司的应收账款',
                     type: '应收账款',
-                    owner: '暴力服务商B',
+                    displayOwner: '暴力服务商B',
                     displayCheckStatus: '已查验',
                     displayTransStatus: '已授权待转让'
                 }],
@@ -123,7 +124,7 @@
                 }
             },
             getTransShow(row){
-                
+                return accountHelper.isOwner(row.owner) && (row.transStatus === constant.ASSET_LIST_STATUS.TRANSFERED || row.transStatus === constant.ASSET_LIST_STATUS.REFUSED || row.transStatus === constant.ASSET_LIST_STATUS.INVALID)
             },
             getDisplayCheckStatus(status){
                 switch (status){
@@ -151,6 +152,8 @@
             getDataList(page){
                 axios.get({url:`/assets?pageNum=${page}&pageSize=10`,ctx:this}).then((data)=>{
                     this.handleData(data);
+                }).catch(e=>{
+                    console.error('-----',e)
                 });
             },
             handleData(data){
@@ -163,8 +166,10 @@
                         name:asset.asset_name,
                         type:asset.type,
                         owner:asset.owner,
+                        transStatus:asset.transfer_status,
+                        displayOwner:accountHelper.getAccountList().find((a)=>a.address === asset.owner) ? accountHelper.getAccountList().find((a)=>a.address === asset.owner).name : '',
                         displayCheckStatus:this.getDisplayCheckStatus(asset.check_status),
-                        displayTransStatus:this.getDisplayCheckStatus(asset.transfer_status),
+                        displayTransStatus:this.getDisplayAssetTransStatus(asset.transfer_status),
                     };
                     return o;
                 })
@@ -181,6 +186,8 @@
         .flexColumn;
         align-items: center;
         background:rgba(250,250,250,1);
+        padding-bottom:40px;
+        box-sizing:border-box;
         .asset_list_wrap{
             width: 69%;
             min-width:994px;

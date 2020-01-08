@@ -299,7 +299,6 @@
                     width: 100%;
                     flex: 1;
                     box-sizing: border-box;
-                    padding-bottom:40px;
                     overflow-y: auto;
                 }
                 .login_dialog_container {
