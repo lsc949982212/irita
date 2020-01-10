@@ -56,7 +56,7 @@
                                 denom:
                             </span>
                             <span class="content_chain_info_item_content">
-1
+                                {{ chainInfo.type }}
                             </span>
                         </div>
                         <div class="content_chain_info_item_wrap">
@@ -64,7 +64,7 @@
                                 owner:
                             </span>
                             <span class="content_chain_info_item_content">
-2
+                                {{ chainInfo.owner }}
                             </span>
                         </div>
                         <div class="content_chain_info_item_wrap">
@@ -72,7 +72,7 @@
                                 详情:
                             </span>
                             <span class="content_chain_info_item_content link" @click="handleTokenDetailClick">
-https://www.taobao.com
+                                {{ chainInfo.nft_uri }}
                             </span>
                         </div>
                     </div>
@@ -82,7 +82,7 @@ https://www.taobao.com
                                 token_id:
                             </span>
                             <span class="content_chain_info_item_content">
-4
+                                {{ chainInfo.nft_id }}
                             </span>
                         </div>
                         <div class="content_chain_info_item_wrap">
@@ -90,7 +90,7 @@ https://www.taobao.com
                                 token_uri:
                             </span>
                             <span class="content_chain_info_item_content">
-
+                                {{ chainInfo.nft_uri }}
                             </span>
                         </div>
                     </div>
@@ -421,6 +421,14 @@ https://www.taobao.com
                 serviceTxCurrentPage : 1,
                 hasSecret:true,
                 accountApplyAuthorizeStatus:0,
+                chainInfo:{
+                    nft_id:"",
+                    number:"",
+                    asset_name:"",
+                    type:"",
+                    owner:"",
+                    nft_uri:""
+                }
             }
         },
         components : {},
@@ -610,8 +618,14 @@ https://www.taobao.com
                 });
             },
             handleDetailData(data){
-                console.log('detail data', JSON.parse(data))
-                this.jsonData = data;
+                console.log('detail data', data)
+                if(data.asset_info){
+                    this.jsonData =  JSON.parse(data.asset_info);
+                }
+                if(data.chain_info){
+                    this.chainInfo = data.chain_info;
+                }
+
                 this.renderUI();
             },
             renderUI(){
@@ -774,11 +788,12 @@ https://www.taobao.com
                             .content_chain_info_item_title {
                                 font-size: 14px;
                                 color: #9E9E9E;
-                                width: 80px;
+                                min-width: 80px;
                             }
                             .content_chain_info_item_content {
                                 font-size: 14px;
                                 color: @mainFontColor;
+                                word-break: break-all;
                             }
                             .link {
                                 color: @themeColor;

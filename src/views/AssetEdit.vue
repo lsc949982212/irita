@@ -51,7 +51,6 @@
 <script>
     import Select from '../components/Select';
     import schema from './schema';
-    import jsonData from './data';
     import { dictionary } from '../constant/dictionary';
     import JsonSchema from '../helper/JsonSchemaHelper';
     import axios from '../helper/httpHelper';
