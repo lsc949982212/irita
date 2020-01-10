@@ -83,6 +83,7 @@
     import jsonData from './data';
     import { dictionary } from '../constant/dictionary';
     import JsonSchema from '../helper/JsonSchemaHelper';
+    import axios from '../helper/httpHelper';
 
     export default {
         name : 'AssetAdd',
@@ -149,6 +150,12 @@
             },
             postData(){
                 console.log('-=-=-=-=-=-', this.jsonData)
+                axios.post({url:`/assets/`,body:this.jsonData,ctx:this}).then((data)=>{
+                    console.log('======',data)
+
+                }).catch(e=>{
+                    console.error('-----',e)
+                });
             },
             changeAuth(res){
                 this.authList[res.index].value = res.auth;

@@ -109,6 +109,12 @@
             },
             postData(){
                 console.log(this.jsonData)
+                axios.put({url:`/assets/`,body:this.jsonData,ctx:this}).then((data)=>{
+                    console.log('response after submit json data',data)
+
+                }).catch(e=>{
+                    console.error('submit json data failed',e)
+                });
             },
             changeAuth(res){
                 this.authList[res.index].value = res.auth;
@@ -128,12 +134,14 @@
                     }
 
                 }).catch(e=>{
-                    console.error('-----',e)
+                    console.error('get asset detail failed',e)
                 });
             },
             handleDetailData(data){
-                console.log('detail data', JSON.parse(data))
-                this.jsonData = data;
+                console.log('detail data', data)
+                if(data.asset_info){
+                    this.jsonData =  JSON.parse(data.asset_info);
+                }
                 this.renderUI();
             },
             renderUI(){

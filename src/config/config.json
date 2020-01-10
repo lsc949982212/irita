@@ -16,6 +16,6 @@
   },
   "expired":1800000,
   "app":{
-    "address":"http://10.1.4.50:8080"
+    "address":""
   }
 }
