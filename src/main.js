@@ -3,6 +3,7 @@ import App from './App.vue';
 import router from './router';
 import store from './store';
 import './theme/index.css';
+import {accountHelper} from "./helper/accountHelper";
 
 Vue.config.productionTip = false;
 import {
@@ -167,6 +168,7 @@ Vue.prototype.$confirm = MessageBox.confirm;
 Vue.prototype.$prompt = MessageBox.prompt;
 Vue.prototype.$notify = Notification;
 Vue.prototype.$message = Message;
+Vue.prototype.$accountHelper = accountHelper;
 
 new Vue({
   router,

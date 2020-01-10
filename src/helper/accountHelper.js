@@ -20,5 +20,13 @@ export const accountHelper = {
         }else{
             return false;
         }
+    },
+    getAccountAddress(){
+        let token = sessionStorage.getItem('token');
+        if(token){
+            return JSON.parse(token).address;
+        }else{
+            return '';
+        }
     }
 };

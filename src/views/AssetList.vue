@@ -115,11 +115,11 @@
                     case constant.ASSET_LIST_STATUS.ACCEPT:
                         return '已接受待转让';
                     case constant.ASSET_LIST_STATUS.TRANSFERED:
-                        return '已转让';
+                        return '正常';
                     case constant.ASSET_LIST_STATUS.REFUSED:
-                        return '已拒绝';
+                        return '正常';
                     case constant.ASSET_LIST_STATUS.INVALID:
-                        return '已失效';
+                        return '正常';
 
                 }
             },
@@ -139,7 +139,7 @@
             },
             handleCheckClick(row){
                 console.log(row)
-                this.$router.push('/asset_detail?type=check');
+                this.$router.push(`/asset_detail?type=check&nft_id=${row.id}&owner=${row.owner}&transStatus=${row.transStatus}`);
             },
             handleTransClick(row){
                 console.log(row)

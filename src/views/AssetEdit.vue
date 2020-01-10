@@ -54,6 +54,7 @@
     import jsonData from './data';
     import { dictionary } from '../constant/dictionary';
     import JsonSchema from '../helper/JsonSchemaHelper';
+    import axios from '../helper/httpHelper';
 
     export default {
         name : 'AssetAdd',
@@ -78,13 +79,8 @@
             Select
         },
         mounted(){
-            $("#edit_json_schema_node").alpaca({
-                "schemaSource" : schema,
-                "dataSource" : jsonData
-            });
-            setTimeout(() =>{
-                this.checkData();
-            }, 1000)
+            this.getDetails();
+
 
         },
         methods : {
@@ -125,6 +121,31 @@
                     }
                 }
 
+            },
+            getDetails(){
+                axios.get({url:`/assets/detail/${this.$route.query.nft_id}?address=${this.$accountHelper.getAccountAddress()}`,ctx:this}).then((data)=>{
+                    if(data){
+                        this.handleDetailData(data.data);
+                    }
+
+                }).catch(e=>{
+                    console.error('-----',e)
+                });
+            },
+            handleDetailData(data){
+                console.log('detail data', JSON.parse(data))
+                this.jsonData = data;
+                this.renderUI();
+            },
+            renderUI(){
+                $("#edit_json_schema_node").alpaca({
+                    "schemaSource" : schema,
+                    "dataSource" : this.jsonData
+                });
+
+                setTimeout(() =>{
+                    this.checkData();
+                }, 1000)
             }
         }
     }
@@ -251,6 +272,9 @@
                         width: 250px;
                         height: 26px;
 
+                    }
+                    .help-block{
+                        display:none;
                     }
                     .radio {
                         width: 150px;

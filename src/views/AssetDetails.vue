@@ -15,6 +15,12 @@
                            v-show="applyBtnShow"
                            class="btn" type="primary">申请查看
                 </el-button>
+                <el-button size="small"
+                           @click="unlock"
+                           v-show="unlockShow"
+                           class="btn" type="primary">点击解密
+                </el-button>
+
 
             </div>
             <div class="asset_details_trans_container" v-if="$route.query.type === 'trans'">
@@ -352,8 +358,7 @@ https://www.taobao.com
 </template>
 
 <script>
-    import schema from './schema';
-    import jsonData from './data';
+    import schema from './detailSchema';
     import { constant } from '../constant/constant';
     import axios from '../helper/httpHelper';
 
@@ -414,57 +419,51 @@ https://www.taobao.com
                 authCurrentPage : 1,
                 assetTxCurrentPage : 1,
                 serviceTxCurrentPage : 1,
+                hasSecret:true,
+                accountApplyAuthorizeStatus:0,
             }
         },
         components : {},
         mounted(){
-            $("#detail_json_schema_node").alpaca({
-                "schemaSource" : schema,
-                "dataSource" : jsonData,
-                "view" : "bootstrap-display"
-            });
+            this.getDetails();
+            this.getAssetTransList(1);
+            this.getAssetAuthList(1);
             console.log(this.$route)
 
-
-            setTimeout(()=>{
-                let node = this.getElementByAttr('div','data-alpaca-field-path', /^\//);
-                for(let item of node){
-                    const path = item.getAttribute('data-alpaca-field-path')
-                    let status = document.createElement('span');
-                    status.className = 'check_status';
-                    status.innerHTML = '未查验';
-                    item.appendChild(status);
-                    let btn = document.createElement('span');
-                    btn.className = 'check_btn';
-                    btn.innerHTML = '查验';
-                    btn.onclick = this.handleCheck.bind(this, path);
-                    item.appendChild(btn);
-
-                }
-            },300)
         },
         computed : {
             editBtnShow(){
                 //todo 资产拥有者,并且状态是正常
-                return this.$route.query.type === 'check'
+                const {type, transStatus} = this.$route.query;
+                return type === 'check' && this.isOwner && (Number(transStatus) === constant.ASSET_LIST_STATUS.TRANSFERED || Number(transStatus) === constant.ASSET_LIST_STATUS.REFUSED || Number(transStatus) === constant.ASSET_LIST_STATUS.INVALID)
             },
             applyBtnShow(){
-                //todo 非资产拥有者,并且有加密的数据
+                //todo 非资产拥有者,并且有加密的数据, 当前账号申请查看状态不能是申请中或者是已经申请
                 //转让申请中或者是已接收待转让
-                return this.$route.query.type === 'check' && !this.isOwner
+                return this.$route.query.type === 'check' && !this.isOwner && this.hasSecret && (this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.REFUSED || this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.INVALID);
             },
+            unlockShow(){
+                //todo 非资产拥有者,并且有加密的数据, 展示点击解密, 资产查看的授权状态必须是owner已经授权当前申请者
+
+                return this.$route.query.type === 'check' && !this.isOwner && this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.AUTH;
+            },
+
             isOwner(){
-                //todo
-                return true
+                console.log('is owner',this.$route.query.owner === this.$accountHelper.getAccountAddress())
+                return this.$route.query.owner === this.$accountHelper.getAccountAddress()
             }
         },
         methods : {
             edit(){
-                this.$router.push('/asset_edit');
+                this.$router.push(`/asset_edit?nft_id=${this.$route.query.nft_id}`);
             },
             applyCheck(){
 
             },
+            unlock(){
+
+            },
+
             acceptTrans(row){
                 this.centerDialogVisible = true;
                 this.dialogTitle = '确认接受转让?';
@@ -548,10 +547,12 @@ https://www.taobao.com
             onTxTransPaginationClick(page){
                 console.log(page)
                 this.transCurrentPage = page
+                this.getAssetTransList(page);
             },
             onAuthPaginationClick(page){
                 console.log(page)
                 this.authCurrentPage = page
+                this.getAssetAuthList(page);
             },
             onAssetTxPaginationClick(page){
                 console.log(page)
@@ -597,7 +598,67 @@ https://www.taobao.com
             },
             handleCheck(path){
                 console.log(path)
-            }
+            },
+            getDetails(){
+                axios.get({url:`/assets/detail/${this.$route.query.nft_id}?address=${this.$accountHelper.getAccountAddress()}`,ctx:this}).then((data)=>{
+                    if(data){
+                        this.handleDetailData(data.data);
+                    }
+
+                }).catch(e=>{
+                    console.error('-----',e)
+                });
+            },
+            handleDetailData(data){
+                console.log('detail data', JSON.parse(data))
+                this.jsonData = data;
+                this.renderUI();
+            },
+            renderUI(){
+                $("#detail_json_schema_node").alpaca({
+                    "schemaSource" : schema,
+                    "dataSource" : this.jsonData,
+                    "view" : "bootstrap-display"
+                });
+                return;
+                setTimeout(()=>{
+                    let node = this.getElementByAttr('div','data-alpaca-field-path', /^\//);
+                    for(let item of node){
+                        const path = item.getAttribute('data-alpaca-field-path')
+                        let status = document.createElement('span');
+                        status.className = 'check_status';
+                        status.innerHTML = '未查验';
+                        item.appendChild(status);
+                        let btn = document.createElement('span');
+                        btn.className = 'check_btn';
+                        btn.innerHTML = '查验';
+                        btn.onclick = this.handleCheck.bind(this, path);
+                        item.appendChild(btn);
+
+                    }
+                },300)
+            },
+            getAssetTransList(page){
+                axios.get({url:`/assets_transfer/${this.$route.query.nft_id}/transfer_records?pageNum=${page}&pageSize=10`,ctx:this}).then((data)=>{
+                    this.handleAssetTransData(data);
+                }).catch(e=>{
+                    console.error('-----',e)
+                });
+            },
+            handleAssetTransData(data){
+                console.log('transfer asset list data', data)
+            },
+            getAssetAuthList(page){
+                axios.get({url:`/assets_authorization/${this.$route.query.nft_id}/authorization_records?pageNum=${page}&pageSize=10`,ctx:this}).then((data)=>{
+                    this.handleAssetAuthData(data);
+                }).catch(e=>{
+                    console.error('-----',e)
+                });
+            },
+            handleAssetAuthData(data){
+                console.log('authorization asset list data', data)
+            },
+
 
         }
     }
@@ -673,6 +734,8 @@ https://www.taobao.com
                     .alpaca-control {
                         font-size: 14px;
                         color: @mainFontColor;
+                        word-break: break-all;
+                        max-width: 500px;
                     }
                     .check_status{
                         font-size:14px;
