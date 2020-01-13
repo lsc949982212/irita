@@ -108,7 +108,13 @@
                 if(to.path === '/login'){
                     this.activeTab = 0
                 } else {
-                    this.activeTab = 1
+                    this.activeTab = 1;
+                    let token = sessionStorage.getItem('token');
+                    let displayUserName = '';
+                    if(token){
+                        displayUserName = JSON.parse(token).name;
+                    }
+                    this.displayUserName = displayUserName;
                 }
             },
             expired(expired){

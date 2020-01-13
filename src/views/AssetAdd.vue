@@ -84,7 +84,7 @@
     import { dictionary } from '../constant/dictionary';
     import JsonSchema from '../helper/JsonSchemaHelper';
     import axios from '../helper/httpHelper';
-
+    import { Message } from 'element-ui';
     export default {
         name : 'AssetAdd',
         data(){
@@ -151,10 +151,19 @@
             postData(){
                 console.log('-=-=-=-=-=-', this.jsonData)
                 axios.post({url:`/assets/`,body:this.jsonData,ctx:this}).then((data)=>{
-                    console.log('======',data)
-
+                    console.log(data);
+                    if(data && data.data && data.data.status === 'success'){
+                        Message({
+                            message : '新增资产成功',
+                            type : 'success'
+                        });
+                        this.$router.go(-1);
+                    }else{
+                        this.$message.error('新增资产失败');
+                    }
                 }).catch(e=>{
-                    console.error('-----',e)
+                    console.error('-----',e);
+                    this.$message.error('新增资产失败');
                 });
             },
             changeAuth(res){

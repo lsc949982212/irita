@@ -338,7 +338,7 @@
                 top="35vh"
                 center>
             <div class="asset_details_dialog_container">
-                <span class="asset_details_dialog_title">dialogTitle</span>
+                <span class="asset_details_dialog_title">{{ dialogTitle }}</span>
                 <div slot="footer" class="dialog-footer">
                     <el-button @click="handleCancelBtnClick"
                                size="medium"
@@ -361,42 +361,58 @@
     import schema from './detailSchema';
     import { constant } from '../constant/constant';
     import axios from '../helper/httpHelper';
+    import cfg from '../config/config';
+    import { Message } from 'element-ui';
 
     export default {
         name : 'AssetAdd',
         data(){
+            let token = sessionStorage.getItem('token');
+            let recevieAddr, receiverName;
+
+            if(token){
+                for(let key in cfg.account){
+                    if(cfg.account[key].address !== JSON.parse(token).address){
+                        recevieAddr = cfg.account[key].address;
+                        receiverName = cfg.account[key].name;
+                    }
+                }
+            }
+console.log(recevieAddr, receiverName)
+
+
             return {
                 jsonData : null,
                 transferData : [{
-                    id : '金属送吧膜回收,知否知否',
+                    /*id : '金属送吧膜回收,知否知否',
                     time : 'A公司的应收账款',
                     receiver : '应收账款',
-                    txStatus : '暴力服务商B',
+                    txStatus : '暴力服务商B',*/
                 }],
                 applyAndAuthDataList : [{
-                    id : '金属送吧膜回收,知否知否',
+                    /*id : '金属送吧膜回收,知否知否',
                     time : 'A公司的应收账款',
                     applicant : '应收账款',
-                    applyStatus : '暴力服务商B',
+                    applyStatus : '暴力服务商B',*/
                 }],
                 assetListData : [{
-                    id : '金属送吧膜回收,知否知否',
+                    /*id : '金属送吧膜回收,知否知否',
                     txType : 'A公司的应收账款',
                     txHash : '应收账款',
                     time : '暴力服务商B',
                     senderAddr : 'A公司的应收账款',
                     receiverAddr : '应收账款',
-                    height : '暴力服务商B',
+                    height : '暴力服务商B',*/
                 }],
                 serviceListData : [{
-                    id : '金属送吧膜回收,知否知否',
+                    /*id : '金属送吧膜回收,知否知否',
                     serviceName : 'A公司的应收账款',
                     serviceType : '应收账款',
                     serviceHash : '暴力服务商B',
                     time : 'A公司的应收账款',
                     providerAddr : '应收账款',
                     consumeAddr : '应收账款',
-                    height : '暴力服务商B',
+                    height : '暴力服务商B',*/
                 }],
                 tab : 0,
                 totalTransCount : 100,
@@ -404,14 +420,10 @@
                 totalTxListCount : 100,
                 totalServiceListCount : 100,
                 options : [{
-                    value : '1',
-                    label : '应收账款'//todo 受让方的账号名称
-                }, {
-                    value : '2',
-                    label : '非标资产',
-                    disabled : true
+                    value : recevieAddr,
+                    label : receiverName
                 }],
-                value : '1',
+                value : recevieAddr,
                 centerDialogVisible : false,
                 dialogTitle : '确认转让?',
                 dialogType : 1,
@@ -436,6 +448,7 @@
             this.getDetails();
             this.getAssetTransList(1);
             this.getAssetAuthList(1);
+            this.onAssetTxPaginationClick(1);
             console.log(this.$route)
 
         },
@@ -443,7 +456,7 @@
             editBtnShow(){
                 //todo 资产拥有者,并且状态是正常
                 const {type, transStatus} = this.$route.query;
-                return type === 'check' && this.isOwner && (Number(transStatus) === constant.ASSET_LIST_STATUS.TRANSFERED || Number(transStatus) === constant.ASSET_LIST_STATUS.REFUSED || Number(transStatus) === constant.ASSET_LIST_STATUS.INVALID)
+                return type === 'check' && this.isOwner && Number(transStatus) === constant.ASSET_STATUS.NORMAL;
             },
             applyBtnShow(){
                 //todo 非资产拥有者,并且有加密的数据, 当前账号申请查看状态不能是申请中或者是已经申请
@@ -564,11 +577,13 @@
             },
             onAssetTxPaginationClick(page){
                 console.log(page)
-                this.assetTxCurrentPage = page
+                this.assetTxCurrentPage = page;
+                this.getAssetTxList(page);
             },
             onServiceTxPaginationClick(page){
                 console.log(page)
-                this.serviceTxCurrentPage = page
+                this.serviceTxCurrentPage = page;
+                this.getServiceDataList(page);
             },
             getDataList(page, url, index){
                 axios.get({url, ctx : this}).then((data) =>{
@@ -585,7 +600,41 @@
                 this.dialogType = 0;
             },
             handleConfirmBtnClick(){
-
+                if(this.dialogType === 0){
+                    this.transfer();
+                }
+            },
+            transfer(){
+                let publicKey, address;
+                let token = sessionStorage.getItem('token');
+                if(token){
+                    for(let key in cfg.account){
+                        if(cfg.account[key].address !== JSON.parse(token).address){
+                            publicKey = cfg.account[key].publicKey;
+                            address = cfg.account[key].address;
+                        }
+                    }
+                }
+                const body = {
+                    provider:address,
+                    provider_pubkey:publicKey
+                };
+                axios.post({url:`/assets_transfer/${this.$route.query.nft_id}/transfer_owner`,body,ctx:this}).then((data)=>{
+                    console.log(data);
+                    if(data && data.data && data.data.status === 'success'){
+                        Message({
+                            message : '申请转让成功',
+                            type : 'success'
+                        });
+                        this.centerDialogVisible = false;
+                    }else{
+                        this.$message.error('申请转让失败');
+                    }
+                }).catch(e=>{
+                    console.error('-----',e);
+                    this.$message.error('申请转让失败');
+                    this.centerDialogVisible = false;
+                });
             },
             handleCancelBtnClick(){
                 this.centerDialogVisible = false;
@@ -634,8 +683,8 @@
                     "dataSource" : this.jsonData,
                     "view" : "bootstrap-display"
                 });
-                return;
-                setTimeout(()=>{
+
+                /*setTimeout(()=>{
                     let node = this.getElementByAttr('div','data-alpaca-field-path', /^\//);
                     for(let item of node){
                         const path = item.getAttribute('data-alpaca-field-path')
@@ -650,7 +699,7 @@
                         item.appendChild(btn);
 
                     }
-                },300)
+                },300)*/
             },
             getAssetTransList(page){
                 axios.get({url:`/assets_transfer/${this.$route.query.nft_id}/transfer_records?pageNum=${page}&pageSize=10`,ctx:this}).then((data)=>{
@@ -661,6 +710,7 @@
             },
             handleAssetTransData(data){
                 console.log('transfer asset list data', data)
+                this.totalApplyCount = data.total;
             },
             getAssetAuthList(page){
                 axios.get({url:`/assets_authorization/${this.$route.query.nft_id}/authorization_records?pageNum=${page}&pageSize=10`,ctx:this}).then((data)=>{
@@ -670,8 +720,32 @@
                 });
             },
             handleAssetAuthData(data){
-                console.log('authorization asset list data', data)
+                console.log('authorization asset list data', data);
+                this.totalApplyCount = data.total;
             },
+            getAssetTxList(page){
+                axios.get({url:`/assets_authorization/${this.$route.query.nft_id}/authorization_records?pageNum=${page}&pageSize=10`,ctx:this}).then((data)=>{
+                    this.handleTxListData(data);
+                }).catch(e=>{
+                    console.error('-----',e)
+                });
+            },
+            handleTxListData(data){
+                console.log('asset list data', data);
+                this.totalApplyCount = data.total;
+            },
+            getServiceDataList(page){
+                axios.get({url:`/assets_authorization/${this.$route.query.nft_id}/authorization_records?pageNum=${page}&pageSize=10`,ctx:this}).then((data)=>{
+                    this.handleServiceDataData(data);
+                }).catch(e=>{
+                    console.error('-----',e)
+                });
+            },
+            handleServiceDataData(data){
+                console.log('service list data', data);
+                this.totalApplyCount = data.total;
+            },
+
 
 
         }

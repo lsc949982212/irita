@@ -110,21 +110,17 @@
             },
             getDisplayAssetTransStatus(status){
                 switch (status){
-                    case constant.ASSET_LIST_STATUS.APPLYING:
+                    case constant.ASSET_STATUS.NORMAL:
+                        return '正常';
+                    case constant.ASSET_STATUS.APPLyING:
                         return '转让申请中';
-                    case constant.ASSET_LIST_STATUS.ACCEPT:
+                    case constant.ASSET_STATUS.ACCEPT:
                         return '已接受待转让';
-                    case constant.ASSET_LIST_STATUS.TRANSFERED:
-                        return '正常';
-                    case constant.ASSET_LIST_STATUS.REFUSED:
-                        return '正常';
-                    case constant.ASSET_LIST_STATUS.INVALID:
-                        return '正常';
 
                 }
             },
             getTransShow(row){
-                return accountHelper.isOwner(row.owner) && (row.transStatus === constant.ASSET_LIST_STATUS.TRANSFERED || row.transStatus === constant.ASSET_LIST_STATUS.REFUSED || row.transStatus === constant.ASSET_LIST_STATUS.INVALID)
+                return accountHelper.isOwner(row.owner) && row.transStatus === constant.ASSET_STATUS.NORMAL
             },
             getDisplayCheckStatus(status){
                 switch (status){
@@ -143,7 +139,7 @@
             },
             handleTransClick(row){
                 console.log(row)
-                this.$router.push('/asset_detail?type=trans');
+                this.$router.push(`/asset_detail?type=trans&nft_id=${row.id}&owner=${row.owner}&transStatus=${row.transStatus}`);
             },
             onPageChange(page){
                 this.txListCurrentPage = page;
