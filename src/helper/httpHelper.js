@@ -2,6 +2,7 @@ import axios from 'axios';
 import {constant} from '../constant/constant';
 import loginHelper from '../helper/loginHelper';
 import cfg from '../config/config';
+import {accountHelper} from '../helper/accountHelper';
 
 export default {
     get(params) {
@@ -11,7 +12,7 @@ export default {
             return new Promise(()=>{});
         }
         return new Promise((res,rej)=>{
-            axios.get(`${cfg.app.address}${url}`, {timeout:constant.TIME_OUT}).then(result => res(result.data)).catch((e)=>rej(e));
+            axios.get(`${accountHelper.getAccount().domain}${url}`, {timeout:constant.TIME_OUT}).then(result => res(result.data)).catch((e)=>rej(e));
         })
 
     },
@@ -22,7 +23,7 @@ export default {
             return new Promise(()=>{});
         }
         return new Promise((res,rej)=>{
-            axios.post(url, body, {timeout: constant.TIME_OUT}).then(result => {
+            axios.post(`${accountHelper.getAccount().domain}${url}`, body, {timeout: constant.TIME_OUT}).then(result => {
                     res(result);
                 }
             ).catch((e)=>{
@@ -38,7 +39,7 @@ export default {
             return new Promise(()=>{});
         }
         return new Promise((res,rej)=>{
-            axios.put(url, body, {timeout: constant.TIME_OUT}).then(result => {
+            axios.put(`${accountHelper.getAccount().domain}${url}`, body, {timeout: constant.TIME_OUT}).then(result => {
                 res(result);
                 }
             ).catch((e)=>{

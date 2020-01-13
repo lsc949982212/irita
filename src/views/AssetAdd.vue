@@ -149,8 +149,15 @@
                 this.postData();
             },
             postData(){
-                console.log('-=-=-=-=-=-', this.jsonData)
-                axios.post({url:`/assets/`,body:this.jsonData,ctx:this}).then((data)=>{
+
+                const body = {
+                    asset_data:this.jsonData,
+                    owner:this.$accountHelper.getAccount().address,
+                    owner_pubkey:this.$accountHelper.getAccount().publicKey,
+                };
+
+                console.log('save asset',this.jsonData);
+                axios.post({url:`/assets`,body,ctx:this}).then((data)=>{
                     console.log(data);
                     if(data && data.data && data.data.status === 'success'){
                         Message({

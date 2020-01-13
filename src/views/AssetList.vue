@@ -52,7 +52,7 @@
                             <el-button @click="handleCheckClick(scope.row)" type="text" size="small">
                                 查看
                                 <i style="position:relative;width:5px;height:5px;top:-8px;left:-3px;
-                                background:rgba(254,47,93,1);border-radius:50%;display:inline-block;"></i>
+                                background:rgba(254,47,93,1);border-radius:50%;display:inline-block;" v-show="scope.row.isApply"></i>
                             </el-button>
                             <el-button type="text" size="small"
                                        v-show="getTransShow(scope.row)"
@@ -70,7 +70,7 @@
                         @current-change="onPageChange"
                         :current-page="txListCurrentPage"
                         layout="prev, pager, next"
-                        :total="1000">
+                        :total="totalTxCount">
                 </el-pagination>
             </div>
         </div>
@@ -94,7 +94,7 @@
                     displayCheckStatus: '已查验',
                     displayTransStatus: '已授权待转让'
                 }],
-                totalTxCount:100,
+                totalTxCount:1,
                 txListCurrentPage:1,
             }
         },
@@ -146,7 +146,7 @@
                 this.getDataList(page);
             },
             getDataList(page){
-                axios.get({url:`/assets?pageNum=${page}&pageSize=10`,ctx:this}).then((data)=>{
+                axios.get({url:`/assets?pageNum=${page}&pageSize=10&used_count=true`,ctx:this}).then((data)=>{
                     this.handleData(data);
                 }).catch(e=>{
                     console.error('-----',e)
@@ -166,6 +166,7 @@
                         displayOwner:accountHelper.getAccountList().find((a)=>a.address === asset.owner) ? accountHelper.getAccountList().find((a)=>a.address === asset.owner).name : '',
                         displayCheckStatus:this.getDisplayCheckStatus(asset.check_status),
                         displayTransStatus:this.getDisplayAssetTransStatus(asset.transfer_status),
+                        isApply:asset.is_apply
                     };
                     return o;
                 })

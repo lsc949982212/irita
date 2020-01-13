@@ -14,6 +14,7 @@ export default class loginHelper {
                 address:cfg.account[username].address,
                 publicKey:cfg.account[username].publicKey,
                 name:cfg.account[username].name,
+                domain:cfg.account[username].domain,
             };
 
             sessionStorage.setItem('token',JSON.stringify(token));

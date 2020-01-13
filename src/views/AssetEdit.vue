@@ -138,7 +138,7 @@
 
             },
             getDetails(){
-                axios.get({url:`/assets/detail/${this.$route.query.nft_id}?address=${this.$accountHelper.getAccountAddress()}`,ctx:this}).then((data)=>{
+                axios.get({url:`/assets/detail/${this.$route.query.nft_id}?address=${this.$accountHelper.getAccount().address}`,ctx:this}).then((data)=>{
                     if(data){
                         this.handleDetailData(data.data);
                     }

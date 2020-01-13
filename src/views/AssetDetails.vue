@@ -111,12 +111,12 @@
                                 min-width="120">
                         </el-table-column>
                         <el-table-column
-                                prop="receiver"
+                                prop="displayOwner"
                                 label="受让者"
                                 min-width="120">
                         </el-table-column>
                         <el-table-column
-                                prop="txStatus"
+                                prop="displayStatus"
                                 label="转让状态"
                                 min-width="80">
                         </el-table-column>
@@ -130,14 +130,14 @@
                                     转让
                                 </el-button>
                                 <el-button @click="acceptTrans(scope.row)"
-                                           v-show="getTransDisplayShow(scope.row,1)"
+                                           v-show="getAcceptTransDisplayShow(scope.row,1)"
                                            type="text" size="small">
                                     接受转让
                                 </el-button>
 
                                 <el-button type="text" size="small"
                                            @click="refused(scope.row)"
-                                           v-show="getTransDisplayShow(scope.row,1)">拒绝
+                                           v-show="getRefusedTransDisplayShow(scope.row,1)">拒绝
                                 </el-button>
                             </template>
                         </el-table-column>
@@ -153,7 +153,7 @@
                         @current-change="onTxTransPaginationClick"
                         :current-page="transCurrentPage"
                         layout="prev, pager, next"
-                        :total="1000">
+                        :total="totalTransCount">
                 </el-pagination>
             </div>
             <div class="content_container">
@@ -207,7 +207,7 @@
                         @current-change="onAuthPaginationClick"
                         :current-page="authCurrentPage"
                         layout="prev, pager, next"
-                        :total="1000">
+                        :total="totalApplyCount">
                 </el-pagination>
             </div>
             <div class="content_container">
@@ -316,7 +316,7 @@
                         @current-change="onAssetTxPaginationClick"
                         :current-page="assetTxCurrentPage"
                         layout="prev, pager, next"
-                        :total="1000">
+                        :total="totalTxListCount">
                 </el-pagination>
             </div>
             <div class="pagination_container" v-show="totalServiceListCount > 5 && tab === 1">
@@ -328,7 +328,7 @@
                         @current-change="onServiceTxPaginationClick"
                         :current-page="serviceTxCurrentPage"
                         layout="prev, pager, next"
-                        :total="1000">
+                        :total="totalServiceListCount">
                 </el-pagination>
             </div>
         </div>
@@ -415,10 +415,10 @@ console.log(recevieAddr, receiverName)
                     height : '暴力服务商B',*/
                 }],
                 tab : 0,
-                totalTransCount : 100,
-                totalApplyCount : 100,
-                totalTxListCount : 100,
-                totalServiceListCount : 100,
+                totalTransCount : 1,
+                totalApplyCount : 1,
+                totalTxListCount : 1,
+                totalServiceListCount : 1,
                 options : [{
                     value : recevieAddr,
                     label : receiverName
@@ -470,8 +470,8 @@ console.log(recevieAddr, receiverName)
             },
 
             isOwner(){
-                console.log('is owner',this.$route.query.owner === this.$accountHelper.getAccountAddress())
-                return this.$route.query.owner === this.$accountHelper.getAccountAddress()
+                console.log('is owner',this.$route.query.owner === this.$accountHelper.getAccount().address)
+                return this.$route.query.owner === this.$accountHelper.getAccount().address
             }
         },
         methods : {
@@ -512,7 +512,7 @@ console.log(recevieAddr, receiverName)
             },
             getTransDisplayShow(row, type){
                 if(type === 0){
-                    if(this.isOwner && row.status === constant.ASSET_LIST_STATUS.ACCEPT){
+                    if(this.$accountHelper.isOwner(row.consumer) && row.status === constant.ASSET_LIST_STATUS.ACCEPT){
                         return true;
                     } else {
                         return false;
@@ -524,6 +524,12 @@ console.log(recevieAddr, receiverName)
                         return false;
                     }
                 }
+
+            },
+            getAcceptTransDisplayShow(row,type){
+
+            },
+            getRefusedTransDisplayShow(row,type){
 
             },
             getAuthShow(row){
@@ -627,6 +633,7 @@ console.log(recevieAddr, receiverName)
                             type : 'success'
                         });
                         this.centerDialogVisible = false;
+                        this.$router.go(-1);
                     }else{
                         this.$message.error('申请转让失败');
                     }
@@ -657,7 +664,7 @@ console.log(recevieAddr, receiverName)
                 console.log(path)
             },
             getDetails(){
-                axios.get({url:`/assets/detail/${this.$route.query.nft_id}?address=${this.$accountHelper.getAccountAddress()}`,ctx:this}).then((data)=>{
+                axios.get({url:`/assets/detail/${this.$route.query.nft_id}?address=${this.$accountHelper.getAccount().address}`,ctx:this}).then((data)=>{
                     if(data){
                         this.handleDetailData(data.data);
                     }
@@ -703,7 +710,10 @@ console.log(recevieAddr, receiverName)
             },
             getAssetTransList(page){
                 axios.get({url:`/assets_transfer/${this.$route.query.nft_id}/transfer_records?pageNum=${page}&pageSize=10`,ctx:this}).then((data)=>{
-                    this.handleAssetTransData(data);
+                    if(data && data.data){
+                        this.handleAssetTransData(data);
+                    }
+
                 }).catch(e=>{
                     console.error('-----',e)
                 });
@@ -711,6 +721,17 @@ console.log(recevieAddr, receiverName)
             handleAssetTransData(data){
                 console.log('transfer asset list data', data)
                 this.totalApplyCount = data.total;
+                this.transferData = data.data.map((t)=>{
+                    return {
+                        id : t.nft_id,
+                        time : t.create_at,
+                        receiver : t.provider,
+                        txStatus : t.status,
+                        displayStatus:this.getDisplayAssetTransStatus(t.status),
+                        displayOwner:this.$accountHelper.getAccountList().find((a)=>a.address === t.provider) ? this.$accountHelper.getAccountList().find((a)=>a.address === t.provider).name : '',
+                        consumer:t.consumer,
+                    }
+                })
             },
             getAssetAuthList(page){
                 axios.get({url:`/assets_authorization/${this.$route.query.nft_id}/authorization_records?pageNum=${page}&pageSize=10`,ctx:this}).then((data)=>{

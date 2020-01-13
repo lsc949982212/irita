@@ -21,12 +21,12 @@ export const accountHelper = {
             return false;
         }
     },
-    getAccountAddress(){
+    getAccount(){
         let token = sessionStorage.getItem('token');
         if(token){
-            return JSON.parse(token).address;
+            return JSON.parse(token);
         }else{
-            return '';
+            return null;
         }
-    }
+    },
 };
