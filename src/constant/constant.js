@@ -35,7 +35,8 @@ export const constant = {
         APPLYING:0,
         AUTH:1,
         REFUSED:2,
-        INVALID:3
+        INVALID:3,
+        EXPIRED:4
     },
     CHECK_STATUS:{
         NOT_CHECK:0,

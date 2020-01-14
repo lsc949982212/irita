@@ -86,14 +86,7 @@
         name : 'AssetList',
         data(){
             return {
-                tableData: [{
-                    id: '金属送吧膜回收,知否知否',
-                    name: 'A公司的应收账款',
-                    type: '应收账款',
-                    displayOwner: '暴力服务商B',
-                    displayCheckStatus: '已查验',
-                    displayTransStatus: '已授权待转让'
-                }],
+                tableData: [],
                 totalTxCount:1,
                 txListCurrentPage:1,
             }
@@ -147,7 +140,9 @@
             },
             getDataList(page){
                 axios.get({url:`/assets?pageNum=${page}&pageSize=10&used_count=true`,ctx:this}).then((data)=>{
-                    this.handleData(data);
+                    if(data && data.data){
+                        this.handleData(data);
+                    }
                 }).catch(e=>{
                     console.error('-----',e)
                 });
@@ -156,7 +151,7 @@
                 console.log(data)
                 this.totalTxCount = data.total;
                 this.tableData = data.data.map((asset)=>{
-                    let o = {
+                    return {
                         number:asset.number,
                         id:asset.nft_id,
                         name:asset.asset_name,
@@ -168,7 +163,6 @@
                         displayTransStatus:this.getDisplayAssetTransStatus(asset.transfer_status),
                         isApply:asset.is_apply
                     };
-                    return o;
                 })
             }
         }

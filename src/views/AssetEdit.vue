@@ -109,7 +109,10 @@
             },
             postData(){
                 console.log(this.jsonData)
-                axios.put({url:`/assets/`,body:this.jsonData,ctx:this}).then((data)=>{
+                const body = {
+                    asset_data:this.jsonData,
+                };
+                axios.put({url:`/assets`,body,ctx:this}).then((data)=>{
                     console.log('response after submit json data',data)
                     if(data && data.data && data.data.status === 'success'){
                         Message({

@@ -29,4 +29,11 @@ export const accountHelper = {
             return null;
         }
     },
+    getUserNameByAddress(address){
+        return this.getAccountList().find(item=>item.address === address) ? this.getAccountList().find(item=>item.address === address).name : address
+    },
+    getPublicKeyByAddress(address){
+        return this.getAccountList().find(item=>item.address === address) ? this.getAccountList().find(item=>item.address === address).publicKey : ''
+    },
+
 };
