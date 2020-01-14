@@ -306,6 +306,7 @@
                     flex: 1;
                     box-sizing: border-box;
                     overflow-y: auto;
+                    background: #fafafa;
                 }
                 .login_dialog_container {
                     .flexColumn;

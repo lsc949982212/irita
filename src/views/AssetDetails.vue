@@ -43,6 +43,7 @@
             </div>
             <div class="schema_container" id="schema_container">
                 <div class="content_item" id="detail_json_schema_node"></div>
+                <div class="content_item" id="locked_detail_json_schema_node" style="display:none;"></div>
             </div>
 
             <div class="content_container">
@@ -284,8 +285,8 @@
                                 min-width="130">
                         </el-table-column>
                         <el-table-column
-                                prop="id"
-                                label="time"
+                                prop="time"
+                                label="时间"
                                 min-width="150">
                         </el-table-column>
                         <el-table-column
@@ -445,16 +446,15 @@
                 operateNftId : 0,
                 requestId : 0,
                 consumer : '',
-                authNftId : '',
-                flUnlock:false,
+                authRequestId : '',
+                flUnlock : false,
+                nftId : '',
+                provider:''//转让的时候需要
             }
         },
         components : {},
         mounted(){
-            this.getDetails();
-            this.getAssetTransList(1);
-            this.getAssetAuthList(1);
-            this.onAssetTxPaginationClick(1);
+            this.loadData();
             console.log(this.$route)
 
         },
@@ -467,12 +467,12 @@
             applyBtnShow(){
                 //todo 非资产拥有者,并且有加密的数据, 当前账号申请查看状态不能是申请中或者是已经申请
                 //转让申请中或者是已接收待转让
-                return this.$route.query.type === 'check' && !this.isOwner && this.hasSecret && (this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.REFUSED || this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.INVALID || this.accountApplyAuthorizeStatus === 5);
+                return this.$route.query.type === 'check' && !this.isOwner && this.hasSecret && !this.flUnlock && (this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.REFUSED || this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.INVALID || this.accountApplyAuthorizeStatus === 5);
             },
             unlockShow(){
                 //todo 非资产拥有者,并且有加密的数据, 展示点击解密, 资产查看的授权状态必须是owner已经授权当前申请者
 
-                return this.$route.query.type === 'check' && !this.isOwner && this.flUnlock;
+                return this.$route.query.type === 'check' && !this.isOwner;
             },
 
             isOwner(){
@@ -481,6 +481,12 @@
             }
         },
         methods : {
+            loadData(){
+                this.getDetails();
+                this.getAssetTransList(1);
+                this.getAssetAuthList(1);
+                this.onAssetTxPaginationClick(1);
+            },
             getDisplayAssetTransStatus(status){
                 switch (status){
                     case constant.ASSET_LIST_STATUS.APPLYING:
@@ -527,7 +533,7 @@
                             message : '申请查看成功',
                             type : 'success'
                         });
-
+                        this.loadData();
                     } else {
                         this.$message.error('申请查看失败');
                     }
@@ -547,6 +553,7 @@
                 this.dialogType = 1;
                 this.operateNftId = row.id;
                 this.requestId = row.requestId;
+                this.provider = row.provider;
             },
             acceptTrans(row){
                 this.centerDialogVisible = true;
@@ -581,7 +588,7 @@
                 if(this.dialogType === 0){
                     this.transfer();
                 } else if(this.dialogType === 1){//最后一步,确认了就发送链上交易
-                    this.refuseAuth();
+                    this.postTransfer();
                 } else if(this.dialogType === 2){
                     this.postAcceptTrans();
                 } else if(this.dialogType === 3){
@@ -596,6 +603,11 @@
 
             handleTabClick(tab){
                 this.tab = tab;
+                if(tab === 0){
+                    this.onAssetTxPaginationClick(1);
+                }else{
+                    this.onServiceTxPaginationClick(1);
+                }
             },
             onTxTransPaginationClick(page){
                 console.log(page)
@@ -641,6 +653,7 @@
                             message : '接受申请成功',
                             type : 'success'
                         });
+                        this.loadData();
                         this.centerDialogVisible = false;
                     } else {
                         this.$message.error('接受申请失败');
@@ -652,6 +665,34 @@
                     this.centerDialogVisible = false;
                 });
 
+            },
+            postTransfer(){
+                /*const body = {
+                    provider : this.provider,
+                    provider_pubkey:this.$accountHelper.getPublicKeyByAddress(this.provider)
+                };
+                axios.post({
+                    url : `/assets_transfer/${this.operateNftId}/transfer_owner`,
+                    body,
+                    ctx : this
+                }).then((data) =>{
+                    console.log(data);
+                    if(data && data.data && data.data.status === 'success'){
+                        Message({
+                            message : '转让成功',
+                            type : 'success'
+                        });
+                        this.loadData();
+                        this.centerDialogVisible = false;
+                    } else {
+                        this.$message.error('转让失败');
+                        this.centerDialogVisible = false;
+                    }
+                }).catch(e =>{
+                    console.error(e);
+                    this.$message.error('转让失败');
+                    this.centerDialogVisible = false;
+                });*/
             },
             postRefuseTrans(){
                 const body = {
@@ -668,6 +709,7 @@
                             message : '拒绝申请成功',
                             type : 'success'
                         });
+                        this.loadData();
                         this.centerDialogVisible = false;
                     } else {
                         this.$message.error('拒绝申请失败');
@@ -696,6 +738,7 @@
                             message : '拒绝成功',
                             type : 'success'
                         });
+                        this.loadData();
                         this.centerDialogVisible = false;
                     } else {
                         this.$message.error('拒绝失败');
@@ -723,6 +766,7 @@
                             message : '授权成功',
                             type : 'success'
                         });
+                        this.loadData();
                         this.centerDialogVisible = false;
                     } else {
                         this.$message.error('授权失败');
@@ -761,7 +805,8 @@
                             type : 'success'
                         });
                         this.centerDialogVisible = false;
-                        this.$router.go(-1);
+                        //this.$router.go(-1);
+                        this.loadData();
                     } else {
                         this.$message.error('申请转让失败');
                     }
@@ -773,10 +818,10 @@
             },
             unlock(){//点击解密
                 const body = {
-                    "request_id" : this.requestId,
+                    "request_id" : this.authRequestId,
                 };
                 axios.post({
-                    url : `/assets_authorization/${this.operateNftId}/authorization/lookup`,
+                    url : `/assets_authorization/${this.nftId}/authorization/lookup`,
                     body,
                     ctx : this
                 }).then((data) =>{
@@ -786,15 +831,22 @@
                             message : '解密成功',
                             type : 'success'
                         });
-                        this.centerDialogVisible = false;
+                        this.jsonData = JSON.parse(data.data.data);
+                        document.getElementById('detail_json_schema_node').style.display = 'none';
+                        document.getElementById('locked_detail_json_schema_node').style.display = 'block';
+                        setTimeout(()=>{
+                            $("#locked_detail_json_schema_node").alpaca({
+                                "schemaSource" : schema,
+                                "dataSource" : JSON.parse(data.data.data),
+                                "view" : "bootstrap-display"
+                            });
+                        },100)
                     } else {
                         this.$message.error('解密失败');
-                        this.centerDialogVisible = false;
                     }
                 }).catch(e =>{
                     console.error(e);
                     this.$message.error('解密失败');
-                    this.centerDialogVisible = false;
                 });
             },
             handleCancelBtnClick(){
@@ -834,7 +886,7 @@
                 console.log('detail data', data)
                 if(data.asset_info){
                     this.jsonData = JSON.parse(data.asset_info);
-                    this.hasSecret = (this.jsonData.authorizationProperties.length > 0 || this.jsonData.secretProperties.length > 0) && !this.$accountHelper.isOwner(data.chain_info.owner)
+                    this.hasSecret = this.jsonData.authorizationProperties.length > 0 && !this.$accountHelper.isOwner(data.chain_info.owner)
                 }
                 if(data.chain_info){
                     this.chainInfo = data.chain_info;
@@ -917,8 +969,9 @@
                 let authorizedItem = data.data.find((item) => item.status === constant.AUTHORIZATION_STATUS.AUTH && item.consumer === this.$accountHelper.getAccount().address);
                 if(authorizedItem){
                     this.consumer = authorizedItem.consumer;
-                    this.authNftId = authorizedItem.nft_id;
+                    this.authRequestId = authorizedItem.request_id;
                     this.flUnlock = true;
+                    this.nftId = authorizedItem.nft_id;
                 }
                 this.applyAndAuthDataList = data.data.map((a) =>{
                     return {
@@ -948,23 +1001,25 @@
             handleTxListData(data){
                 console.log('asset list data', data);
                 this.totalTxListCount = data.total;
-                this.assetListData = data.data.map((item)=>{
+                this.assetListData = data.data.map((item) =>{
                     return {
                         txType : item.type,
                         txHash : item.tx_hash,
                         time : formatTimestamp(item.time),
-                        senderAddr : 'A公司的应收账款',
-                        receiverAddr : '应收账款',
+                        senderAddr : item.consumer,
+                        receiverAddr : item.provider,
                         height : item.height,
                     }
                 })
             },
             getServiceDataList(page){
                 axios.get({
-                    url : `/assets_authorization/${this.$route.query.nft_id}/authorization_records?pageNum=${page}&pageSize=10`,
+                    url : `/assets_tx/service_tx?pageNum=${page}&pageSize=10&used_count=true`,
                     ctx : this
                 }).then((data) =>{
-                    this.handleServiceDataData(data);
+                    if(data && data.data){
+                        this.handleServiceDataData(data);
+                    }
                 }).catch(e =>{
                     console.error(e)
                 });
@@ -972,6 +1027,17 @@
             handleServiceDataData(data){
                 console.log('service list data', data);
                 this.totalServiceListCount = data.total;
+                this.serviceListData = data.data.map((item)=>{
+                    return {
+                        serviceName : item.service_name,
+                        serviceType : item.type,
+                        serviceHash : item.tx_hash,
+                        time : formatTimestamp(item.time),
+                        providerAddr : item.provider,
+                        consumeAddr : item.consumer,
+                        height : item.height,
+                    }
+                })
             },
 
 
