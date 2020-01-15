@@ -54,6 +54,7 @@
     import { dictionary } from '../constant/dictionary';
     import JsonSchema from '../helper/JsonSchemaHelper';
     import axios from '../helper/httpHelper';
+    import { Message } from 'element-ui';
 
     export default {
         name : 'AssetAdd',
@@ -79,8 +80,6 @@
         },
         mounted(){
             this.getDetails();
-
-
         },
         methods : {
             handleCancelClick(){
@@ -91,7 +90,7 @@
             },
             checkData(){
                 let jsonData = $("#edit_json_schema_node").alpaca().getValue();
-                console.log(jsonData);
+                console.log('已经编辑完的数据',jsonData);
                 this.authList = new JsonSchema(jsonData).getFormatAuthData();
                 jsonData.authorizationProperties = [];
                 jsonData.secretProperties = [];
@@ -101,14 +100,15 @@
             save(){
                 let authorization = this.authList.filter((a) => a.value === '2');
                 let secret = this.authList.filter((a) => a.value === '3');
-                this.jsonData.authorizationProperties = [];
-                this.jsonData.secretProperties = [];
+                /*this.jsonData.authorizationProperties = [];
+                this.jsonData.secretProperties = [];*/
+                this.checkData();
                 authorization.forEach((a) => this.jsonData.authorizationProperties.push(a.str));
                 secret.forEach((a) => this.jsonData.secretProperties.push(a.str));
                 this.postData();
             },
             postData(){
-                console.log(this.jsonData)
+                console.log('要发送的数据',this.jsonData)
                 const body = {
                     asset_data:this.jsonData,
                 };
@@ -116,7 +116,7 @@
                     console.log('response after submit json data',data)
                     if(data && data.data && data.data.status === 'success'){
                         Message({
-                            message : '新增资产成功',
+                            message : '编辑资产成功',
                             type : 'success'
                         });
                         this.$router.go(-1);

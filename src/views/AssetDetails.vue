@@ -385,37 +385,10 @@
 
             return {
                 jsonData : null,
-                transferData : [{
-                    /*id : '金属送吧膜回收,知否知否',
-                    time : 'A公司的应收账款',
-                    receiver : '应收账款',
-                    txStatus : '暴力服务商B',*/
-                }],
-                applyAndAuthDataList : [{
-                    /*id : '金属送吧膜回收,知否知否',
-                    time : 'A公司的应收账款',
-                    applicant : '应收账款',
-                    applyStatus : '暴力服务商B',*/
-                }],
-                assetListData : [{
-                    /*id : '金属送吧膜回收,知否知否',
-                    txType : 'A公司的应收账款',
-                    txHash : '应收账款',
-                    time : '暴力服务商B',
-                    senderAddr : 'A公司的应收账款',
-                    receiverAddr : '应收账款',
-                    height : '暴力服务商B',*/
-                }],
-                serviceListData : [{
-                    /*id : '金属送吧膜回收,知否知否',
-                    serviceName : 'A公司的应收账款',
-                    serviceType : '应收账款',
-                    serviceHash : '暴力服务商B',
-                    time : 'A公司的应收账款',
-                    providerAddr : '应收账款',
-                    consumeAddr : '应收账款',
-                    height : '暴力服务商B',*/
-                }],
+                transferData : [],
+                applyAndAuthDataList : [],
+                assetListData : [],
+                serviceListData : [],
                 tab : 0,
                 totalTransCount : 1,
                 totalApplyCount : 1,
@@ -456,27 +429,24 @@
         mounted(){
             this.loadData();
             console.log(this.$route)
-
+            console.log('执行了 detail mounted')
         },
         computed : {
             editBtnShow(){
-                //todo 资产拥有者,并且状态是正常
+                //资产拥有者,并且状态是正常
                 const {type, transStatus} = this.$route.query;
                 return type === 'check' && this.isOwner && Number(transStatus) === constant.ASSET_STATUS.NORMAL;
             },
             applyBtnShow(){
-                //todo 非资产拥有者,并且有加密的数据, 当前账号申请查看状态不能是申请中或者是已经申请
-                //转让申请中或者是已接收待转让
-                return this.$route.query.type === 'check' && !this.isOwner && this.hasSecret && !this.flUnlock && (this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.REFUSED || this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.INVALID || this.accountApplyAuthorizeStatus === 5);
+                //非资产拥有者  &&  有授权查看的数据 && (授权状态是: 已拒绝 || 已失效 || 已过期)
+                return this.$route.query.type === 'check' && !this.isOwner && this.hasSecret && (this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.REFUSED || this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.INVALID || this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.EXPIRED || this.accountApplyAuthorizeStatus === 5);
             },
             unlockShow(){
-                //todo 非资产拥有者,并且有加密的数据, 展示点击解密, 资产查看的授权状态必须是owner已经授权当前申请者
-
-                return this.$route.query.type === 'check' && !this.isOwner;
+                //非资产拥有者 && 有加密的数据 && 展示点击解密 && (授权状态是: 已授权)
+                return this.$route.query.type === 'check' && !this.isOwner && this.hasSecret && this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.AUTH;
             },
 
             isOwner(){
-                console.log('is owner', this.$route.query.owner === this.$accountHelper.getAccount().address)
                 return this.$route.query.owner === this.$accountHelper.getAccount().address
             }
         },
@@ -965,13 +935,13 @@
             handleAssetAuthData(data){
                 console.log('authorization asset list data', data);
                 this.totalApplyCount = data.total;
-                //判断是否展示'点击解密'按钮;
-                let authorizedItem = data.data.find((item) => item.status === constant.AUTHORIZATION_STATUS.AUTH && item.consumer === this.$accountHelper.getAccount().address);
-                if(authorizedItem){
-                    this.consumer = authorizedItem.consumer;
-                    this.authRequestId = authorizedItem.request_id;
+                //判断是否展示'点击解密'按钮和'申请查看'按钮;  accountApplyAuthorizeStatus
+                if(data.data.length > 0){
+                    this.consumer = data.data[0].consumer;
+                    this.authRequestId = data.data[0].request_id;
                     this.flUnlock = true;
-                    this.nftId = authorizedItem.nft_id;
+                    this.nftId = data.data[0].nft_id;
+                    this.accountApplyAuthorizeStatus = data.data[0].status;
                 }
                 this.applyAndAuthDataList = data.data.map((a) =>{
                     return {

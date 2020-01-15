@@ -110,7 +110,7 @@
         mounted(){
             $("#json_schema_node").alpaca({
                 "schemaSource" : schema,
-                "dataSource" : jsonData
+                //"dataSource" : jsonData
             });
         },
         methods : {
@@ -130,6 +130,7 @@
                 let jsonData = $("#json_schema_node").alpaca().getValue();
                 console.log(jsonData);
                 if(!jsonData.basicInfo.assetNo || !jsonData.basicInfo.assetType || !jsonData.basicInfo.assetName){
+                    this.$message.error('请填写必填项');
                     return;
                 }
                 this.authList = new JsonSchema(jsonData).getFormatAuthData();
@@ -169,7 +170,7 @@
                         this.$message.error('新增资产失败');
                     }
                 }).catch(e=>{
-                    console.error('-----',e);
+                    console.error(e);
                     this.$message.error('新增资产失败');
                 });
             },
@@ -304,6 +305,9 @@
                         margin-right: 10px;
                         min-width:150px;
                         margin-bottom:0;
+                    }
+                    .help-block{
+                        display:none;
                     }
                     .alpaca-required-indicator {
                         display: none;
