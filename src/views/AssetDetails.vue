@@ -12,7 +12,7 @@
                 </el-button>
                 <el-button size="small"
                            @click="applyCheck"
-                           v-show="applyBtnShow"
+                           v-show="applyAuthShow"
                            class="btn" type="primary">申请查看
                 </el-button>
                 <el-button size="small"
@@ -23,7 +23,9 @@
 
 
             </div>
-            <div class="asset_details_trans_container" v-if="$route.query.type === 'trans'">
+            <div class="asset_details_trans_container" 
+                 v-show="applyTransShow"
+                 v-if="$route.query.type === 'trans'">
                 <span class="asset_details_trans_title">
                     受让方 :
                 </span>
@@ -359,7 +361,7 @@
 </template>
 
 <script>
-    import schema from './detailSchema';
+    import schema from '../schema/detailSchema';
     import { constant } from '../constant/constant';
     import axios from '../helper/httpHelper';
     import cfg from '../config/config';
@@ -380,9 +382,6 @@
                     }
                 }
             }
-            console.log(recevieAddr, receiverName)
-
-
             return {
                 jsonData : null,
                 transferData : [],
@@ -408,6 +407,7 @@
                 serviceTxCurrentPage : 1,
                 hasSecret : true,
                 accountApplyAuthorizeStatus : 5,
+                accountApplyTransStatus : 5,
                 chainInfo : {
                     nft_id : "",
                     number : "",
@@ -422,14 +422,15 @@
                 authRequestId : '',
                 flUnlock : false,
                 nftId : '',
-                provider:''//转让的时候需要
+                provider:'',//转让的时候需要
+                flMounted:false,
+                useUnlock:false,
+                transRequestId:''
             }
         },
         components : {},
         mounted(){
             this.loadData();
-            console.log(this.$route)
-            console.log('执行了 detail mounted')
         },
         computed : {
             editBtnShow(){
@@ -437,22 +438,24 @@
                 const {type, transStatus} = this.$route.query;
                 return type === 'check' && this.isOwner && Number(transStatus) === constant.ASSET_STATUS.NORMAL;
             },
-            applyBtnShow(){
+            applyAuthShow(){
                 //非资产拥有者  &&  有授权查看的数据 && (授权状态是: 已拒绝 || 已失效 || 已过期)
                 return this.$route.query.type === 'check' && !this.isOwner && this.hasSecret && (this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.REFUSED || this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.INVALID || this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.EXPIRED || this.accountApplyAuthorizeStatus === 5);
+            },
+            applyTransShow(){//展示申请转让按钮
+                //资产拥有者 && (转让状态是: 已拒绝 || 已失效)
+                return this.$route.query.type === 'trans' && this.isOwner && (this.accountApplyTransStatus === constant.ASSET_LIST_STATUS.REFUSED || this.accountApplyTransStatus === constant.ASSET_LIST_STATUS.INVALID || this.accountApplyTransStatus === 5);
             },
             unlockShow(){
                 //非资产拥有者 && 有加密的数据 && 展示点击解密 && (授权状态是: 已授权)
                 return this.$route.query.type === 'check' && !this.isOwner && this.hasSecret && this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.AUTH;
             },
-
             isOwner(){
                 return this.$route.query.owner === this.$accountHelper.getAccount().address
             }
         },
         methods : {
             loadData(){
-                this.getDetails();
                 this.getAssetTransList(1);
                 this.getAssetAuthList(1);
                 this.onAssetTxPaginationClick(1);
@@ -500,16 +503,16 @@
                     console.log(data);
                     if(data && data.data && data.data.status === 'success'){
                         Message({
-                            message : '申请查看成功',
+                            message : '申请已提交成功,请耐心等待',
                             type : 'success'
                         });
                         this.loadData();
                     } else {
-                        this.$message.error('申请查看失败');
+                        this.$message.error('申请提交失败');
                     }
                 }).catch(e =>{
                     console.error(e);
-                    this.$message.error('申请查看失败');
+                    this.$message.error('申请提交失败');
                 });
             },
             handleTransBtnClick(){
@@ -840,8 +843,13 @@
                 console.log(path)
             },
             getDetails(){
+                let url = `/assets/detail/${this.$route.query.nft_id}?address=${this.$accountHelper.getAccount().address}`;
+                if(this.useUnlock){
+                    url += `&request_id=${this.transRequestId}`;
+                }
+
                 axios.get({
-                    url : `/assets/detail/${this.$route.query.nft_id}?address=${this.$accountHelper.getAccount().address}`,
+                    url,
                     ctx : this
                 }).then((data) =>{
                     if(data){
@@ -894,17 +902,42 @@
                     ctx : this
                 }).then((data) =>{
                     if(data && data.data){
-                        this.handleAssetTransData(data);
+                        this.handleAssetTransData(data, page);
                     }
 
                 }).catch(e =>{
                     console.error(e)
                 });
             },
-            handleAssetTransData(data){
+            handleAssetTransData(data, page){
                 console.log('transfer asset list data', data)
+                //判断是否展示'申请转让'按钮 accountApplyTransStatus
+                if(data.data.length > 0 && page === 1){
+                    this.accountApplyTransStatus = data.data[0].status;
+                    //如果最新的转让状态是  转让申请中,并且当前账户是受让方, 使用直接调用解密接口 (useUnlock)
+                    if(data.data[0].status === constant.ASSET_LIST_STATUS.APPLYING && this.$accountHelper.getAccount().address === data.data[0].consumer){
+                        this.useUnlock = true;
+                        this.transRequestId = data.data[0].request_id;
+                        console.log('trans request id:',this.transRequestId)
+                    }else{
+                        this.useUnlock = false;
+                    }
+                    if(!this.flMounted){
+                        this.getDetails();
+                        this.flMounted = true;
+                    }
+
+                }else if(data.data.length === 0){
+                    if(!this.flMounted){
+                        this.getDetails();
+                        this.flMounted = true;
+                    }
+                }
                 this.totalTransCount = data.total;
                 this.transferData = data.data.map((t) =>{
+                    //不同状态下,provider和consumer意义不同
+                    let receiver = t.status === constant.ASSET_LIST_STATUS.ACCEPT ? t.provider : t.consumer;
+
                     return {
                         id : t.nft_id,
                         requestId : t.request_id,
@@ -912,7 +945,7 @@
                         receiver : t.provider,
                         txStatus : t.status,
                         displayStatus : this.getDisplayAssetTransStatus(t.status),
-                        displayReceiver : this.$accountHelper.getUserNameByAddress(t.consumer),
+                        displayReceiver : this.$accountHelper.getUserNameByAddress(receiver),
                         consumer : t.consumer,
                         provider : t.provider,
                         showAcceptBtn : t.status === constant.ASSET_LIST_STATUS.APPLYING && t.consumer === this.$accountHelper.getAccount().address,
@@ -926,17 +959,17 @@
                     ctx : this
                 }).then((data) =>{
                     if(data && data.data){
-                        this.handleAssetAuthData(data);
+                        this.handleAssetAuthData(data, page);
                     }
                 }).catch(e =>{
                     console.error(e)
                 });
             },
-            handleAssetAuthData(data){
+            handleAssetAuthData(data, page){
                 console.log('authorization asset list data', data);
                 this.totalApplyCount = data.total;
                 //判断是否展示'点击解密'按钮和'申请查看'按钮;  accountApplyAuthorizeStatus
-                if(data.data.length > 0){
+                if(data.data.length > 0 && page === 1){
                     this.consumer = data.data[0].consumer;
                     this.authRequestId = data.data[0].request_id;
                     this.flUnlock = true;
@@ -957,8 +990,9 @@
                 })
             },
             getAssetTxList(page){
+                const {query_type, number} = this.$route.query;
                 axios.get({
-                    url : `/assets_tx?pageNum=${page}&pageSize=10&used_count=true`,
+                    url : `/assets_tx?pageNum=${page}&pageSize=10&used_count=true&asset_no=${number}&asset_type=${query_type}`,
                     ctx : this
                 }).then((data) =>{
                     if(data && data.data){
@@ -984,7 +1018,7 @@
             },
             getServiceDataList(page){
                 axios.get({
-                    url : `/assets_tx/service_tx?pageNum=${page}&pageSize=10&used_count=true`,
+                    url : `/assets_tx/service_tx?pageNum=${page}&pageSize=10&used_count=true&nft_id=${this.$route.query.nft_id}`,
                     ctx : this
                 }).then((data) =>{
                     if(data && data.data){

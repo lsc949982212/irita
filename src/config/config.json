@@ -18,6 +18,7 @@
   },
   "expired":1800000,
   "app":{
-    "explorer":"http://dev.iritaplorer.io"
+    "explorer":"http://dev.iritaplorer.io",
+    "lcd":"http://192.168.150.31:31317"
   }
 }

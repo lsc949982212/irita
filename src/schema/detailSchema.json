@@ -89,10 +89,10 @@
             },
             "allowOverdue": {
               "$id": "#/properties/detailedInfo/properties/receivable/properties/allowOverdue",
-              "type": "boolean",
+              "type": "string",
               "title": "是否允许逾期",
               "default": false,
-              "examples": [true]
+              "examples": ["*"]
             },
             "overdueInterestRate": {
               "$id": "#/properties/detailedInfo/properties/receivable/properties/overdueInterestRate",
@@ -123,7 +123,7 @@
               "title": "付款方式",
               "default": "现金/现汇",
               "examples": ["现金/现汇"],
-              "enum": ["现金/现汇","商业承兑汇票","银行承兑汇票"]
+              "enum": ["现金/现汇","商业承兑汇票","银行承兑汇票","******"]
             },
             "receivableTotalAmount": {
               "$id": "#/properties/detailedInfo/properties/receivable/properties/receivableTotalAmount",
@@ -138,7 +138,7 @@
               "title": "币种",
               "default": "CNY",
               "examples": ["CNY"],
-              "enum":["CAD","AUD","CHF","CNH","GBP","HKD","SGD","CNY","EUR","JPY","USD","SEK","NOK","DKK"]
+              "pattern": "^(.*)$"
             },
             "comments": {
               "$id": "#/properties/detailedInfo/properties/receivable/properties/comments",
@@ -224,7 +224,7 @@
                 "title": "合同类型",
                 "default": "购销合同",
                 "examples": ["购销合同"],
-                "enum":["购销合同","框架协议","其他"]
+                "enum":["购销合同","框架协议","其他","******"]
               },
               "payerCode": {
                 "$id": "#/properties/detailedInfo/properties/contracts/items/properties/payerCode",
@@ -303,7 +303,7 @@
                 "title": "币种",
                 "default": "",
                 "examples": ["enum string"],
-                "enum":["CAD","AUD","CHF","CNH","GBP","HKD","SGD","CNY","EUR","JPY","USD","SEK","NOK","DKK"]
+                "pattern": "^(.*)$"
               },
               "contractDate": {
                 "$id": "#/properties/detailedInfo/properties/contracts/items/properties/contractDate",
@@ -362,7 +362,7 @@
                 "title": "币种",
                 "default": "",
                 "examples": ["CNY"],
-                "enum":["CAD","AUD","CHF","CNH","GBP","HKD","SGD","CNY","EUR","JPY","USD","SEK","NOK","DKK"]
+                "pattern": "^(.*)$"
               },
               "payerCode": {
                 "$id": "#/properties/detailedInfo/properties/invoices/items/properties/payerCode",

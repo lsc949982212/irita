@@ -79,24 +79,18 @@
 
 <script>
     import Select from '../components/Select';
-    import schema from './schema';
+    import schema from '../schema/schema';
     import jsonData from './data';
     import { dictionary } from '../constant/dictionary';
     import JsonSchema from '../helper/JsonSchemaHelper';
     import axios from '../helper/httpHelper';
     import { Message } from 'element-ui';
+    import cfg from '../config/config';
     export default {
         name : 'AssetAdd',
         data(){
             return {
-                options : [{
-                    value : '1',
-                    label : '应收账款'
-                }, {
-                    value : '2',
-                    label : '非标资产',
-                    disabled : true
-                }],
+                options : [],
                 value : '1',
                 step : 1,
                 authList : [],
@@ -110,18 +104,38 @@
         mounted(){
             $("#json_schema_node").alpaca({
                 "schemaSource" : schema,
-                //"dataSource" : jsonData
+                "dataSource" : jsonData
             });
+            this.getAssetType();
         },
         methods : {
             add(){
                 this.$router.push('/asset_add');
             },
-            handleClick(row){
-                console.log(row)
-            },
             handleCancelClick(){
                 this.$router.go(-1);
+            },
+            getAssetType(){
+                const url = `/assets/denoms`;
+                //console.error(url)
+                axios.get({url,ctx:this}).then((data)=>{
+                    console.log(data);
+                    if(data && data.status === 'success'){
+                        if(data && data.data){
+                            this.options = data.data.map((item, index)=>{
+                                return {
+                                    value : `'${index+1}'`,
+                                    label : item
+                                }
+                            })
+                        }
+                    }else{
+                        this.$message.error('请求数据错误');
+                    }
+                }).catch(e=>{
+                    console.error(e);
+                    this.$message.error('请求数据错误');
+                });
             },
             changeStep(step){
                 this.step = step;
@@ -176,19 +190,6 @@
             },
             changeAuth(res){
                 this.authList[res.index].value = res.auth;
-            },
-            getDisplayType(type){
-                if(type === 'payments'){
-                    return '款项信息'
-                } else if(type === 'contracts'){
-                    return '合同信息'
-                } else if(type === 'invoices'){
-                    return '发票信息'
-                } else if(type === 'receivable'){
-                    return '资产详情'
-                } else if(type === 'basicInfo'){
-                    return '基本信息'
-                }
             },
             handleThirdStepPre(){
                 this.authList = [];

@@ -128,11 +128,11 @@
             },
             handleCheckClick(row){
                 console.log(row)
-                this.$router.push(`/asset_detail?type=check&nft_id=${row.id}&owner=${row.owner}&transStatus=${row.transStatus}`);
+                this.$router.push(`/asset_detail?type=check&nft_id=${row.id}&owner=${row.owner}&transStatus=${row.transStatus}&query_type=${row.type}&number=${row.number}`);
             },
             handleTransClick(row){
                 console.log(row)
-                this.$router.push(`/asset_detail?type=trans&nft_id=${row.id}&owner=${row.owner}&transStatus=${row.transStatus}`);
+                this.$router.push(`/asset_detail?type=trans&nft_id=${row.id}&owner=${row.owner}&transStatus=${row.transStatus}&query_type=${row.type}&number=${row.number}`);
             },
             onPageChange(page){
                 this.txListCurrentPage = page;
@@ -144,7 +144,7 @@
                         this.handleData(data);
                     }
                 }).catch(e=>{
-                    console.error('-----',e)
+                    console.error(e)
                 });
             },
             handleData(data){
