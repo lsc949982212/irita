@@ -425,7 +425,8 @@
                 provider:'',//转让的时候需要
                 flMounted:false,
                 useUnlock:false,
-                transRequestId:''
+                transRequestId:'',
+                postTransRequestId:''
             }
         },
         components : {},
@@ -921,6 +922,11 @@
                         console.log('trans request id:',this.transRequestId)
                     }else{
                         this.useUnlock = false;
+                    }
+
+                    if(data.data[0].status === constant.ASSET_LIST_STATUS.ACCEPT && this.$accountHelper.getAccount().address === data.data[0].consumer){
+                        console.log('current trans status is:已接收',data.data[0].request_id)
+                        this.postTransRequestId = data.data[0].request_id;
                     }
                     if(!this.flMounted){
                         this.getDetails();
