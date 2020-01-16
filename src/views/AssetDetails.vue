@@ -24,7 +24,7 @@
 
 
             </div>
-            <div class="asset_details_trans_container" 
+            <div class="asset_details_trans_container"
                  v-show="applyTransShow"
                  v-if="$route.query.type === 'trans'">
                 <span class="asset_details_trans_title">
@@ -425,14 +425,14 @@
                 authRequestId : '',
                 flUnlock : false,
                 nftId : '',
-                provider:'',//转让的时候需要
-                flMounted:false,
-                useUnlock:false,
-                loading:false,
-                applyBtnLoading:false,
-                transRequestId:'',
-                postTransRequestId:'',
-                postTransNftId:'',
+                provider : '',//转让的时候需要
+                flMounted : false,
+                useUnlock : false,
+                loading : false,
+                applyBtnLoading : false,
+                transRequestId : '',
+                postTransRequestId : '',
+                postTransNftId : '',
             }
         },
         components : {},
@@ -590,7 +590,7 @@
                 this.tab = tab;
                 if(tab === 0){
                     this.onAssetTxPaginationClick(1);
-                }else{
+                } else {
                     this.onServiceTxPaginationClick(1);
                 }
             },
@@ -641,7 +641,7 @@
                     } else if(data && data.data && data.data.status === 'fail'){
                         this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
                         this.centerDialogVisible = false;
-                    }  else {
+                    } else {
                         this.$message.error('接受申请失败');
                         this.centerDialogVisible = false;
                     }
@@ -655,7 +655,7 @@
             },
             postTransfer(){
                 const body = {
-                    request_id:this.postTransRequestId
+                    request_id : this.postTransRequestId
                 };
                 this.loading = true;
                 axios.post({
@@ -675,7 +675,7 @@
                     } else if(data && data.data && data.data.status === 'fail'){
                         this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
                         this.centerDialogVisible = false;
-                    }  else {
+                    } else {
                         this.$message.error('转让失败,请稍后重试');
                         this.centerDialogVisible = false;
                     }
@@ -708,7 +708,7 @@
                     } else if(data && data.data && data.data.status === 'fail'){
                         this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
                         this.centerDialogVisible = false;
-                    }  else {
+                    } else {
                         this.$message.error('拒绝申请失败');
                         this.centerDialogVisible = false;
                     }
@@ -743,7 +743,7 @@
                     } else if(data && data.data && data.data.status === 'fail'){
                         this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
                         this.centerDialogVisible = false;
-                    }  else {
+                    } else {
                         this.$message.error('拒绝失败');
                         this.centerDialogVisible = false;
                     }
@@ -777,7 +777,7 @@
                     } else if(data && data.data && data.data.status === 'fail'){
                         this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
                         this.centerDialogVisible = false;
-                    }  else {
+                    } else {
                         this.$message.error('授权失败');
                         this.centerDialogVisible = false;
                     }
@@ -822,7 +822,7 @@
                     } else if(data && data.data && data.data.status === 'fail'){
                         this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
                         this.centerDialogVisible = false;
-                    }  else {
+                    } else {
                         this.$message.error('申请转让失败');
                     }
                 }).catch(e =>{
@@ -850,17 +850,17 @@
                         this.jsonData = JSON.parse(data.data.data);
                         document.getElementById('detail_json_schema_node').style.display = 'none';
                         document.getElementById('locked_detail_json_schema_node').style.display = 'block';
-                        setTimeout(()=>{
+                        setTimeout(() =>{
                             $("#locked_detail_json_schema_node").alpaca({
                                 "schemaSource" : schema,
                                 "dataSource" : JSON.parse(data.data.data),
                                 "view" : "bootstrap-display"
                             });
-                        },100)
+                        }, 100)
                     } else if(data && data.data && data.data.status === 'fail'){
                         this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
                         this.centerDialogVisible = false;
-                    }  else {
+                    } else {
                         this.$message.error('解密失败');
                     }
                 }).catch(e =>{
@@ -908,15 +908,16 @@
             },
             handleDetailData(data){
                 console.log('detail data', data)
-                if(data.asset_info){
+                if(data && data.asset_info){
                     this.jsonData = JSON.parse(data.asset_info);
                     this.hasSecret = this.jsonData.authorizationProperties.length > 0 && !this.$accountHelper.isOwner(data.chain_info.owner)
+                    this.renderUI();
                 }
-                if(data.chain_info){
+                if(data && data.chain_info){
                     this.chainInfo = data.chain_info;
                 }
 
-                this.renderUI();
+
             },
             renderUI(){
                 $("#detail_json_schema_node").alpaca({
@@ -961,16 +962,18 @@
                 if(data.data.length > 0 && page === 1){
                     this.accountApplyTransStatus = data.data[0].status;
                     //如果最新的转让状态是  转让申请中,并且当前账户是受让方, 使用直接调用解密接口 (useUnlock)
-                    if(data.data[0].status === constant.ASSET_LIST_STATUS.APPLYING && this.$accountHelper.getAccount().address === data.data[0].consumer){
+                    //当前账户是受让者
+                    if(data.data[0].status === constant.ASSET_LIST_STATUS.APPLYING && this.$accountHelper.getAccount().address === data.data[0].provider){
                         this.useUnlock = true;
                         this.transRequestId = data.data[0].request_id;
-                        console.log('trans request id:',this.transRequestId)
-                    }else{
+                        console.log('trans request id:', this.transRequestId)
+                    } else {
                         this.useUnlock = false;
                     }
 
+                    //当前账户是owner
                     if(data.data[0].status === constant.ASSET_LIST_STATUS.ACCEPT && this.$accountHelper.getAccount().address === data.data[0].consumer){
-                        console.log('current trans status is:已接受',data.data[0].request_id);
+                        console.log('current trans status is:已接受', data.data[0].request_id);
                         this.postTransRequestId = data.data[0].request_id;
                         this.postTransNftId = data.data[0].nft_id;
                     }
@@ -979,7 +982,7 @@
                         this.flMounted = true;
                     }
 
-                }else if(data.data.length === 0){
+                } else if(data.data.length === 0){
                     if(!this.flMounted){
                         this.getDetails();
                         this.flMounted = true;
@@ -987,9 +990,6 @@
                 }
                 this.totalTransCount = data.total;
                 this.transferData = data.data.map((t) =>{
-                    //不同状态下,provider和consumer意义不同
-                    let receiver = (t.status === constant.ASSET_LIST_STATUS.ACCEPT || t.status === constant.ASSET_LIST_STATUS.TRANSFERED || t.status === constant.ASSET_LIST_STATUS.REFUSED) ? t.provider : t.consumer;
-                    //todo 不同状态对应的受让者,需要修改
                     return {
                         id : t.nft_id,
                         requestId : t.request_id,
@@ -997,10 +997,10 @@
                         receiver : t.provider,
                         txStatus : t.status,
                         displayStatus : this.getDisplayAssetTransStatus(t.status),
-                        displayReceiver : this.$accountHelper.getUserNameByAddress(receiver),
+                        displayReceiver : this.$accountHelper.getUserNameByAddress(t.provider),
                         consumer : t.consumer,
                         provider : t.provider,
-                        showAcceptBtn : t.status === constant.ASSET_LIST_STATUS.APPLYING && t.consumer === this.$accountHelper.getAccount().address,
+                        showAcceptBtn : t.status === constant.ASSET_LIST_STATUS.APPLYING && t.provider === this.$accountHelper.getAccount().address,
                         showTransBtn : t.status === constant.ASSET_LIST_STATUS.ACCEPT && t.consumer === this.$accountHelper.getAccount().address
                     }
                 })
@@ -1083,7 +1083,7 @@
             handleServiceDataData(data){
                 console.log('service list data', data);
                 this.totalServiceListCount = data.total;
-                this.serviceListData = data.data.map((item)=>{
+                this.serviceListData = data.data.map((item) =>{
                     return {
                         serviceName : item.service_name,
                         serviceType : item.type,

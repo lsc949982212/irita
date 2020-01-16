@@ -47,15 +47,4 @@ export default {
             });
         })
     },
-    getFromLcd(params) {
-        const{url, ctx} = params;
-        if(loginHelper.checkLoginStatus(ctx) !== constant.SUCCESS.code){
-            loginHelper.exit(ctx);
-            return new Promise(()=>{});
-        }
-        return new Promise((res,rej)=>{
-            axios.get(`${url}`, {timeout:constant.TIME_OUT}).then(result => res(result.data)).catch((e)=>rej(e));
-        })
-
-    },
 }
