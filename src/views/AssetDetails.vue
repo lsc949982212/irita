@@ -988,8 +988,8 @@
                 this.totalTransCount = data.total;
                 this.transferData = data.data.map((t) =>{
                     //不同状态下,provider和consumer意义不同
-                    let receiver = (t.status === constant.ASSET_LIST_STATUS.ACCEPT || t.status === constant.ASSET_LIST_STATUS.TRANSFERED) ? t.provider : t.consumer;
-
+                    let receiver = (t.status === constant.ASSET_LIST_STATUS.ACCEPT || t.status === constant.ASSET_LIST_STATUS.TRANSFERED || t.status === constant.ASSET_LIST_STATUS.REFUSED) ? t.provider : t.consumer;
+                    //todo 不同状态对应的受让者,需要修改
                     return {
                         id : t.nft_id,
                         requestId : t.request_id,

@@ -98,7 +98,7 @@
               "$id": "#/properties/detailedInfo/properties/receivable/properties/overdueInterestRate",
               "type": "number",
               "title": "逾期利率",
-              "default": 0.0,
+              "default": "",
               "examples": [0.05]
             },
             "payerCode": {
@@ -121,7 +121,7 @@
               "$id": "#/properties/detailedInfo/properties/receivable/properties/paymentMethod",
               "type": "string",
               "title": "付款方式",
-              "default": "现金/现汇",
+              "default": "",
               "examples": ["现金/现汇"],
               "enum": ["现金/现汇","商业承兑汇票","银行承兑汇票"]
             },
@@ -129,14 +129,14 @@
               "$id": "#/properties/detailedInfo/properties/receivable/properties/receivableTotalAmount",
               "type": "number",
               "title": "应收款总额",
-              "default": 0.0,
+              "default": "",
               "examples": [1234.45]
             },
             "currency": {
               "$id": "#/properties/detailedInfo/properties/receivable/properties/currency",
               "type": "string",
               "title": "币种",
-              "default": "CNY",
+              "default": "",
               "examples": ["CNY"],
               "enum":["CAD","AUD","CHF","CNH","GBP","HKD","SGD","CNY","EUR","JPY","USD","SEK","NOK","DKK"]
             },
@@ -171,7 +171,7 @@
                 "$id": "#/properties/detailedInfo/properties/payments/items/properties/amount",
                 "type": "number",
                 "title": "金额",
-                "default": 0.0,
+                "default": "",
                 "examples": [1234.45]
               },
               "stage": {
@@ -223,7 +223,7 @@
                 "$id": "#/properties/detailedInfo/properties/contracts/items/properties/contractType",
                 "type": "string",
                 "title": "合同类型",
-                "default": "购销合同",
+                "default": "",
                 "examples": ["购销合同"],
                 "enum":["购销合同","框架协议","其他"]
               },
@@ -295,7 +295,7 @@
                 "$id": "#/properties/detailedInfo/properties/contracts/items/properties/contractAmount",
                 "type": "number",
                 "title": "合同金额",
-                "default": 0.0,
+                "default": "",
                 "examples": [12345.12]
               },
               "currency": {
@@ -354,7 +354,7 @@
                 "$id": "#/properties/detailedInfo/properties/invoices/items/properties/invoiceAmount",
                 "type": "number",
                 "title": "发票金额",
-                "default": 0.0,
+                "default": "",
                 "examples": [1234.12]
               },
               "currency": {
