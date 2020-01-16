@@ -86,6 +86,7 @@
     import axios from '../helper/httpHelper';
     import { Message } from 'element-ui';
     import cfg from '../config/config';
+    import { getErrorMsgByErrorCode } from '../helper/errorCodeHelper';
     export default {
         name : 'AssetAdd',
         data(){
@@ -180,7 +181,9 @@
                             type : 'success'
                         });
                         this.$router.go(-1);
-                    }else{
+                    } else if(data && data.data && data.data.status === 'fail'){
+                        this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
+                    } else{
                         this.$message.error('新增资产失败');
                     }
                 }).catch(e=>{

@@ -55,6 +55,7 @@
     import JsonSchema from '../helper/JsonSchemaHelper';
     import axios from '../helper/httpHelper';
     import { Message } from 'element-ui';
+    import { getErrorMsgByErrorCode } from '../helper/errorCodeHelper';
 
     export default {
         name : 'AssetAdd',
@@ -120,7 +121,9 @@
                             type : 'success'
                         });
                         this.$router.go(-1);
-                    }else{
+                    } else if(data && data.data && data.data.status === 'fail'){
+                        this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
+                    } else{
                         this.$message.error('编辑资产失败');
                     }
 
