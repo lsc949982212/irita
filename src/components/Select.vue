@@ -38,13 +38,24 @@
             index:{
                 required:true,
                 type:Number,
-            }
+            },
+            value:{
+                required:false,
+                type:String,
+            },
+
         },
         data(){
+            let label;
+            if(this.value){
+                label = this.options.find(o=>o.value === this.value) ? this.options.find(o=>o.value === this.value).label :this.options[0].label
+            }else{
+                this.label = this.options[0].label;
+            }
             return {
                 info:this.options,
                 optionsShow:false,
-                label:this.options[0].label
+                label
             }
         },
         methods:{

@@ -7,10 +7,10 @@
                 </span>
             </div>
 
-            <div class="edit_schema_container" @click="handleAuthContainerClick">
+            <div class="edit_schema_container" v-show="step === 1">
                 <div class="content_item" id="edit_json_schema_node"></div>
             </div>
-            <div class="content_container">
+            <div class="content_container" v-show="step === 2">
                 <div class="content_item">
                     <div class="auth_title_container">
                         <span class="auth_title">
@@ -29,6 +29,7 @@
                             </span>
                             <Select :options="info.data" :index="index"
                                     @closeOtherOps="closeOtherOps"
+                                    :value="info.value"
                                     :ref="`select_${index}`"
                                     @changeAuth="changeAuth"/>
                         </div>
@@ -39,8 +40,20 @@
             <div class="btn_container">
                 <el-button size="medium"
                            @click="save"
+                           v-show="step === 2"
                            class="btn" type="primary">保存
                 </el-button>
+                <el-button size="medium"
+                           @click="next"
+                           v-show="step === 1"
+                           class="btn" type="primary">下一步
+                </el-button>
+                <el-button size="medium"
+                           @click="previous"
+                           v-show="step === 2"
+                           class="btn" type="primary">上一步
+                </el-button>
+
                 <el-button class="btn" size="medium" @click="handleCancelClick">取消</el-button>
             </div>
 
@@ -74,6 +87,9 @@
                 authList : [],
                 jsonData : null,
                 dictionary,
+                authorizationProperties:[],
+                secretProperties:[],
+
             }
         },
         components : {
@@ -86,30 +102,26 @@
             handleCancelClick(){
                 this.$router.go(-1);
             },
-            handleAuthContainerClick(){
-                this.checkData();
+            previous(){
+                this.step = 1;
             },
-            checkData(){
-                let jsonData = $("#edit_json_schema_node").alpaca().getValue();
-                console.log('已经编辑完的数据',jsonData);
-                this.authList = new JsonSchema(jsonData).getFormatAuthData();
-                jsonData.authorizationProperties = [];
-                jsonData.secretProperties = [];
-                this.jsonData = jsonData;
-
+            next(){
+                this.step = 2;
+                this.setAuthListUI();
             },
             save(){
                 let authorization = this.authList.filter((a) => a.value === '2');
                 let secret = this.authList.filter((a) => a.value === '3');
-                /*this.jsonData.authorizationProperties = [];
-                this.jsonData.secretProperties = [];*/
-                this.checkData();
-                authorization.forEach((a) => this.jsonData.authorizationProperties.push(a.str));
-                secret.forEach((a) => this.jsonData.secretProperties.push(a.str));
+                let jsonData = $("#edit_json_schema_node").alpaca().getValue();
+                jsonData.authorizationProperties = [];
+                jsonData.secretProperties = [];
+                authorization.forEach((a) => jsonData.authorizationProperties.push(a.str));
+                secret.forEach((a) => jsonData.secretProperties.push(a.str));
+                this.jsonData = jsonData;
                 this.postData();
             },
             postData(){
-                console.log('要发送的数据',this.jsonData)
+                console.log('要发送的数据',this.jsonData);
                 const body = {
                     asset_data:this.jsonData,
                 };
@@ -157,18 +169,22 @@
                 console.log('detail data', data)
                 if(data.asset_info){
                     this.jsonData =  JSON.parse(data.asset_info);
+                    this.authorizationProperties = this.jsonData.authorizationProperties;
+                    this.secretProperties = this.jsonData.secretProperties;
+                    this.renderUI();
                 }
-                this.renderUI();
+
             },
             renderUI(){
                 $("#edit_json_schema_node").alpaca({
                     "schemaSource" : schema,
                     "dataSource" : this.jsonData
                 });
-
-                setTimeout(() =>{
-                    this.checkData();
-                }, 1000)
+            },
+            setAuthListUI(){
+                let jsonData = $("#edit_json_schema_node").alpaca().getValue();
+                console.error(this.authorizationProperties,this.secretProperties)
+                this.authList = new JsonSchema(jsonData,this.authorizationProperties,this.secretProperties).setEditFormatAuthData().getEditAuthDataList();
             }
         }
     }
@@ -222,7 +238,6 @@
                 .content_item {
                     width: 100%;
                     .auth_title_container {
-                        border-bottom: 1px solid #EDEDED;
                         padding-bottom: 10px;
                         width: 100%;
                         .flexRow;

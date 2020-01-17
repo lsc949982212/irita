@@ -5,28 +5,32 @@ import { dictionary } from '../constant/dictionary';
  * get display format data
  */
 export default class JsonSchemaHelper {
-    constructor(jsonData){
+    constructor(jsonData,authorizationProperties,secretProperties){
         this.data = jsonData;
-        this.authDataList = [];
-        this.setFormatAuthData();
+        this.addAuthDataList = [];
+        this.editAuthDataList = [];
+        this.authorizationProperties = authorizationProperties;
+        this.secretProperties = secretProperties;
+        //this.setAddFormatAuthData();
     }
 
-    setFormatAuthData(data = this.data, prop = ''){
+    setAddFormatAuthData(data = this.data, prop = ''){
         for(let key in data){
+            if(key === 'authorizationProperties' || key === 'secretProperties') continue;
             if(data[key] instanceof Array){
                 if(data[key].length > 0){
                     let str = key;
                     if(prop){
                         str = `${prop}.${key}`
                     }
-                    this.setFormatAuthData(data[key][0], `${str}[*]`)
+                    this.setAddFormatAuthData(data[key][0], `${str}[*]`)
                 }
             } else if(typeof data[key] === 'object'){
                 let str = key;
                 if(prop){
                     str = `${prop}.${key}`
                 }
-                this.setFormatAuthData(data[key], str)
+                this.setAddFormatAuthData(data[key], str)
             } else {
                 let str = key;
                 if(prop){
@@ -55,14 +59,43 @@ export default class JsonSchemaHelper {
                     }
                     authData.type = type;
                 }
-                this.authDataList.push(authData)
+                this.addAuthDataList.push(authData)
             }
         }
+        return this;
     }
 
-    getFormatAuthData(){
-        return this.authDataList;
+    getAddAuthDataList(){
+        return this.addAuthDataList;
     }
+
+    setEditFormatAuthData(){
+        console.error('json data',this.data);
+        this.setAddFormatAuthData();
+        console.error('auth list',this.getAddAuthDataList());
+        let addAuthDataList = this.getAddAuthDataList();
+        addAuthDataList.forEach((a)=>{
+            if(this.authorizationProperties && this.authorizationProperties.length){
+
+                if(this.authorizationProperties.includes(a.str)){
+                    a.value = '2';
+                }
+            }
+            if(this.secretProperties && this.secretProperties.length){
+                if(this.secretProperties.includes(a.str)){
+                    a.value = '3';
+                }
+            }
+
+        });
+        this.editAuthDataList = addAuthDataList;
+        return this;
+    }
+
+    getEditAuthDataList(){
+        return this.editAuthDataList;
+    }
+
 
 
 }

@@ -148,7 +148,7 @@
                     this.$message.error('请填写必填项');
                     return;
                 }
-                this.authList = new JsonSchema(jsonData).getFormatAuthData();
+                this.authList = new JsonSchema(jsonData).setAddFormatAuthData().getAddAuthDataList();
                 console.log('auth list:', this.authList)
                 jsonData.authorizationProperties = [];
                 jsonData.secretProperties = [];
