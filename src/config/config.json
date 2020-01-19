@@ -19,5 +19,6 @@
   "app":{
     "explorer":"${explorerAddress}"
   },
-  "env":"${env}"
+  "env":"${env}",
+  "chainId":"${chainId}"
 }
