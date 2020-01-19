@@ -949,7 +949,7 @@
                     case 'height':
                         window.open(`${cfg.app.explorer}/#/block/${param}`);
                     case 'serviceName':
-                        window.open(`${cfg.app.explorer}/#/service?serviceName=${param}&chainId=irita-dev`);
+                        window.open(`${cfg.app.explorer}/#/service?serviceName=${param}&chainId=${cfg.chainId}`);
                 }
             },
             getElementByAttr(tag, dataAttr, reg){

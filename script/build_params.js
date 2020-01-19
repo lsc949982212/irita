@@ -33,7 +33,7 @@ if (program.params) {
     secondAddress = program.params[9];
     secondName = program.params[10];
     secondDomain = program.params[11];
-    chainId = program.params[11];
+    chainId = program.params[12];
 
 }
 
