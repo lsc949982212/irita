@@ -74,16 +74,8 @@
                             <span class="content_chain_info_item_title">
                                 owner:
                             </span>
-                            <span class="content_chain_info_item_content">
+                            <span class="content_chain_info_item_content link" @click="toExplorer('address')">
                                 {{ chainInfo.owner }}
-                            </span>
-                        </div>
-                        <div class="content_chain_info_item_wrap">
-                            <span class="content_chain_info_item_title">
-                                详情:
-                            </span>
-                            <span class="content_chain_info_item_content link" @click="handleTokenDetailClick">
-                                {{ chainInfo.nft_uri }}
                             </span>
                         </div>
                     </div>
@@ -92,7 +84,7 @@
                             <span class="content_chain_info_item_title">
                                 token_id:
                             </span>
-                            <span class="content_chain_info_item_content">
+                            <span class="content_chain_info_item_content link" @click="toExplorer('nft_id')">
                                 {{ chainInfo.nft_id }}
                             </span>
                         </div>
@@ -100,9 +92,9 @@
                             <span class="content_chain_info_item_title">
                                 token_uri:
                             </span>
-                            <span class="content_chain_info_item_content">
+                            <a class="content_chain_info_item_content link" :href="chainInfo.nft_uri" target="_blank">
                                 {{ chainInfo.nft_uri }}
-                            </span>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -258,9 +250,13 @@
                                 min-width="100">
                         </el-table-column>
                         <el-table-column
-                                prop="txHash"
                                 label="交易哈希"
                                 min-width="100">
+                            <template slot-scope="scope">
+                                <span class="link_url" @click="toExplorer('hash',scope.row.txHash)">
+                                    {{ scope.row.txHash }}
+                                </span>
+                            </template>
                         </el-table-column>
                         <el-table-column
                                 prop="time"
@@ -268,19 +264,31 @@
                                 min-width="60">
                         </el-table-column>
                         <el-table-column
-                                prop="senderAddr"
                                 label="发起地址"
                                 min-width="120">
+                            <template slot-scope="scope">
+                                <span class="link_url" @click="toExplorer('address',scope.row.senderAddr)">
+                                    {{ scope.row.senderAddr }}
+                                </span>
+                            </template>
                         </el-table-column>
                         <el-table-column
-                                prop="receiverAddr"
                                 label="接收地址"
                                 min-width="120">
+                            <template slot-scope="scope">
+                                <span class="link_url" @click="toExplorer('address',scope.row.receiverAddr)">
+                                    {{ scope.row.receiverAddr }}
+                                </span>
+                            </template>
                         </el-table-column>
                         <el-table-column
-                                prop="height"
                                 label="区块高度"
                                 min-width="50">
+                            <template slot-scope="scope">
+                                <span class="link_url" @click="toExplorer('height',scope.row.height)">
+                                    {{ scope.row.height }}
+                                </span>
+                            </template>
                         </el-table-column>
 
                     </el-table>
@@ -294,6 +302,11 @@
                                 prop="serviceName"
                                 label="服务名称"
                                 min-width="100">
+                            <template slot-scope="scope">
+                                <span class="link_url" @click="toExplorer('serviceName',scope.row.serviceName)">
+                                    {{ scope.row.serviceName }}
+                                </span>
+                            </template>
                         </el-table-column>
                         <el-table-column
                                 prop="serviceType"
@@ -301,9 +314,13 @@
                                 min-width="100">
                         </el-table-column>
                         <el-table-column
-                                prop="serviceHash"
                                 label="服务交易哈希"
                                 min-width="130">
+                            <template slot-scope="scope">
+                                <span class="link_url" @click="toExplorer('hash',scope.row.serviceHash)">
+                                    {{ scope.row.serviceHash }}
+                                </span>
+                            </template>
                         </el-table-column>
                         <el-table-column
                                 prop="time"
@@ -311,19 +328,32 @@
                                 min-width="150">
                         </el-table-column>
                         <el-table-column
-                                prop="providerAddr"
                                 label="提供方地址"
                                 min-width="120">
+                            <template slot-scope="scope">
+                                <span class="link_url" @click="toExplorer('address',scope.row.providerAddr)">
+                                    {{ scope.row.providerAddr }}
+                                </span>
+                            </template>
                         </el-table-column>
                         <el-table-column
-                                prop="consumeAddr"
                                 label="消费方地址"
                                 min-width="120">
+                            <template slot-scope="scope">
+                                <span class="link_url" @click="toExplorer('address',scope.row.consumeAddr)">
+                                    {{ scope.row.consumeAddr }}
+                                </span>
+                            </template>
                         </el-table-column>
                         <el-table-column
                                 prop="height"
                                 label="区块高度"
                                 min-width="70">
+                            <template slot-scope="scope">
+                                <span class="link_url" @click="toExplorer('height',scope.row.height)">
+                                    {{ scope.row.height }}
+                                </span>
+                            </template>
                         </el-table-column>
 
                     </el-table>
@@ -908,8 +938,19 @@
             handleCancelBtnClick(){
                 this.centerDialogVisible = false;
             },
-            handleTokenDetailClick(){
-                window.open(`${cfg.app.explorer}/#/nft/token?denom=${this.chainInfo.type}&tokenId=${this.chainInfo.nft_id}`)
+            toExplorer(type,param){
+                switch (type){
+                    case 'address':
+                        window.open(`${cfg.app.explorer}/#/address/${param ? param : this.chainInfo.owner}`);
+                    case 'nft_id':
+                        window.open(`${cfg.app.explorer}/#/nft/token?denom=${this.chainInfo.type}&tokenId=${this.chainInfo.number}`);
+                    case 'hash':
+                        window.open(`${cfg.app.explorer}/#/tx?txHash=${param}`);
+                    case 'height':
+                        window.open(`${cfg.app.explorer}/#/block/${param}`);
+                    case 'serviceName':
+                        window.open(`${cfg.app.explorer}/#/service?serviceName=${param}&chainId=irita-dev`);
+                }
             },
             getElementByAttr(tag, dataAttr, reg){
                 let aElements = document.getElementById('schema_container').getElementsByTagName(tag);
@@ -1368,7 +1409,13 @@
                     }
 
                 }
+                .content_table_wrap{
 
+                    .link_url{
+                        color: @themeColor;
+                        cursor: pointer;
+                    }
+                }
             }
             .pagination_container {
                 .flexRow;
