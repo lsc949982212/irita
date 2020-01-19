@@ -38,7 +38,7 @@ if (program.params) {
 
 
 replaceEnv([
-        "src/env/config.json"
+        "src/config/config.json"
     ],
     {
         "version": version,
