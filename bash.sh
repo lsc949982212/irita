@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function recover_config_file(){
-  git checkout -- src/cfg/config.json
+  git checkout -- src/config/config.json
 }
 
 function use_dev(){

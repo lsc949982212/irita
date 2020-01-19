@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "param": "node script/build_params.js -p"
+    "param": "node script/build_params.js -p",
+    "revert": "git checkout HEAD src/config/config.json"
   },
   "dependencies": {
     "axios": "^0.19.0",

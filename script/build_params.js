@@ -22,17 +22,17 @@ console.log(env,explorerAddress,fistPsd,firstPublicKey,firstAddress,
     secondName,secondDomain);
 if (program.params) {
     env = program.params[0];
-    explorerAddress = program.params[2];
-    fistPsd = program.params[3];
-    firstPublicKey = program.params[4];
-    firstAddress = program.params[5];
-    firstName = program.params[6];
-    firstDomain = program.params[7];
-    $secondPsd = program.params[8];
-    secondPublicKey = program.params[9];
-    secondAddress = program.params[10];
-    secondName = program.params[11];
-    secondDomain = program.params[12];
+    explorerAddress = program.params[1];
+    fistPsd = program.params[2];
+    firstPublicKey = program.params[3];
+    firstAddress = program.params[4];
+    firstName = program.params[5];
+    firstDomain = program.params[6];
+    $secondPsd = program.params[7];
+    secondPublicKey = program.params[8];
+    secondAddress = program.params[9];
+    secondName = program.params[10];
+    secondDomain = program.params[11];
 
 }
 

@@ -8,7 +8,7 @@
       "domain":"${firstDomain}"
     },
     "test":{
-      "psd": "$secondPsd}",
+      "psd": "${secondPsd}",
       "publicKey":"${secondPublicKey}",
       "address":"${secondAddress}",
       "name":"${secondName}",
