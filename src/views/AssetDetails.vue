@@ -47,6 +47,13 @@
             <div class="schema_container" id="schema_container">
                 <div class="content_item" id="detail_json_schema_node"></div>
                 <div class="content_item" id="locked_detail_json_schema_node" style="display:none;"></div>
+                <div class="note_container">
+                    <span class="auth_title">授权可见:</span>
+                    <span class="auth_color"></span>
+                    <span class="secret_title">仅自己可见:</span>
+                    <span class="secret_color"></span>
+
+                </div>
             </div>
 
             <div class="content_container">
@@ -104,6 +111,10 @@
                 <p class="content_chain_info">
                     资产转让
                 </p>
+                <el-button size="small"
+                           @click="refreshList('trans')"
+                           class="auth_refresh_btn" type="primary">刷新
+                </el-button>
                 <div class="content_table_wrap">
                     <el-table
                             :data="transferData"
@@ -164,6 +175,10 @@
                 <p class="content_chain_info">
                     数据申请与授权
                 </p>
+                <el-button size="small"
+                           @click="refreshList('auth')"
+                           class="auth_refresh_btn" type="primary">刷新
+                </el-button>
                 <div class="content_table_wrap">
                     <el-table
                             :data="applyAndAuthDataList"
@@ -228,7 +243,10 @@
                     </span>
 
                 </div>
-
+                <el-button size="small"
+                           @click="refreshList('list')"
+                           class="auth_refresh_btn" type="primary">刷新
+                </el-button>
                 <div class="content_table_wrap" v-show="tab === 0">
                     <el-table
                             :data="assetListData"
@@ -433,6 +451,8 @@
                 transRequestId : '',
                 postTransRequestId : '',
                 postTransNftId : '',
+                authorizationList:[],
+                secretList:[],
             }
         },
         components : {},
@@ -466,6 +486,21 @@
                 this.getAssetTransList(1);
                 this.getAssetAuthList(1);
                 this.onAssetTxPaginationClick(1);
+            },
+            refreshList(type){
+                switch (type){
+                    case 'trans':
+                        this.transCurrentPage = 1;
+                        this.getAssetTransList(1);
+                    case 'auth':
+                        this.authCurrentPage = 1;
+                        this.getAssetAuthList(1);
+                    case 'list':
+                        this.assetTxCurrentPage = 1;
+                        this.authCurrentPage = 1;
+                        this.tab = 0;
+                        this.onAssetTxPaginationClick(1);
+                }
             },
             getDisplayAssetTransStatus(status){
                 switch (status){
@@ -848,6 +883,7 @@
                             type : 'success'
                         });
                         this.jsonData = JSON.parse(data.data.data);
+                        this.secretList = JSON.parse(data.data.data).secretProperties;
                         document.getElementById('detail_json_schema_node').style.display = 'none';
                         document.getElementById('locked_detail_json_schema_node').style.display = 'block';
                         setTimeout(() =>{
@@ -856,7 +892,8 @@
                                 "dataSource" : JSON.parse(data.data.data),
                                 "view" : "bootstrap-display"
                             });
-                        }, 100)
+                        }, 100);
+                        this.setSecretFieldStyle();
                     } else if(data && data.data && data.data.status === 'fail'){
                         this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
                         this.centerDialogVisible = false;
@@ -910,14 +947,62 @@
                 console.log('detail data', data)
                 if(data && data.asset_info){
                     this.jsonData = JSON.parse(data.asset_info);
+                    this.authorizationList = JSON.parse(data.asset_info).authorizationProperties;
+                    this.secretList = JSON.parse(data.asset_info).secretProperties;
                     this.hasSecret = this.jsonData.authorizationProperties.length > 0 && !this.$accountHelper.isOwner(data.chain_info.owner)
                     this.renderUI();
                 }
                 if(data && data.chain_info){
                     this.chainInfo = data.chain_info;
                 }
+            },
+            setSecretFieldStyle(){
+                setTimeout(()=>{
+                    let node = this.getElementByAttr('div','data-alpaca-field-path', /^\//);
+                    const pathMap = new Map();
+                    for(let item of node){
+                        const name = item.getAttribute('data-alpaca-field-path');
+                        //console.error(name)
+                        pathMap.set(name, item);
+                    }
 
+                    this.authorizationList.forEach((a)=>{
+                        let replaced = a.replace(/\./g,'/').replace('$','');
+                        if(pathMap.has(replaced)){
+                            pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].style.color = '#6CA4F5';
+                            pathMap.get(replaced).getElementsByClassName('control-label')[0].style.color = '#6CA4F5';
+                        }else{
+                            Array.from(pathMap.keys()).forEach((p)=>{
+                                if(p.includes('[') && p.includes(']')){
+                                    let num = p.split('[')[1].split(']')[0];
+                                    if(p.replace(num,'*') === replaced){
+                                        pathMap.get(p).getElementsByClassName('alpaca-control')[0].style.color = '#6CA4F5';
+                                        pathMap.get(p).getElementsByClassName('control-label')[0].style.color = '#6CA4F5';
+                                    }
+                                }
+                            })
+                        }
+                    });
+                    this.secretList.forEach((a)=>{
+                        let replaced = a.replace(/\./g,'/').replace('$','');
+                        if(pathMap.has(replaced)){
+                            pathMap.get(replaced).style.color = 'yellow';
+                            pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].style.color = '#F56C6C';
+                            pathMap.get(replaced).getElementsByClassName('control-label')[0].style.color = '#F56C6C';
+                        }else{
+                            Array.from(pathMap.keys()).forEach((p)=>{
+                                if(p.includes('[') && p.includes(']')){
+                                    let num = p.split('[')[1].split(']')[0];
+                                    if(p.replace(num,'*') === replaced){
+                                        pathMap.get(p).getElementsByClassName('alpaca-control')[0].style.color = '#F56C6C';
+                                        pathMap.get(p).getElementsByClassName('control-label')[0].style.color = '#F56C6C';
+                                    }
+                                }
+                            })
+                        }
+                    });
 
+                },250)
             },
             renderUI(){
                 $("#detail_json_schema_node").alpaca({
@@ -925,6 +1010,7 @@
                     "dataSource" : this.jsonData,
                     "view" : "bootstrap-display"
                 });
+                this.setSecretFieldStyle();
 
                 /*setTimeout(()=>{
                     let node = this.getElementByAttr('div','data-alpaca-field-path', /^\//);
@@ -1121,7 +1207,7 @@
             .asset_details_title_container {
                 .flexRow;
                 justify-content: space-between;
-                margin-bottom: 20px;
+                margin-bottom: 30px;
                 .asset_details_title {
                     font-size: 20px;
                     color: @mainFontColor;
@@ -1145,7 +1231,38 @@
                 }
             }
             .schema_container {
+                position:relative;
+                .note_container{
+                    position:absolute;
+                    right:0;
+                    top:-15px;
+                    .flexRow;
+                    align-items: center;
+                    .auth_title{
+                        font-size:12px;
+                        color:#9E9E9E;
+                    }
+                    .auth_color{
+                        width:60px;
+                        border-radius:4px;
+                        height:20px;
+                        background: #6CA4F5;
+                        margin-right:20px;
+                        margin-left:10px;
+                    }
+                    .secret_title{
+                        font-size:12px;
+                        color:#9E9E9E;
+                    }
+                    .secret_color{
+                        width:60px;
+                        border-radius:4px;
+                        height:20px;
+                        background: #F56C6C;
+                        margin-left:10px;
+                    }
 
+                }
                 .alpaca-container-item {
                     background: rgba(248, 248, 248, 1) !important;
                 }
@@ -1198,6 +1315,13 @@
                     color: @mainFontColor;
                     padding-bottom: 10px;
                     border-bottom: 1px solid #EDEDED
+                }
+                position:relative;
+                .auth_refresh_btn{
+                    position:absolute;
+                    top:10px;
+                    right:20px;
+                    z-index:10;
                 }
                 .content_chain_info_wrap {
                     .flexRow;
