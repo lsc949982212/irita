@@ -12,6 +12,7 @@ export default {
             return new Promise(()=>{});
         }
         return new Promise((res,rej)=>{
+            console.log('url',`${accountHelper.getAccount().domain}${url}`)
             axios.get(`${accountHelper.getAccount().domain}${url}`, {timeout:constant.TIME_OUT}).then(result => res(result.data)).catch((e)=>rej(e));
         })
 
@@ -23,6 +24,7 @@ export default {
             return new Promise(()=>{});
         }
         return new Promise((res,rej)=>{
+            console.log('url',`${accountHelper.getAccount().domain}${url}`)
             axios.post(`${accountHelper.getAccount().domain}${url}`, body, {timeout: constant.TIME_OUT}).then(result => {
                     res(result);
                 }

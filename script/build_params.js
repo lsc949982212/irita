@@ -17,9 +17,7 @@ console.log('Replacing environments ...');
 let env,explorerAddress,fistPsd,firstPublicKey,firstAddress,
     firstName,firstDomain,secondPsd,secondPublicKey,secondAddress,
     secondName,secondDomain,chainId;
-console.log(env,explorerAddress,fistPsd,firstPublicKey,firstAddress,
-    firstName,firstDomain,secondPsd,secondPublicKey,secondAddress,
-    secondName,secondDomain,chainId);
+console.log(env);
 if (program.params) {
     env = program.params[0];
     explorerAddress = program.params[1];

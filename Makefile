@@ -1,2 +1,2 @@
 build_app:
-	yarn param $(params) && yarn build
+	npm run param $(params) && yarn build

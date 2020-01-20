@@ -47,7 +47,7 @@
             <div class="schema_container" id="schema_container">
                 <div class="content_item" id="detail_json_schema_node"></div>
                 <div class="content_item" id="locked_detail_json_schema_node" style="display:none;"></div>
-                <div class="note_container">
+                <div class="note_container" v-show="jsonData">
                     <span class="auth_title">授权可见:</span>
                     <span class="auth_color"></span>
                     <span class="secret_title">仅自己可见:</span>
@@ -488,6 +488,7 @@
         components : {},
         mounted(){
             this.loadData();
+            //this.getCheckout();
         },
         computed : {
             editBtnShow(){
@@ -1222,6 +1223,21 @@
                     }
                 })
             },
+            getCheckout(){
+                axios.get({
+                    url : `/assets_check/${this.$route.query.nft_id}?examine_no=hello&address=faa1fwgw9ej3yzq6frn8rq7pswfhkdcsq8szgx0xkq`,
+                    ctx : this
+                }).then((data) =>{
+                    if(data && data.status && data.status === 'success'){
+                        Message({
+                            message : '查验已提交成功,请耐心等待',
+                            type : 'success'
+                        });
+                    }
+                }).catch(e =>{
+                    console.error(e)
+                });
+            }
 
 
         }

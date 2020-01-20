@@ -17,7 +17,6 @@ export default new Vuex.Store({
             state.offsetLeft = data;
         },
         SET_EXPIRED_STATUS(state, data){
-            console.error('===',data)
             state.expired = data;
         },
 
