@@ -105,7 +105,7 @@
         mounted(){
             $("#json_schema_node").alpaca({
                 "schemaSource" : schema,
-                "dataSource" : jsonData
+                //"dataSource" : jsonData
             });
             this.getAssetType();
         },
