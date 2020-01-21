@@ -494,7 +494,7 @@
             editBtnShow(){
                 //资产拥有者,并且状态是正常
                 const {type, transStatus} = this.$route.query;
-                return type === 'check' && this.isOwner && Number(transStatus) === constant.ASSET_STATUS.NORMAL && (this.accountApplyTransStatus === constant.ASSET_LIST_STATUS.REFUSED || this.accountApplyTransStatus === constant.ASSET_LIST_STATUS.INVALID || this.accountApplyTransStatus === 5);
+                return type === 'check' && this.isOwner && Number(transStatus) === constant.ASSET_STATUS.NORMAL && (this.accountApplyTransStatus === constant.ASSET_LIST_STATUS.TRANSFERED || this.accountApplyTransStatus === constant.ASSET_LIST_STATUS.REFUSED || this.accountApplyTransStatus === constant.ASSET_LIST_STATUS.INVALID || this.accountApplyTransStatus === 5);
             },
             applyAuthShow(){
                 //非资产拥有者  &&  有授权查看的数据 && (授权状态是: 已拒绝 || 已失效 || 已过期)
