@@ -50,7 +50,7 @@
             if(this.value){
                 label = this.options.find(o=>o.value === this.value) ? this.options.find(o=>o.value === this.value).label :this.options[0].label
             }else{
-                this.label = this.options[0].label;
+                label = this.options[0].label;
             }
             return {
                 info:this.options,
