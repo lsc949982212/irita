@@ -418,6 +418,7 @@
     import { Message } from 'element-ui';
     import { formatTimestamp } from '../util/util';
     import { getErrorMsgByErrorCode } from '../helper/errorCodeHelper';
+    import { conversionHelper } from '../helper/conversionHelper';
 
     export default {
         name : 'AssetAdd',
@@ -481,8 +482,8 @@
                 transRequestId : '',
                 postTransRequestId : '',
                 postTransNftId : '',
-                authorizationList:[],
-                secretList:[],
+                authorizationList : [],
+                secretList : [],
             }
         },
         components : {},
@@ -531,7 +532,7 @@
                         this.authCurrentPage = 1;
                         if(this.tab === 0){
                             this.onAssetTxPaginationClick(1);
-                        }else{
+                        } else {
                             this.onServiceTxPaginationClick(1);
                         }
 
@@ -943,7 +944,7 @@
             handleCancelBtnClick(){
                 this.centerDialogVisible = false;
             },
-            toExplorer(type,param){
+            toExplorer(type, param){
                 switch (type){
                     case 'address':
                         window.open(`${cfg.app.explorer}/#/address/${param ? param : this.chainInfo.owner}`);
@@ -992,8 +993,10 @@
             handleDetailData(data){
                 console.log('detail data', data)
                 if(data && data.asset_info){
-                    console.error(data.asset_info)
-                    this.jsonData = JSON.parse(data.asset_info);
+                    let jsonData = JSON.parse(data.asset_info);
+                    conversionHelper.booleanToDisplayField(jsonData);
+                    console.log('json data after conversion', jsonData);
+                    this.jsonData = jsonData;
                     this.authorizationList = JSON.parse(data.asset_info).authorizationProperties;
                     this.secretList = JSON.parse(data.asset_info).secretProperties;
                     this.hasSecret = this.jsonData.authorizationProperties.length > 0 && !this.$accountHelper.isOwner(data.chain_info.owner)
@@ -1004,8 +1007,8 @@
                 }
             },
             setSecretFieldStyle(){
-                setTimeout(()=>{
-                    let node = this.getElementByAttr('div','data-alpaca-field-path', /^\//);
+                setTimeout(() =>{
+                    let node = this.getElementByAttr('div', 'data-alpaca-field-path', /^\//);
                     const pathMap = new Map();
                     for(let item of node){
                         const name = item.getAttribute('data-alpaca-field-path');
@@ -1013,16 +1016,16 @@
                         pathMap.set(name, item);
                     }
 
-                    this.authorizationList.forEach((a)=>{
-                        let replaced = a.replace(/\./g,'/').replace('$','');
+                    this.authorizationList.forEach((a) =>{
+                        let replaced = a.replace(/\./g, '/').replace('$', '');
                         if(pathMap.has(replaced)){
                             pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].style.color = '#6CA4F5';
                             pathMap.get(replaced).getElementsByClassName('control-label')[0].style.color = '#6CA4F5';
-                        }else{
-                            Array.from(pathMap.keys()).forEach((p)=>{
+                        } else {
+                            Array.from(pathMap.keys()).forEach((p) =>{
                                 if(p.includes('[') && p.includes(']')){
                                     let num = p.split('[')[1].split(']')[0];
-                                    if(p.replace(num,'*') === replaced){
+                                    if(p.replace(num, '*') === replaced){
                                         pathMap.get(p).getElementsByClassName('alpaca-control')[0].style.color = '#6CA4F5';
                                         pathMap.get(p).getElementsByClassName('control-label')[0].style.color = '#6CA4F5';
                                     }
@@ -1030,17 +1033,17 @@
                             })
                         }
                     });
-                    this.secretList.forEach((a)=>{
-                        let replaced = a.replace(/\./g,'/').replace('$','');
+                    this.secretList.forEach((a) =>{
+                        let replaced = a.replace(/\./g, '/').replace('$', '');
                         if(pathMap.has(replaced)){
                             pathMap.get(replaced).style.color = 'yellow';
                             pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].style.color = '#F56C6C';
                             pathMap.get(replaced).getElementsByClassName('control-label')[0].style.color = '#F56C6C';
-                        }else{
-                            Array.from(pathMap.keys()).forEach((p)=>{
+                        } else {
+                            Array.from(pathMap.keys()).forEach((p) =>{
                                 if(p.includes('[') && p.includes(']')){
                                     let num = p.split('[')[1].split(']')[0];
-                                    if(p.replace(num,'*') === replaced){
+                                    if(p.replace(num, '*') === replaced){
                                         pathMap.get(p).getElementsByClassName('alpaca-control')[0].style.color = '#F56C6C';
                                         pathMap.get(p).getElementsByClassName('control-label')[0].style.color = '#F56C6C';
                                     }
@@ -1049,7 +1052,7 @@
                         }
                     });
 
-                },250)
+                }, 250)
             },
             renderUI(){
                 $("#detail_json_schema_node").alpaca({
@@ -1293,35 +1296,35 @@
                 }
             }
             .schema_container {
-                position:relative;
-                .note_container{
-                    position:absolute;
-                    right:0;
-                    top:-15px;
+                position: relative;
+                .note_container {
+                    position: absolute;
+                    right: 0;
+                    top: -15px;
                     .flexRow;
                     align-items: center;
-                    .auth_title{
-                        font-size:12px;
-                        color:#9E9E9E;
+                    .auth_title {
+                        font-size: 12px;
+                        color: #9E9E9E;
                     }
-                    .auth_color{
-                        width:60px;
-                        border-radius:4px;
-                        height:20px;
+                    .auth_color {
+                        width: 60px;
+                        border-radius: 4px;
+                        height: 20px;
                         background: #6CA4F5;
-                        margin-right:20px;
-                        margin-left:10px;
+                        margin-right: 20px;
+                        margin-left: 10px;
                     }
-                    .secret_title{
-                        font-size:12px;
-                        color:#9E9E9E;
+                    .secret_title {
+                        font-size: 12px;
+                        color: #9E9E9E;
                     }
-                    .secret_color{
-                        width:60px;
-                        border-radius:4px;
-                        height:20px;
+                    .secret_color {
+                        width: 60px;
+                        border-radius: 4px;
+                        height: 20px;
                         background: #F56C6C;
-                        margin-left:10px;
+                        margin-left: 10px;
                     }
 
                 }
@@ -1378,12 +1381,12 @@
                     padding-bottom: 10px;
                     border-bottom: 1px solid #EDEDED
                 }
-                position:relative;
-                .auth_refresh_btn{
-                    position:absolute;
-                    top:10px;
-                    right:20px;
-                    z-index:10;
+                position: relative;
+                .auth_refresh_btn {
+                    position: absolute;
+                    top: 10px;
+                    right: 20px;
+                    z-index: 10;
                 }
                 .content_chain_info_wrap {
                     .flexRow;
@@ -1430,9 +1433,9 @@
                     }
 
                 }
-                .content_table_wrap{
+                .content_table_wrap {
 
-                    .link_url{
+                    .link_url {
                         color: @themeColor;
                         cursor: pointer;
                     }

@@ -1,10 +1,9 @@
-import cfg from '../config/config';
 
 export const conversionHelper = {
     booleanToDisplayField(data){
-        if(!data instanceof Array && typeof data === 'object'){
+        if(!(data instanceof Array) && typeof data === 'object'){
             for(let key in data){
-                if(!data[key] instanceof Array && typeof data[key] === 'object'){
+                if(!(data[key] instanceof Array) && typeof data[key] === 'object'){
                     this.booleanToDisplayField(data[key])
                 }else if(data[key] instanceof Array){
                     data[key].forEach((d)=>this.booleanToDisplayField(d))
@@ -25,8 +24,6 @@ export const conversionHelper = {
                 data = '否';
             }
         }
-
-
     }
 
 
