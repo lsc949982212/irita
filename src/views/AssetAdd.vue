@@ -105,9 +105,14 @@
         mounted(){
             $("#json_schema_node").alpaca({
                 "schemaSource" : schema,
-                "dataSource" : jsonData
+                //"dataSource" : jsonData
             });
             this.getAssetType();
+            setTimeout(()=>{
+                document.getElementsByClassName('alpaca-required-indicator').forEach((node)=>{
+                    node.innerHTML = '(必填)';
+                })
+            },1000)
         },
         methods : {
             add(){
@@ -314,7 +319,9 @@
                         display:none;
                     }
                     .alpaca-required-indicator {
-                        display: none;
+                        //display: none;
+                        font-style:normal;
+                        color:red;
                     }
                     .alpaca-control {
                         font-size: 14px;
