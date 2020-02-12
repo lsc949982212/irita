@@ -105,7 +105,7 @@
         mounted(){
             $("#json_schema_node").alpaca({
                 "schemaSource" : schema,
-                //"dataSource" : jsonData
+                "dataSource" : jsonData
             });
             this.getAssetType();
         },
@@ -332,6 +332,9 @@
                             height:26px;
                             display:inline-block;
                         }
+                    }
+                    .form-control{
+                        padding:0 0 0 12px;
                     }
                     .form-control:focus{
                         box-shadow:0 0 3px @themeColor;

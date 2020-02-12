@@ -14,7 +14,7 @@
         "assetNo": {
           "$id": "#/properties/basicInfo/properties/assetNo",
           "type": "string",
-          "title": "资产编码",
+          "title": "资产编号",
           "default": "",
           "examples": ["CDCD::8475:1111:3900:2020"],
           "pattern": "^(.*)$"
@@ -22,7 +22,7 @@
         "assetType": {
           "$id": "#/properties/basicInfo/properties/assetType",
           "type": "string",
-          "title": "资产分类",
+          "title": "资产类型",
           "default": "",
           "examples": ["receivableSchema"],
           "pattern": "^(.*)$"

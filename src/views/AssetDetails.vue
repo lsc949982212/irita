@@ -85,7 +85,7 @@
                                 token_id:
                             </span>
                             <span class="content_chain_info_item_content link" @click="toExplorer('nft_id')">
-                                {{ chainInfo.nft_id }}
+                                {{ chainInfo.number }}
                             </span>
                         </div>
                         <div class="content_chain_info_item_wrap">
@@ -529,8 +529,12 @@
                     case 'list':
                         this.assetTxCurrentPage = 1;
                         this.authCurrentPage = 1;
-                        this.tab = 0;
-                        this.onAssetTxPaginationClick(1);
+                        if(this.tab === 0){
+                            this.onAssetTxPaginationClick(1);
+                        }else{
+                            this.onServiceTxPaginationClick(1);
+                        }
+
                 }
             },
             getDisplayAssetTransStatus(status){
@@ -988,6 +992,7 @@
             handleDetailData(data){
                 console.log('detail data', data)
                 if(data && data.asset_info){
+                    console.error(data.asset_info)
                     this.jsonData = JSON.parse(data.asset_info);
                     this.authorizationList = JSON.parse(data.asset_info).authorizationProperties;
                     this.secretList = JSON.parse(data.asset_info).secretProperties;

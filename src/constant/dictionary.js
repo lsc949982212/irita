@@ -1,6 +1,6 @@
 export const dictionary = new Map([
-    ['assetNo','资产编码'],
-    ['assetType','资产分类代码'],
+    ['assetNo','资产编号'],
+    ['assetType','资产类型代码'],
     ['assetName','资产名称'],
     ['assetOwner','所有者'],
     ['cargoName','交易货物名称'],

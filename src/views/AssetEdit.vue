@@ -324,6 +324,9 @@
                             display: inline-block;
                         }
                     }
+                    .form-control{
+                        padding:0 0 0 12px;
+                    }
                     .form-control:focus {
                         box-shadow: 0 0 3px @themeColor;
                         border-color: @themeColor;
