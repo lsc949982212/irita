@@ -19,14 +19,19 @@
                             :value="item.value">
                     </el-option>
                 </el-select>
-
-                <input type="file" id="files" style="display: none" @change="fileImport" accept=".json">
-                <input type="button" id="fileImport" value="导入">
-
-
-
             </div>
             <div class="add_schema_container step_second" v-show="step === 2">
+
+                <div class="add_schema_download_container">
+                    <a target="_blank"
+                       class="download_node"
+                       download href="../../static/receivable_json.json">资产模板文件下载</a>
+                    <input type="file" id="files" style="display:none;margin-left:20px;" @change="fileImport" accept=".json">
+                    <el-button size="medium"
+                               @click="handleImportClick"
+                               class="btn" type="primary">导入资产
+                    </el-button>
+                </div>
                 <div class="content_item" id="json_schema_node"></div>
             </div>
             <div class="content_container step_third" v-show="step === 3">
@@ -86,13 +91,12 @@
 <script>
     import Select from '../components/Select';
     import schema from '../schema/schema';
-    import jsonData from './data';
     import { dictionary } from '../constant/dictionary';
     import JsonSchema from '../helper/JsonSchemaHelper';
     import axios from '../helper/httpHelper';
     import { Message } from 'element-ui';
-    import cfg from '../config/config';
     import { getErrorMsgByErrorCode } from '../helper/errorCodeHelper';
+
     export default {
         name : 'AssetAdd',
         data(){
@@ -110,39 +114,41 @@
         },
         mounted(){
             this.getAssetType();
-
-
-            document.getElementById('fileImport').addEventListener('click',()=>{
-                console.error('----')
-                document.getElementById('files').click();
-            })
+            $("#json_schema_node").alpaca({
+                "schemaSource" : schema,
+            });
+            setTimeout(() =>{
+                document.getElementsByClassName('alpaca-required-indicator').forEach((node) =>{
+                    node.innerHTML = '(必填)';
+                })
+            }, 1000);
         },
         methods : {
             add(){
                 this.$router.push('/asset_add');
             },
-            fileImport() {
-                console.error('----')
-                //获取读取我文件的File对象
-                var selectedFile = document.getElementById('files').files[0];
-                var name = selectedFile.name;//读取选中文件的文件名
-                var size = selectedFile.size;//读取选中文件的大小
-                console.log("文件名:"+name+"大小:"+size);
-
-                var reader = new FileReader();//这是核心,读取操作就是由它完成.
-                reader.readAsText(selectedFile);//读取文件的内容,也可以读取文件的URL
-                reader.onload = function () {
-                    //当读取完成后回调这个函数,然后此时文件的内容存储到了result中,直接操作即可
-                    console.error(this.result);
+            handleImportClick(){
+                document.getElementById('files').click();
+            },
+            fileImport(){
+                const selectedFile = document.getElementById('files').files[0];
+                const reader = new FileReader();
+                reader.readAsText(selectedFile);
+                reader.onload = () =>{
+                    const el = document.getElementById('json_schema_node');
+                    const childs = el.childNodes;
+                    for(let i = childs.length - 1 ; i >= 0 ; i--){
+                        el.removeChild(childs[i]);
+                    }
                     $("#json_schema_node").alpaca({
                         "schemaSource" : schema,
-                        "dataSource" : this.result
+                        "dataSource" : reader.result
                     });
-                    setTimeout(()=>{
-                        document.getElementsByClassName('alpaca-required-indicator').forEach((node)=>{
+                    setTimeout(() =>{
+                        document.getElementsByClassName('alpaca-required-indicator').forEach((node) =>{
                             node.innerHTML = '(必填)';
                         })
-                    },1000)
+                    }, 1000)
                 }
             },
             handleCancelClick(){
@@ -150,26 +156,25 @@
             },
             getAssetType(){
                 const url = `/assets/denoms`;
-                //console.error(url)
-                axios.get({url,ctx:this}).then((data)=>{
+                axios.get({url, ctx : this}).then((data) =>{
                     console.log(data);
                     if(data && data.status === 'success'){
                         if(data && data.data){
-                            this.options = data.data.map((item, index)=>{
+                            this.options = data.data.map((item, index) =>{
                                 return {
-                                    value : `'${index+1}'`,
+                                    value : `'${index + 1}'`,
                                     label : item
                                 }
-                            })
+                            });
                             if(data.data.length > 0){
                                 this.value = data.data[0]
                             }
 
                         }
-                    }else{
+                    } else {
                         this.$message.error('请求数据错误');
                     }
-                }).catch(e=>{
+                }).catch(e =>{
                     console.error(e);
                     this.$message.error('请求数据错误');
                 });
@@ -203,13 +208,13 @@
             postData(){
 
                 const body = {
-                    asset_data:this.jsonData,
-                    owner:this.$accountHelper.getAccount().address,
-                    owner_pubkey:this.$accountHelper.getAccount().publicKey,
+                    asset_data : this.jsonData,
+                    owner : this.$accountHelper.getAccount().address,
+                    owner_pubkey : this.$accountHelper.getAccount().publicKey,
                 };
 
-                console.log('save asset',this.jsonData);
-                axios.post({url:`/assets`,body,ctx:this}).then((data)=>{
+                console.log('save asset', this.jsonData);
+                axios.post({url : `/assets`, body, ctx : this}).then((data) =>{
                     console.log(data);
                     if(data && data.data && data.data.status === 'success'){
                         Message({
@@ -219,10 +224,10 @@
                         this.$router.go(-1);
                     } else if(data && data.data && data.data.status === 'fail'){
                         this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
-                    } else{
+                    } else {
                         this.$message.error('新增资产失败');
                     }
-                }).catch(e=>{
+                }).catch(e =>{
                     console.error(e);
                     this.$message.error('新增资产失败');
                 });
@@ -325,6 +330,14 @@
 
             }
             .add_schema_container {
+                .add_schema_download_container {
+                    .flexRow;
+                    justify-content: flex-end;
+                    .download_node{
+                        margin-right:20px;
+                        line-height:36px;
+                    }
+                }
                 .alpaca-container-item {
                     background: rgba(248, 248, 248, 1) !important;
                 }
@@ -343,39 +356,39 @@
                         font-weight: 400;
                         color: #9E9E9E;
                         margin-right: 10px;
-                        min-width:150px;
-                        margin-bottom:0;
+                        min-width: 150px;
+                        margin-bottom: 0;
                     }
-                    .help-block{
-                        display:none;
+                    .help-block {
+                        display: none;
                     }
                     .alpaca-required-indicator {
                         //display: none;
-                        font-style:normal;
-                        color:red;
+                        font-style: normal;
+                        color: red;
                     }
                     .alpaca-control {
                         font-size: 14px;
                         color: @mainFontColor;
-                        width:250px;
-                        height:26px;
+                        width: 250px;
+                        height: 26px;
 
                     }
-                    .radio{
-                        width:150px;
-                        margin-top:0;
-                        margin-bottom:0;
-                        margin-left:0;
-                        label{
-                            height:26px;
-                            display:inline-block;
+                    .radio {
+                        width: 150px;
+                        margin-top: 0;
+                        margin-bottom: 0;
+                        margin-left: 0;
+                        label {
+                            height: 26px;
+                            display: inline-block;
                         }
                     }
-                    .form-control{
-                        padding:0 0 0 12px;
+                    .form-control {
+                        padding: 0 0 0 12px;
                     }
-                    .form-control:focus{
-                        box-shadow:0 0 3px @themeColor;
+                    .form-control:focus {
+                        box-shadow: 0 0 3px @themeColor;
                         border-color: @themeColor;
                     }
                 }

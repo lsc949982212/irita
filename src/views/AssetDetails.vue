@@ -22,6 +22,13 @@
                            class="btn" type="primary">点击解密
                 </el-button>
             </div>
+            <el-button size="small"
+                       v-show="!applyTransShow"
+                       style="margin-bottom:10px;"
+                       @click="showJsonData = !showJsonData"
+                       type="primary">
+                {{ showJsonData ? '显示资产详情' : '显示json信息' }}
+            </el-button>
             <div class="asset_details_trans_container"
                  v-show="applyTransShow"
                  v-if="$route.query.type === 'trans'">
@@ -41,13 +48,12 @@
                            @click="handleTransBtnClick"
                            class="asset_details_trans_btn" type="primary">转让申请
                 </el-button>
-
                 <el-button size="small"
+                           style="margin-left:0;"
                            @click="showJsonData = !showJsonData"
                            type="primary">
                     {{ showJsonData ? '显示资产详情' : '显示json信息' }}
                 </el-button>
-                
             </div>
             <div class="schema_container" id="schema_container" v-show="!showJsonData">
                 <div class="content_item" id="detail_json_schema_node"></div>
@@ -65,7 +71,7 @@
             </div>
 
 
-            <div class="content_container">
+            <div class="content_container" style="margin-top:20px;">
                 <p class="content_chain_info">
                     链上信息
                 </p>
@@ -1312,7 +1318,7 @@
                 .note_container {
                     position: absolute;
                     right: 0;
-                    top: -15px;
+                    top: -25px;
                     .flexRow;
                     align-items: center;
                     .auth_title {
@@ -1379,6 +1385,12 @@
                         font-weight: 400;
                         font-size: 14px;
                         margin-left: 30px;
+                    }
+                }
+                #detail_json_schema_node{
+
+                    .alpaca-field-object.alpaca-top, .alpaca-field-object.alpaca-top .alpaca-container{
+                        padding:0;
                     }
                 }
             }
