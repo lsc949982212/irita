@@ -96,6 +96,11 @@
     import axios from '../helper/httpHelper';
     import { Message } from 'element-ui';
     import { getErrorMsgByErrorCode } from '../helper/errorCodeHelper';
+    import data from './data';
+
+    let tempData = JSON.parse(JSON.stringify(data));
+    console.error('=====',tempData)
+    tempData.basicInfo.assetName = JSON.parse(sessionStorage.getItem('token')).name;
 
     export default {
         name : 'AssetAdd',
@@ -114,14 +119,6 @@
         },
         mounted(){
             this.getAssetType();
-            $("#json_schema_node").alpaca({
-                "schemaSource" : schema,
-            });
-            setTimeout(() =>{
-                document.getElementsByClassName('alpaca-required-indicator').forEach((node) =>{
-                    node.innerHTML = '(必填)';
-                })
-            }, 1000);
         },
         methods : {
             add(){
@@ -140,6 +137,7 @@
                     for(let i = childs.length - 1 ; i >= 0 ; i--){
                         el.removeChild(childs[i]);
                     }
+
                     $("#json_schema_node").alpaca({
                         "schemaSource" : schema,
                         "dataSource" : reader.result
@@ -147,7 +145,8 @@
                     setTimeout(() =>{
                         document.getElementsByClassName('alpaca-required-indicator').forEach((node) =>{
                             node.innerHTML = '(必填)';
-                        })
+                        });
+                        document.getElementsByName('basicInfo_assetType')[0].setAttribute('disabled',true)
                     }, 1000)
                 }
             },
@@ -181,6 +180,24 @@
             },
             changeStep(step){
                 this.step = step;
+                if(step === 1){
+                    const el = document.getElementById('json_schema_node');
+                    const childs = el.childNodes;
+                    for(let i = childs.length - 1 ; i >= 0 ; i--){
+                        el.removeChild(childs[i]);
+                    }
+                }else if(step === 2){
+                    $("#json_schema_node").alpaca({
+                        "schemaSource" : schema,
+                        "dataSource" : tempData
+                    });
+                    setTimeout(() =>{
+                        document.getElementsByClassName('alpaca-required-indicator').forEach((node) =>{
+                            node.innerHTML = '(必填)';
+                        });
+                        document.getElementsByName('basicInfo_assetType')[0].setAttribute('disabled',true)
+                    }, 1000);
+                }
             },
             checkData(){
                 let jsonData = $("#json_schema_node").alpaca().getValue();

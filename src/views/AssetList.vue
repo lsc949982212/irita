@@ -149,7 +149,7 @@
                         id:asset.nft_id,
                         name:asset.asset_name,
                         type:asset.type,
-                        owner:asset.owner,
+                        owner:asset.nft_owner,
                         transStatus:asset.transfer_status,
                         displayOwner:accountHelper.getAccountList().find((a)=>a.address === asset.owner) ? accountHelper.getAccountList().find((a)=>a.address === asset.owner).name : '',
                         displayCheckStatus:this.getDisplayCheckStatus(asset.check_status),
