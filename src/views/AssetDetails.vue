@@ -87,10 +87,10 @@
                         </div>
                         <div class="content_chain_info_item_wrap">
                             <span class="content_chain_info_item_title">
-                                owner:
+                                nft_owner:
                             </span>
                             <span class="content_chain_info_item_content link" @click="toExplorer('address')">
-                                {{ chainInfo.owner }}
+                                {{ chainInfo.nft_owner }}
                             </span>
                         </div>
                     </div>
@@ -130,12 +130,12 @@
                                 fixed
                                 prop="time"
                                 label="提出时间"
-                                min-width="120">
+                                min-width="100">
                         </el-table-column>
                         <el-table-column
                                 prop="displayReceiver"
                                 label="受让者"
-                                min-width="120">
+                                min-width="80">
                         </el-table-column>
                         <el-table-column
                                 prop="displayStatus"
@@ -144,7 +144,7 @@
                         </el-table-column>
                         <el-table-column
                                 label="操作"
-                                min-width="80">
+                                min-width="60">
                             <template slot-scope="scope">
                                 <el-button @click="trans(scope.row)"
                                            v-show="scope.row.showTransBtn"
@@ -162,6 +162,11 @@
                                            v-show="scope.row.showAcceptBtn">拒绝
                                 </el-button>
                             </template>
+                        </el-table-column>
+                        <el-table-column
+                                prop="latestUpdateTime"
+                                label="最后更新时间"
+                                min-width="100">
                         </el-table-column>
                     </el-table>
                 </div>
@@ -194,12 +199,12 @@
                                 fixed
                                 prop="time"
                                 label="提出时间"
-                                min-width="120">
+                                min-width="100">
                         </el-table-column>
                         <el-table-column
                                 prop="applicant"
                                 label="申请者"
-                                min-width="120">
+                                min-width="80">
                         </el-table-column>
                         <el-table-column
                                 prop="applyStatus"
@@ -208,7 +213,7 @@
                         </el-table-column>
                         <el-table-column
                                 label="操作"
-                                min-width="80">
+                                min-width="60">
                             <template slot-scope="scope">
                                 <el-button @click="handleAuthClick(scope.row)"
                                            v-show="scope.row.showAuthBtn"
@@ -220,6 +225,11 @@
                                            @click="handleRefusedClick(scope.row)">拒绝
                                 </el-button>
                             </template>
+                        </el-table-column>
+                        <el-table-column
+                                prop="latestUpdateTime"
+                                label="最后更新时间"
+                                min-width="100">
                         </el-table-column>
                     </el-table>
                 </div>
@@ -262,37 +272,37 @@
                                 fixed
                                 prop="txType"
                                 label="交易类型"
-                                min-width="100">
+                                min-width="50">
                         </el-table-column>
                         <el-table-column
                                 label="交易哈希"
-                                min-width="100">
+                                min-width="80">
                             <template slot-scope="scope">
                                 <span class="link_url" @click="toExplorer('hash',scope.row.txHash)">
-                                    {{ scope.row.txHash }}
+                                    {{ getFormatAddress(scope.row.txHash) }}
                                 </span>
                             </template>
                         </el-table-column>
                         <el-table-column
                                 prop="time"
                                 label="时间"
-                                min-width="60">
+                                min-width="100">
                         </el-table-column>
                         <el-table-column
                                 label="发起地址"
-                                min-width="120">
+                                min-width="80">
                             <template slot-scope="scope">
                                 <span class="link_url" @click="toExplorer('address',scope.row.senderAddr)">
-                                    {{ scope.row.senderAddr }}
+                                    {{ getFormatAddress(scope.row.senderAddr) }}
                                 </span>
                             </template>
                         </el-table-column>
                         <el-table-column
                                 label="接收地址"
-                                min-width="120">
+                                min-width="80">
                             <template slot-scope="scope">
                                 <span class="link_url" @click="toExplorer('address',scope.row.receiverAddr)">
-                                    {{ scope.row.receiverAddr }}
+                                    {{ getFormatAddress(scope.row.receiverAddr) }}
                                 </span>
                             </template>
                         </el-table-column>
@@ -326,44 +336,44 @@
                         <el-table-column
                                 prop="serviceType"
                                 label="服务类型"
-                                min-width="100">
+                                min-width="80">
                         </el-table-column>
                         <el-table-column
                                 label="服务交易哈希"
-                                min-width="130">
+                                min-width="80">
                             <template slot-scope="scope">
                                 <span class="link_url" @click="toExplorer('hash',scope.row.serviceHash)">
-                                    {{ scope.row.serviceHash }}
+                                    {{ getFormatAddress(scope.row.serviceHash) }}
                                 </span>
                             </template>
                         </el-table-column>
                         <el-table-column
                                 prop="time"
                                 label="时间"
-                                min-width="150">
+                                min-width="100">
                         </el-table-column>
                         <el-table-column
                                 label="提供方地址"
-                                min-width="120">
+                                min-width="70">
                             <template slot-scope="scope">
                                 <span class="link_url" @click="toExplorer('address',scope.row.providerAddr)">
-                                    {{ scope.row.providerAddr }}
+                                    {{ getFormatAddress(scope.row.providerAddr) }}
                                 </span>
                             </template>
                         </el-table-column>
                         <el-table-column
                                 label="消费方地址"
-                                min-width="120">
+                                min-width="70">
                             <template slot-scope="scope">
                                 <span class="link_url" @click="toExplorer('address',scope.row.consumeAddr)">
-                                    {{ scope.row.consumeAddr }}
+                                    {{ getFormatAddress(scope.row.consumeAddr) }}
                                 </span>
                             </template>
                         </el-table-column>
                         <el-table-column
                                 prop="height"
                                 label="区块高度"
-                                min-width="70">
+                                min-width="50">
                             <template slot-scope="scope">
                                 <span class="link_url" @click="toExplorer('height',scope.row.height)">
                                     {{ scope.row.height }}
@@ -431,7 +441,7 @@
     import axios from '../helper/httpHelper';
     import cfg from '../config/config';
     import { Message } from 'element-ui';
-    import { formatTimestamp } from '../util/util';
+    import { formatTimestamp, getFormatAddress } from '../util/util';
     import { getErrorMsgByErrorCode } from '../helper/errorCodeHelper';
     import { conversionHelper } from '../helper/conversionHelper';
 
@@ -534,6 +544,9 @@
                 this.getAssetTransList(1);
                 this.getAssetAuthList(1);
                 this.onAssetTxPaginationClick(1);
+            },
+            getFormatAddress(address){
+                return getFormatAddress(address)
             },
             refreshList(type){
                 switch (type){
@@ -963,7 +976,7 @@
             toExplorer(type, param){
                 switch (type){
                     case 'address':
-                        window.open(`${cfg.app.explorer}/#/address/${param ? param : this.chainInfo.owner}`);
+                        window.open(`${cfg.app.explorer}/#/address/${param ? param : this.chainInfo.nft_owner}`);
                     case 'nft_id':
                         window.open(`${cfg.app.explorer}/#/nft/token?denom=${this.chainInfo.type}&tokenId=${this.chainInfo.number}`);
                     case 'hash':
@@ -1113,7 +1126,6 @@
                 //判断是否展示'申请转让'按钮 accountApplyTransStatus
                 if(data.data.length > 0 && page === 1){
                     this.accountApplyTransStatus = data.data[0].status;
-                    console.error('========',this.accountApplyTransStatus)
                     //如果最新的转让状态是  转让申请中,并且当前账户是受让方, 使用直接调用解密接口 (useUnlock)
                     //当前账户是受让者
                     if(data.data[0].status === constant.ASSET_LIST_STATUS.APPLYING && this.$accountHelper.getAccount().address === data.data[0].provider){
@@ -1154,7 +1166,8 @@
                         consumer : t.consumer,
                         provider : t.provider,
                         showAcceptBtn : t.status === constant.ASSET_LIST_STATUS.APPLYING && t.provider === this.$accountHelper.getAccount().address,
-                        showTransBtn : t.status === constant.ASSET_LIST_STATUS.ACCEPT && t.consumer === this.$accountHelper.getAccount().address
+                        showTransBtn : t.status === constant.ASSET_LIST_STATUS.ACCEPT && t.consumer === this.$accountHelper.getAccount().address,
+                        latestUpdateTime:formatTimestamp(t.update_at),
                     }
                 })
             },
@@ -1191,6 +1204,7 @@
                         showAuthBtn : a.status === constant.AUTHORIZATION_STATUS.APPLYING && a.provider === this.$accountHelper.getAccount().address,
                         provider : a.provider,
                         consumer : a.consumer,
+                        latestUpdateTime:formatTimestamp(a.update_at),
                     }
                 })
             },
@@ -1217,7 +1231,7 @@
                         time : formatTimestamp(item.time),
                         senderAddr : item.consumer,
                         receiverAddr : item.provider,
-                        height : item.height,
+                        height : item.height
                     }
                 })
             },

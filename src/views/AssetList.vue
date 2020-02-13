@@ -27,19 +27,25 @@
                             min-width="60">
                     </el-table-column>
                     <el-table-column
+                            prop="displayOwnerAddress"
+                            label="操作者地址"
+                            min-width="75">
+                    </el-table-column>
+                    <el-table-column
                             prop="displayOwner"
                             label="所有者"
-                            min-width="70">
+                            min-width="60">
                     </el-table-column>
+
                     <el-table-column
                             prop="displayCheckStatus"
                             label="查验状态"
-                            min-width="50">
+                            min-width="60">
                     </el-table-column>
                     <el-table-column
                             prop="displayTransStatus"
                             label="转让状态"
-                            min-width="70">
+                            min-width="60">
                     </el-table-column>
                     <el-table-column
                             label="操作"
@@ -77,6 +83,7 @@
     import axios from '../helper/httpHelper';
     import { constant } from '../constant/constant';
     import {accountHelper} from '../helper/accountHelper';
+    import { getFormatAddress } from '../util/util';
 
     export default {
         name : 'AssetList',
@@ -150,8 +157,9 @@
                         name:asset.asset_name,
                         type:asset.type,
                         owner:asset.nft_owner,
+                        displayOwnerAddress:getFormatAddress(asset.nft_owner),
                         transStatus:asset.transfer_status,
-                        displayOwner:accountHelper.getAccountList().find((a)=>a.address === asset.owner) ? accountHelper.getAccountList().find((a)=>a.address === asset.owner).name : '',
+                        displayOwner:accountHelper.getAccountList().find((a)=>a.address === asset.nft_owner) ? accountHelper.getAccountList().find((a)=>a.address === asset.nft_owner).name : '',
                         displayCheckStatus:this.getDisplayCheckStatus(asset.check_status),
                         displayTransStatus:this.getDisplayAssetTransStatus(asset.transfer_status),
                         isApply:asset.is_apply
