@@ -99,8 +99,10 @@
     import data from './data';
 
     let tempData = JSON.parse(JSON.stringify(data));
-    console.error('=====',tempData)
-    tempData.basicInfo.assetName = JSON.parse(sessionStorage.getItem('token')).name;
+    if(sessionStorage.getItem('token')){
+        tempData.basicInfo.assetName = JSON.parse(sessionStorage.getItem('token')).name;
+    }
+
 
     export default {
         name : 'AssetAdd',
