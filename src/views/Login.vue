@@ -46,7 +46,7 @@
         width: 100%;
         height: 100%;
         //background:linear-gradient(139deg,rgba(52,73,110,1) 0%,rgba(29,46,77,1) 100%), url('../assets/bg.png') no-repeat 60%;
-        background-color: rgba(52, 73, 110, 1);
+        background-color: #2449AD;
         background-image: url('../assets/bg.png');
         background-size: 1800px 1050px;
         background-repeat: no-repeat;;

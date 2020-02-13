@@ -284,7 +284,7 @@
                     width: 100%;
                     height: 80px;
                     flex:0 0 80px;
-                    background: linear-gradient(139deg, rgba(52, 73, 110, 1) 0%, rgba(29, 46, 77, 1) 100%);
+                    background: #2449AD;
                     position: relative;
                     .flexRow;
                     justify-content: center;

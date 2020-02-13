@@ -52,7 +52,7 @@
                            style="margin-left:0;"
                            @click="showJsonData = !showJsonData"
                            type="primary">
-                    {{ showJsonData ? '显示资产详情' : '显示json信息' }}
+                    显示/隐藏 原始数据
                 </el-button>
             </div>
             <div class="schema_container" id="schema_container" v-show="!showJsonData">
@@ -1314,11 +1314,12 @@
                 }
             }
             #schema_container{
-                height:400px;
-                overflow-y: auto;
+
             }
             .schema_container {
                 position: relative;
+                height:400px;
+                overflow-y: auto;
                 .note_container {
                     position: absolute;
                     right: 0;
