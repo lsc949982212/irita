@@ -19,6 +19,12 @@
                             :value="item.value">
                     </el-option>
                 </el-select>
+
+                <input type="file" id="files" style="display: none" @change="fileImport" accept=".json">
+                <input type="button" id="fileImport" value="导入">
+
+
+
             </div>
             <div class="add_schema_container step_second" v-show="step === 2">
                 <div class="content_item" id="json_schema_node"></div>
@@ -92,7 +98,7 @@
         data(){
             return {
                 options : [],
-                value : '1',
+                value : '',
                 step : 1,
                 authList : [],
                 jsonData : null,
@@ -103,20 +109,41 @@
             Select
         },
         mounted(){
-            $("#json_schema_node").alpaca({
-                "schemaSource" : schema,
-                //"dataSource" : jsonData
-            });
             this.getAssetType();
-            setTimeout(()=>{
-                document.getElementsByClassName('alpaca-required-indicator').forEach((node)=>{
-                    node.innerHTML = '(必填)';
-                })
-            },1000)
+
+
+            document.getElementById('fileImport').addEventListener('click',()=>{
+                console.error('----')
+                document.getElementById('files').click();
+            })
         },
         methods : {
             add(){
                 this.$router.push('/asset_add');
+            },
+            fileImport() {
+                console.error('----')
+                //获取读取我文件的File对象
+                var selectedFile = document.getElementById('files').files[0];
+                var name = selectedFile.name;//读取选中文件的文件名
+                var size = selectedFile.size;//读取选中文件的大小
+                console.log("文件名:"+name+"大小:"+size);
+
+                var reader = new FileReader();//这是核心,读取操作就是由它完成.
+                reader.readAsText(selectedFile);//读取文件的内容,也可以读取文件的URL
+                reader.onload = function () {
+                    //当读取完成后回调这个函数,然后此时文件的内容存储到了result中,直接操作即可
+                    console.error(this.result);
+                    $("#json_schema_node").alpaca({
+                        "schemaSource" : schema,
+                        "dataSource" : this.result
+                    });
+                    setTimeout(()=>{
+                        document.getElementsByClassName('alpaca-required-indicator').forEach((node)=>{
+                            node.innerHTML = '(必填)';
+                        })
+                    },1000)
+                }
             },
             handleCancelClick(){
                 this.$router.go(-1);
@@ -134,6 +161,10 @@
                                     label : item
                                 }
                             })
+                            if(data.data.length > 0){
+                                this.value = data.data[0]
+                            }
+
                         }
                     }else{
                         this.$message.error('请求数据错误');

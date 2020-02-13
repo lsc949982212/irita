@@ -21,8 +21,6 @@
                            v-show="unlockShow"
                            class="btn" type="primary">点击解密
                 </el-button>
-
-
             </div>
             <div class="asset_details_trans_container"
                  v-show="applyTransShow"
@@ -43,8 +41,15 @@
                            @click="handleTransBtnClick"
                            class="asset_details_trans_btn" type="primary">转让申请
                 </el-button>
+
+                <el-button size="small"
+                           @click="showJsonData = !showJsonData"
+                           type="primary">
+                    {{ showJsonData ? '显示资产详情' : '显示json信息' }}
+                </el-button>
+                
             </div>
-            <div class="schema_container" id="schema_container">
+            <div class="schema_container" id="schema_container" v-show="!showJsonData">
                 <div class="content_item" id="detail_json_schema_node"></div>
                 <div class="content_item" id="locked_detail_json_schema_node" style="display:none;"></div>
                 <div class="note_container" v-show="jsonData">
@@ -55,6 +60,10 @@
 
                 </div>
             </div>
+            <div class="schema_container" v-show="showJsonData">
+                <pre>{{ jsonData }}</pre>
+            </div>
+
 
             <div class="content_container">
                 <p class="content_chain_info">
@@ -484,6 +493,7 @@
                 postTransNftId : '',
                 authorizationList : [],
                 secretList : [],
+                showJsonData: false
             }
         },
         components : {},
@@ -502,8 +512,8 @@
                 return this.$route.query.type === 'check' && !this.isOwner && this.hasSecret && (this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.REFUSED || this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.INVALID || this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.EXPIRED || this.accountApplyAuthorizeStatus === 5);
             },
             applyTransShow(){//展示申请转让按钮
-                //资产拥有者 && (转让状态是: 已拒绝 || 已失效)
-                return this.$route.query.type === 'trans' && this.isOwner && (this.accountApplyTransStatus === constant.ASSET_LIST_STATUS.REFUSED || this.accountApplyTransStatus === constant.ASSET_LIST_STATUS.INVALID || this.accountApplyTransStatus === 5);
+                //资产拥有者 && (转让状态是: 已拒绝 || 已失效 || 已转让)
+                return this.$route.query.type === 'trans' && this.isOwner && (this.accountApplyTransStatus === constant.ASSET_LIST_STATUS.TRANSFERED || this.accountApplyTransStatus === constant.ASSET_LIST_STATUS.REFUSED || this.accountApplyTransStatus === constant.ASSET_LIST_STATUS.INVALID || this.accountApplyTransStatus === 5);
             },
             unlockShow(){
                 //非资产拥有者 && 有加密的数据 && 展示点击解密 && (授权状态是: 已授权)
@@ -1097,6 +1107,7 @@
                 //判断是否展示'申请转让'按钮 accountApplyTransStatus
                 if(data.data.length > 0 && page === 1){
                     this.accountApplyTransStatus = data.data[0].status;
+                    console.error('========',this.accountApplyTransStatus)
                     //如果最新的转让状态是  转让申请中,并且当前账户是受让方, 使用直接调用解密接口 (useUnlock)
                     //当前账户是受让者
                     if(data.data[0].status === constant.ASSET_LIST_STATUS.APPLYING && this.$accountHelper.getAccount().address === data.data[0].provider){
@@ -1292,6 +1303,7 @@
                 }
                 .asset_details_trans_btn {
                     margin-left: 20px;
+                    margin-right: 20px;
                     width: 136px;
                 }
             }
