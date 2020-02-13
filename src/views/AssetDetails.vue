@@ -27,7 +27,7 @@
                        style="margin-bottom:10px;"
                        @click="showJsonData = !showJsonData"
                        type="primary">
-                {{ showJsonData ? '显示资产详情' : '显示json信息' }}
+                显示/隐藏 原始数据
             </el-button>
             <div class="asset_details_trans_container"
                  v-show="applyTransShow"
