@@ -1313,6 +1313,10 @@
                     width: 136px;
                 }
             }
+            #schema_container{
+                height:400px;
+                overflow-y: auto;
+            }
             .schema_container {
                 position: relative;
                 .note_container {
@@ -1364,6 +1368,8 @@
                         font-weight: 400;
                         color: #9E9E9E;
                         margin-right: 10px;
+                        display:inline-block;
+                        width:140px;
                     }
                     .alpaca-required-indicator {
                         display: none;

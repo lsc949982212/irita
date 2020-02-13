@@ -14,8 +14,16 @@
                               v-show="!expired"
                               @click="handleTabClick(1)"
                               :class="activeTab === 1 ? 'active' : ''">
+                            新建资产
+                        </span>
+                        <span class="tab"
+                              v-show="!expired"
+                              @click="handleTabClick(2)"
+                              :class="activeTab === 2 ? 'active' : ''">
                             资产列表
                         </span>
+
+
                     </div>
 
                     <div class="login_container"
@@ -108,13 +116,17 @@
                 if(to.path === '/login'){
                     this.activeTab = 0
                 } else {
-                    this.activeTab = 1;
                     let token = sessionStorage.getItem('token');
                     let displayUserName = '';
                     if(token){
                         displayUserName = JSON.parse(token).name;
                     }
                     this.displayUserName = displayUserName;
+                    if(to.path === '/asset_list'){
+                        this.activeTab = 2
+                    }else if(to.path === '/asset_add'){
+                        this.activeTab = 1
+                    }
                 }
             },
             expired(expired){
@@ -139,8 +151,10 @@
             });
             if(this.$route.path === '/login'){
                 this.activeTab = 0
-            } else {
+            } else if(this.$route.path === '/asset_add'){
                 this.activeTab = 1
+            } else  if(this.$route.path === '/asset_list'){
+                this.activeTab = 2
             }
             if(this.expired){
                 this.$router.push('/login');
@@ -153,12 +167,50 @@
                         return;
                     }
                     this.$router.replace('/login')
-                } else {
-                    if(this.$route.path === '/login'){
-                        this.$router.replace('/asset_list')
-                    }else if(this.$route.path !== '/asset_list'){
-                        this.$router.push('/asset_list')
+                } else if(tab === 1){
+                    if(this.$route.path === '/asset_add'){
+                        return;
                     }
+                    this.$router.replace('/asset_add')
+
+
+
+                    /*if(this.$route.path === '/login'){
+                        if(tab === 1){
+                            this.$router.replace('/asset_list')
+                        }else if(tab === 2){
+                            this.$router.replace('/asset_add')
+                        }
+                    }else if(this.$route.path !== '/asset_list'){
+
+                        if(tab === 1){
+                            this.$router.push('/asset_list')
+                        }else if(tab === 2){
+                            this.$router.push('/asset_add')
+                        }
+                    }*/
+
+                } else if(tab === 2){
+                    if(this.$route.path === '/asset_list'){
+                        return;
+                    }
+                    this.$router.replace('/asset_list')
+
+
+                    /*if(this.$route.path === '/login'){
+                        if(tab === 1){
+                            this.$router.replace('/asset_list')
+                        }else if(tab === 2){
+
+                        }
+                    }else if(this.$route.path !== '/asset_list'){
+
+                        if(tab === 1){
+                            this.$router.push('/asset_list')
+                        }else if(tab === 2){
+                            this.$router.push('/asset_add')
+                        }
+                    }*/
 
                 }
             },
@@ -267,9 +319,9 @@
                                     font-weight: 600;
                                     color: rgba(255, 255, 255, 0.5);
                                     border-bottom: 3px solid transparent;
-                                    &:first-child {
+                                    //&:first-child {
                                         margin-right: 40px;
-                                    }
+                                    //}
                                     box-sizing: border-box;
                                 }
                                 .active {

@@ -5,10 +5,6 @@
                 <span class="asset_list_title">
                     资产列表
                 </span>
-                <el-button type="primary" class="btn"
-                           @click="add">
-                    资产新建
-                </el-button>
             </div>
             <div class="table_container">
                 <el-table
@@ -98,9 +94,6 @@
             this.onPageChange(1);
         },
         methods:{
-            add(){
-                this.$router.push('/asset_add');
-            },
             getDisplayAssetTransStatus(status){
                 switch (status){
                     case constant.ASSET_STATUS.NORMAL:
