@@ -118,10 +118,16 @@
                 <p class="content_chain_info">
                     资产转让
                 </p>
-                <el-button size="small"
+                <!--<el-button size="small"
                            @click="refreshList('trans')"
                            class="auth_refresh_btn" type="primary">刷新
-                </el-button>
+                </el-button>-->
+                <div class="auth_refresh_btn" @click="refreshList('trans')">
+                    <img src="../assets/refresh.png" class="refresh_icon">
+                    <span class="auth_refresh_btn_refresh">
+                        刷新
+                    </span>
+                </div>
                 <div class="content_table_wrap">
                     <el-table
                             :data="transferData"
@@ -187,10 +193,16 @@
                 <p class="content_chain_info">
                     数据申请与授权
                 </p>
-                <el-button size="small"
+                <!--<el-button size="small"
                            @click="refreshList('auth')"
                            class="auth_refresh_btn" type="primary">刷新
-                </el-button>
+                </el-button>-->
+                <div class="auth_refresh_btn" @click="refreshList('auth')">
+                    <img src="../assets/refresh.png" class="refresh_icon">
+                    <span class="auth_refresh_btn_refresh">
+                        刷新
+                    </span>
+                </div>
                 <div class="content_table_wrap">
                     <el-table
                             :data="applyAndAuthDataList"
@@ -260,10 +272,16 @@
                     </span>
 
                 </div>
-                <el-button size="small"
+                <!--<el-button size="small"
                            @click="refreshList('list')"
                            class="auth_refresh_btn" type="primary">刷新
-                </el-button>
+                </el-button>-->
+                <div class="auth_refresh_btn" @click="refreshList('list')">
+                    <img src="../assets/refresh.png" class="refresh_icon">
+                    <span class="auth_refresh_btn_refresh">
+                        刷新
+                    </span>
+                </div>
                 <div class="content_table_wrap" v-show="tab === 0">
                     <el-table
                             :data="assetListData"
@@ -1327,13 +1345,13 @@
                     width: 136px;
                 }
             }
-            #schema_container{
-
-            }
             .schema_container {
                 position: relative;
                 height:400px;
                 overflow-y: auto;
+                pre{
+                    border:none;
+                }
                 .note_container {
                     position: absolute;
                     right: 0;
@@ -1432,6 +1450,19 @@
                     top: 10px;
                     right: 20px;
                     z-index: 10;
+                    .flexRow;
+                    align-items: center;
+                    cursor:pointer;
+                    .refresh_icon{
+                        width:17px;
+                        height:14px;
+                    }
+                    .auth_refresh_btn_refresh{
+                        font-size:14px;
+                        color:@themeColor;
+                        margin-left:8px;
+                    }
+
                 }
                 .content_chain_info_wrap {
                     .flexRow;

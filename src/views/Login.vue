@@ -76,6 +76,8 @@
                 }
                 .btn {
                     width: 160px;
+                    background: #21BC5D;
+                    border:none;
                 }
 
             }

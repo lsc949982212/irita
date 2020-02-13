@@ -25,7 +25,11 @@
                 <div class="add_schema_download_container">
                     <a target="_blank"
                        class="download_node"
-                       download href="../../static/receivable_json.json">资产模板文件下载</a>
+                       download>JSON Schema</a>
+                    <a target="_blank"
+                       class="download_node"
+                       download>资产数据文本样例</a>
+
                     <input type="file" id="files" style="display:none;margin-left:20px;" @change="fileImport" accept=".json">
                     <el-button size="medium"
                                @click="handleImportClick"
@@ -149,7 +153,7 @@
                             node.innerHTML = '(必填)';
                         });
                         document.getElementsByName('basicInfo_assetType')[0].setAttribute('disabled',true)
-                    }, 1000)
+                    }, 100)
                 }
             },
             handleCancelClick(){
@@ -198,7 +202,7 @@
                             node.innerHTML = '(必填)';
                         });
                         document.getElementsByName('basicInfo_assetType')[0].setAttribute('disabled',true)
-                    }, 1000);
+                    }, 100);
                 }
             },
             checkData(){
@@ -352,6 +356,11 @@
                 .add_schema_download_container {
                     .flexRow;
                     justify-content: flex-end;
+                    .download_node{
+                        font-size:14px;
+                        color:@themeColor;
+                        cursor:pointer;
+                    }
                     .download_node{
                         margin-right:20px;
                         line-height:36px;
