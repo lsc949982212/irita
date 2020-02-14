@@ -105,6 +105,7 @@
     import axios from '../helper/httpHelper';
     import { Message } from 'element-ui';
     import { getErrorMsgByErrorCode } from '../helper/errorCodeHelper';
+    import { isJson } from '../util/util';
     import data from './data';
 
     let tempData = JSON.parse(JSON.stringify(data));
@@ -143,12 +144,15 @@
                 const reader = new FileReader();
                 reader.readAsText(selectedFile);
                 reader.onload = () =>{
+                    if(!isJson(reader.result)){
+                        this.$message.error('json数据格式有误,请重新上传');
+                        return;
+                    }
                     const el = document.getElementById('json_schema_node');
                     const childs = el.childNodes;
                     for(let i = childs.length - 1 ; i >= 0 ; i--){
                         el.removeChild(childs[i]);
                     }
-
                     $("#json_schema_node").alpaca({
                         "schemaSource" : schema,
                         "dataSource" : reader.result

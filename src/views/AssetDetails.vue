@@ -995,15 +995,20 @@
                 }
             },
             getCheckElement(tag, dataAttr, reg){
-                let aElements = document.getElementById('schema_container').getElementsByTagName(tag);
-                let aEle = [];
-                for(let i = 0 ; i < aElements.length ; i++){
-                    let ele = aElements[i].getAttribute(dataAttr);
-                    if(ele && ele.startsWith('/') && ele !== '/'){
-                        aEle.push(aElements[i]);
+                if(document.getElementById('schema_container')){
+                    let aElements = document.getElementById('schema_container').getElementsByTagName(tag);
+                    let aEle = [];
+                    for(let i = 0 ; i < aElements.length ; i++){
+                        let ele = aElements[i].getAttribute(dataAttr);
+                        if(ele && ele.startsWith('/') && ele !== '/'){
+                            aEle.push(aElements[i]);
+                        }
                     }
+                    return aEle;
+                }else{
+                    return null;
                 }
-                return aEle;
+
             },
             getElementByAttr(tag, dataAttr){
                 let aElements = document.getElementById('schema_container').getElementsByTagName(tag);
