@@ -24,13 +24,13 @@
 
                 <div class="add_schema_download_container">
                     <div class="download_container">
-                        <img src="../assets/refresh.png" class="download_icon">
+                        <img src="../assets/download.png" class="download_icon">
                         <a target="_blank"
                            class="download_node"
                            download>JSON Schema</a>
                     </div>
                     <div class="download_container">
-                        <img src="../assets/refresh.png" class="download_icon">
+                        <img src="../assets/download.png" class="download_icon">
                         <a target="_blank"
                            class="download_node"
                            download>资产数据文本样例</a>
@@ -366,7 +366,7 @@
                         cursor:pointer;
                         .download_icon{
                             width:14px;
-                            height:18px;
+                            height:13px;
                             margin-right:10px;
                         }
                         .download_node{

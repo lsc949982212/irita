@@ -962,6 +962,8 @@
                                 "dataSource" : JSON.parse(data.data.data),
                                 "view" : "bootstrap-display"
                             });
+                            this.drawNoteNode();
+                            this.drawCheckoutNode();
                         }, 100);
                         this.setSecretFieldStyle();
                     } else if(data && data.data && data.data.status === 'fail'){
@@ -1099,20 +1101,11 @@
 
                 }, 250)
             },
-            renderUI(){
-                $("#detail_json_schema_node").alpaca({
-                    "schemaSource" : schema,
-                    "dataSource" : this.jsonData,
-                    "view" : "bootstrap-display"
-                });
-                this.setSecretFieldStyle();
-
+            //添加密文注释
+            drawNoteNode(){
                 setTimeout(()=>{
-                    //添加密文注释
                     let node = this.getElementByAttr('div','data-alpaca-container-item-name');
                     if(node && node.length){
-                        console.error('=======',node)
-
                         const container = document.createElement('div');
                         container.className = 'note_container';
 
@@ -1135,14 +1128,11 @@
                         node[0].appendChild(container);
                         node[0].style.position = 'relative';
 
-
-
-
                     }
-
-
                 },300)
-
+            },
+            //添加查验状态
+            drawCheckoutNode(){
                 /*setTimeout(()=>{
                     let node = this.getCheckElement('div','data-alpaca-field-path', /^\//);
                     for(let item of node){
@@ -1159,6 +1149,16 @@
 
                     }
                 },300)*/
+            },
+            renderUI(){
+                $("#detail_json_schema_node").alpaca({
+                    "schemaSource" : schema,
+                    "dataSource" : this.jsonData,
+                    "view" : "bootstrap-display"
+                });
+                this.setSecretFieldStyle();
+                this.drawNoteNode();
+                this.drawCheckoutNode();
             },
             getAssetTransList(page){
                 axios.get({
