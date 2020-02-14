@@ -23,13 +23,18 @@
             <div class="add_schema_container step_second" v-show="step === 2">
 
                 <div class="add_schema_download_container">
-                    <a target="_blank"
-                       class="download_node"
-                       download>JSON Schema</a>
-                    <a target="_blank"
-                       class="download_node"
-                       download>资产数据文本样例</a>
-
+                    <div class="download_container">
+                        <img src="../assets/refresh.png" class="download_icon">
+                        <a target="_blank"
+                           class="download_node"
+                           download>JSON Schema</a>
+                    </div>
+                    <div class="download_container">
+                        <img src="../assets/refresh.png" class="download_icon">
+                        <a target="_blank"
+                           class="download_node"
+                           download>资产数据文本样例</a>
+                    </div>
                     <input type="file" id="files" style="display:none;margin-left:20px;" @change="fileImport" accept=".json">
                     <el-button size="medium"
                                @click="handleImportClick"
@@ -104,7 +109,7 @@
 
     let tempData = JSON.parse(JSON.stringify(data));
     if(sessionStorage.getItem('token')){
-        tempData.basicInfo.assetName = JSON.parse(sessionStorage.getItem('token')).name;
+        tempData.basicInfo.assetOwner = JSON.parse(sessionStorage.getItem('token')).name;
     }
 
 
@@ -349,6 +354,7 @@
                             margin-top: 60px;
                         }
                     }
+
                 }
 
             }
@@ -356,16 +362,35 @@
                 .add_schema_download_container {
                     .flexRow;
                     justify-content: flex-end;
-                    .download_node{
-                        font-size:14px;
-                        color:@themeColor;
+                    .download_container{
                         cursor:pointer;
+                        .download_icon{
+                            width:14px;
+                            height:18px;
+                            margin-right:10px;
+                        }
+                        .download_node{
+                            font-size:14px;
+                            color:@themeColor;
+
+                        }
                     }
+
                     .download_node{
                         margin-right:20px;
                         line-height:36px;
                     }
+
+
                 }
+                #json_schema_node{
+                    .alpaca-top{
+                        padding:0;
+                        margin:10px 0;
+                    }
+                }
+
+
                 .alpaca-container-item {
                     background: rgba(248, 248, 248, 1) !important;
                 }

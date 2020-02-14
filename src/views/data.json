@@ -2,6 +2,7 @@
   "basicInfo": {
     "assetNo": "",
     "assetType": "receivable",
-    "assetName": ""
+    "assetName": "",
+    "assetOwner": ""
   }
 }

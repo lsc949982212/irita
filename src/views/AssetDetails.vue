@@ -5,30 +5,35 @@
                 <span class="asset_details_title">
                     {{ $route.query.type === 'check'? '资产信息' : '资产转让详情' }}
                 </span>
-                <el-button size="small"
-                           @click="edit"
-                           v-show="editBtnShow"
-                           class="btn" type="primary">编辑
-                </el-button>
-                <el-button size="small"
-                           @click="applyCheck"
-                           v-show="applyAuthShow"
-                           :loading="applyBtnLoading"
-                           class="btn" type="primary">申请查看
-                </el-button>
-                <el-button size="small"
-                           @click="unlock"
-                           v-show="unlockShow"
-                           class="btn" type="primary">点击解密
-                </el-button>
+                <div class="edit_btn_container">
+                    <el-button size="small"
+                               v-show="!applyTransShow" class="btn"
+                               style="margin-bottom:10px;"
+                               @click="showJsonData = !showJsonData"
+                               type="default">
+                        显示/隐藏 原始数据
+                    </el-button>
+                    <el-button size="small"
+                               @click="edit"
+                               v-show="editBtnShow"
+                               class="btn" type="primary">编辑
+                    </el-button>
+                    <el-button size="small"
+                               @click="applyCheck"
+                               v-show="applyAuthShow"
+                               :loading="applyBtnLoading"
+                               class="btn" type="primary">申请查看
+                    </el-button>
+                    <el-button size="small"
+                               @click="unlock"
+                               v-show="unlockShow"
+                               class="btn" type="primary">点击解密
+                    </el-button>
+                </div>
+
+
             </div>
-            <el-button size="small"
-                       v-show="!applyTransShow"
-                       style="margin-bottom:10px;"
-                       @click="showJsonData = !showJsonData"
-                       type="primary">
-                显示/隐藏 原始数据
-            </el-button>
+
             <div class="asset_details_trans_container"
                  v-show="applyTransShow"
                  v-if="$route.query.type === 'trans'">
@@ -48,23 +53,17 @@
                            @click="handleTransBtnClick"
                            class="asset_details_trans_btn" type="primary">转让申请
                 </el-button>
-                <el-button size="small"
-                           style="margin-left:0;"
-                           @click="showJsonData = !showJsonData"
-                           type="primary">
-                    显示/隐藏 原始数据
-                </el-button>
             </div>
             <div class="schema_container" id="schema_container" v-show="!showJsonData">
                 <div class="content_item" id="detail_json_schema_node"></div>
                 <div class="content_item" id="locked_detail_json_schema_node" style="display:none;"></div>
-                <div class="note_container" v-show="jsonData">
+               <!-- <div class="note_container" v-show="jsonData">
                     <span class="auth_title">授权可见:</span>
                     <span class="auth_color"></span>
                     <span class="secret_title">仅自己可见:</span>
                     <span class="secret_color"></span>
 
-                </div>
+                </div>-->
             </div>
             <div class="schema_container" v-show="showJsonData">
                 <pre>{{ jsonData }}</pre>
@@ -118,10 +117,6 @@
                 <p class="content_chain_info">
                     资产转让
                 </p>
-                <!--<el-button size="small"
-                           @click="refreshList('trans')"
-                           class="auth_refresh_btn" type="primary">刷新
-                </el-button>-->
                 <div class="auth_refresh_btn" @click="refreshList('trans')">
                     <img src="../assets/refresh.png" class="refresh_icon">
                     <span class="auth_refresh_btn_refresh">
@@ -193,10 +188,6 @@
                 <p class="content_chain_info">
                     数据申请与授权
                 </p>
-                <!--<el-button size="small"
-                           @click="refreshList('auth')"
-                           class="auth_refresh_btn" type="primary">刷新
-                </el-button>-->
                 <div class="auth_refresh_btn" @click="refreshList('auth')">
                     <img src="../assets/refresh.png" class="refresh_icon">
                     <span class="auth_refresh_btn_refresh">
@@ -272,10 +263,6 @@
                     </span>
 
                 </div>
-                <!--<el-button size="small"
-                           @click="refreshList('list')"
-                           class="auth_refresh_btn" type="primary">刷新
-                </el-button>-->
                 <div class="auth_refresh_btn" @click="refreshList('list')">
                     <img src="../assets/refresh.png" class="refresh_icon">
                     <span class="auth_refresh_btn_refresh">
@@ -1005,12 +992,23 @@
                         window.open(`${cfg.app.explorer}/#/service?serviceName=${param}&chainId=${cfg.chainId}`);
                 }
             },
-            getElementByAttr(tag, dataAttr, reg){
+            getCheckElement(tag, dataAttr, reg){
                 let aElements = document.getElementById('schema_container').getElementsByTagName(tag);
                 let aEle = [];
                 for(let i = 0 ; i < aElements.length ; i++){
                     let ele = aElements[i].getAttribute(dataAttr);
                     if(ele && ele.startsWith('/') && ele !== '/'){
+                        aEle.push(aElements[i]);
+                    }
+                }
+                return aEle;
+            },
+            getElementByAttr(tag, dataAttr){
+                let aElements = document.getElementById('schema_container').getElementsByTagName(tag);
+                let aEle = [];
+                for(let i = 0 ; i < aElements.length ; i++){
+                    let ele = aElements[i].getAttribute(dataAttr);
+                    if(ele && ele === 'detailedInfo'){
                         aEle.push(aElements[i]);
                     }
                 }
@@ -1055,7 +1053,7 @@
             },
             setSecretFieldStyle(){
                 setTimeout(() =>{
-                    let node = this.getElementByAttr('div', 'data-alpaca-field-path', /^\//);
+                    let node = this.getCheckElement('div', 'data-alpaca-field-path', /^\//);
                     const pathMap = new Map();
                     for(let item of node){
                         const name = item.getAttribute('data-alpaca-field-path');
@@ -1066,15 +1064,15 @@
                     this.authorizationList.forEach((a) =>{
                         let replaced = a.replace(/\./g, '/').replace('$', '');
                         if(pathMap.has(replaced)){
-                            pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].style.color = '#6CA4F5';
-                            pathMap.get(replaced).getElementsByClassName('control-label')[0].style.color = '#6CA4F5';
+                            pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].style.color = '#2449AD';
+                            //pathMap.get(replaced).getElementsByClassName('control-label')[0].style.color = '#2449AD';
                         } else {
                             Array.from(pathMap.keys()).forEach((p) =>{
                                 if(p.includes('[') && p.includes(']')){
                                     let num = p.split('[')[1].split(']')[0];
                                     if(p.replace(num, '*') === replaced){
-                                        pathMap.get(p).getElementsByClassName('alpaca-control')[0].style.color = '#6CA4F5';
-                                        pathMap.get(p).getElementsByClassName('control-label')[0].style.color = '#6CA4F5';
+                                        pathMap.get(p).getElementsByClassName('alpaca-control')[0].style.color = '#2449AD';
+                                        //pathMap.get(p).getElementsByClassName('control-label')[0].style.color = '#2449AD';
                                     }
                                 }
                             })
@@ -1084,15 +1082,15 @@
                         let replaced = a.replace(/\./g, '/').replace('$', '');
                         if(pathMap.has(replaced)){
                             pathMap.get(replaced).style.color = 'yellow';
-                            pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].style.color = '#F56C6C';
-                            pathMap.get(replaced).getElementsByClassName('control-label')[0].style.color = '#F56C6C';
+                            pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].style.color = '#FF6200';
+                            //pathMap.get(replaced).getElementsByClassName('control-label')[0].style.color = '#FF6200';
                         } else {
                             Array.from(pathMap.keys()).forEach((p) =>{
                                 if(p.includes('[') && p.includes(']')){
                                     let num = p.split('[')[1].split(']')[0];
                                     if(p.replace(num, '*') === replaced){
-                                        pathMap.get(p).getElementsByClassName('alpaca-control')[0].style.color = '#F56C6C';
-                                        pathMap.get(p).getElementsByClassName('control-label')[0].style.color = '#F56C6C';
+                                        pathMap.get(p).getElementsByClassName('alpaca-control')[0].style.color = '#FF6200';
+                                        //pathMap.get(p).getElementsByClassName('control-label')[0].style.color = '#FF6200';
                                     }
                                 }
                             })
@@ -1109,8 +1107,44 @@
                 });
                 this.setSecretFieldStyle();
 
+                setTimeout(()=>{
+                    //添加密文注释
+                    let node = this.getElementByAttr('div','data-alpaca-container-item-name');
+                    if(node && node.length){
+                        console.error('=======',node)
+
+                        const container = document.createElement('div');
+                        container.className = 'note_container';
+
+                        const authTitle = document.createElement('span');
+                        authTitle.className = 'auth_title';
+                        authTitle.innerHTML = '授权可见';
+                        const authColor = document.createElement('span');
+                        authColor.className = 'auth_color';
+
+                        const secretTitle = document.createElement('span');
+                        secretTitle.className = 'secret_title';
+                        secretTitle.innerHTML = '仅自己可见';
+                        const secretColor = document.createElement('span');
+                        secretColor.className = 'secret_color';
+
+                        container.appendChild(authColor);
+                        container.appendChild(authTitle);
+                        container.appendChild(secretColor);
+                        container.appendChild(secretTitle);
+                        node[0].appendChild(container);
+                        node[0].style.position = 'relative';
+
+
+
+
+                    }
+
+
+                },300)
+
                 /*setTimeout(()=>{
-                    let node = this.getElementByAttr('div','data-alpaca-field-path', /^\//);
+                    let node = this.getCheckElement('div','data-alpaca-field-path', /^\//);
                     for(let item of node){
                         const path = item.getAttribute('data-alpaca-field-path')
                         let status = document.createElement('span');
@@ -1328,6 +1362,11 @@
                 }
                 .btn {
                     width: 136px;
+                    height:34px;
+                }
+                .edit_btn_container{
+                    .flexRow;
+                    justify-content:flex-end;
                 }
             }
             .asset_details_trans_container {
@@ -1354,32 +1393,34 @@
                 }
                 .note_container {
                     position: absolute;
-                    right: 0;
-                    top: -25px;
+                    left: 100px;
+                    top: 13px;
                     .flexRow;
                     align-items: center;
                     .auth_title {
                         font-size: 12px;
-                        color: #9E9E9E;
+                        color: #464646;
+                        margin-right: 20px;
+                        line-height:14px;
                     }
                     .auth_color {
-                        width: 60px;
-                        border-radius: 4px;
-                        height: 20px;
-                        background: #6CA4F5;
-                        margin-right: 20px;
-                        margin-left: 10px;
+                        width: 10px;
+                        border-radius: 2px;
+                        height: 10px;
+                        background: #2449AD;
+                        margin-right: 10px;
                     }
                     .secret_title {
                         font-size: 12px;
-                        color: #9E9E9E;
+                        color: #464646;
+                        line-height:14px;
                     }
                     .secret_color {
-                        width: 60px;
-                        border-radius: 4px;
-                        height: 20px;
-                        background: #F56C6C;
-                        margin-left: 10px;
+                        width: 10px;
+                        border-radius: 2px;
+                        height: 10px;
+                        background: #FF6200;
+                        margin-right: 10px;
                     }
 
                 }

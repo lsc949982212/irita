@@ -27,16 +27,19 @@
                             min-width="60">
                     </el-table-column>
                     <el-table-column
-                            prop="displayOwnerAddress"
                             label="操作者地址"
                             min-width="75">
+                        <template slot-scope="scope">
+                                <span class="link_url" @click="toExplorer('address',scope.row.owner)">
+                                    {{ scope.row.displayOwnerAddress }}
+                                </span>
+                        </template>
                     </el-table-column>
                     <el-table-column
                             prop="displayOwner"
                             label="所有者"
                             min-width="60">
                     </el-table-column>
-
                     <el-table-column
                             prop="displayCheckStatus"
                             label="查验状态"
@@ -84,6 +87,8 @@
     import { constant } from '../constant/constant';
     import {accountHelper} from '../helper/accountHelper';
     import { getFormatAddress } from '../util/util';
+    import cfg from '../config/config';
+
 
     export default {
         name : 'AssetList',
@@ -124,6 +129,12 @@
                     case constant.CHECK_STATUS.CHECK_FAILED:
                         return '查验失败';
 
+                }
+            },
+            toExplorer(type, param){
+                switch (type){
+                    case 'address':
+                        window.open(`${cfg.app.explorer}/#/address/${param ? param : this.chainInfo.nft_owner}`);
                 }
             },
             handleCheckClick(row){
@@ -207,6 +218,10 @@
 
                 .el-table th, .el-table tr{
                     background: yellow;
+                }
+                .link_url {
+                    color: @themeColor;
+                    cursor: pointer;
                 }
             }
             .pagination_container{
