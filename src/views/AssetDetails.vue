@@ -57,13 +57,13 @@
             <div class="schema_container" id="schema_container" v-show="!showJsonData">
                 <div class="content_item" id="detail_json_schema_node"></div>
                 <div class="content_item" id="locked_detail_json_schema_node" style="display:none;"></div>
-               <!-- <div class="note_container" v-show="jsonData">
-                    <span class="auth_title">授权可见:</span>
-                    <span class="auth_color"></span>
-                    <span class="secret_title">仅自己可见:</span>
-                    <span class="secret_color"></span>
+                <!-- <div class="note_container" v-show="jsonData">
+                     <span class="auth_title">授权可见:</span>
+                     <span class="auth_color"></span>
+                     <span class="secret_title">仅自己可见:</span>
+                     <span class="secret_color"></span>
 
-                </div>-->
+                 </div>-->
             </div>
             <div class="schema_container" v-show="showJsonData">
                 <pre>{{ jsonData }}</pre>
@@ -118,6 +118,14 @@
                     资产转让
                 </p>
                 <div class="auth_refresh_btn" @click="refreshList('trans')">
+                    <div class="latest_update_time_container" v-show="transLatestUpdateTime">
+                        <span class="latest_update_title">
+                            最后更新时间
+                        </span>
+                        <span class="latest_update_content">
+                            {{ transLatestUpdateTime }}
+                        </span>
+                    </div>
                     <img src="../assets/refresh.png" class="refresh_icon">
                     <span class="auth_refresh_btn_refresh">
                         刷新
@@ -164,11 +172,6 @@
                                 </el-button>
                             </template>
                         </el-table-column>
-                        <el-table-column
-                                prop="latestUpdateTime"
-                                label="最后更新时间"
-                                min-width="100">
-                        </el-table-column>
                     </el-table>
                 </div>
             </div>
@@ -189,6 +192,14 @@
                     数据申请与授权
                 </p>
                 <div class="auth_refresh_btn" @click="refreshList('auth')">
+                    <div class="latest_update_time_container" v-show="authLatestUpdateTime">
+                        <span class="latest_update_title">
+                            最后更新时间
+                        </span>
+                        <span class="latest_update_content">
+                            {{ authLatestUpdateTime }}
+                        </span>
+                    </div>
                     <img src="../assets/refresh.png" class="refresh_icon">
                     <span class="auth_refresh_btn_refresh">
                         刷新
@@ -228,11 +239,6 @@
                                            @click="handleRefusedClick(scope.row)">拒绝
                                 </el-button>
                             </template>
-                        </el-table-column>
-                        <el-table-column
-                                prop="latestUpdateTime"
-                                label="最后更新时间"
-                                min-width="100">
                         </el-table-column>
                     </el-table>
                 </div>
@@ -514,7 +520,12 @@
                 postTransNftId : '',
                 authorizationList : [],
                 secretList : [],
-                showJsonData: false
+                showJsonData : false,
+                assetType : 'receivable',
+                needSavedData : null,
+                checkData : null,
+                authLatestUpdateTime:'',
+                transLatestUpdateTime:'',
             }
         },
         components : {},
@@ -963,9 +974,9 @@
                                 "view" : "bootstrap-display"
                             });
                             this.drawNoteNode();
-                            this.drawCheckoutNode();
+                            this.setSecretFieldStyle();
                         }, 100);
-                        this.setSecretFieldStyle();
+
                     } else if(data && data.data && data.data.status === 'fail'){
                         this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
                         this.centerDialogVisible = false;
@@ -1005,7 +1016,7 @@
                         }
                     }
                     return aEle;
-                }else{
+                } else {
                     return null;
                 }
 
@@ -1042,10 +1053,23 @@
                     console.error(e)
                 });
             },
+            getCheckStatus(){
+                let url = `/assets_check?pageNum=1&pageSize=10&used_count=false&nft_id=${this.$route.query.nft_id}`;
+                axios.get({
+                    url,
+                    ctx : this
+                }).then((data) =>{
+                    res(data)
+                }).catch(e =>{
+                    console.error(e);
+                    rej(e);
+                });
+            },
             handleDetailData(data){
                 console.log('detail data', data)
                 if(data && data.asset_info){
                     let jsonData = JSON.parse(data.asset_info);
+
                     conversionHelper.booleanToDisplayField(jsonData);
                     console.log('json data after conversion', jsonData);
                     this.jsonData = jsonData;
@@ -1064,22 +1088,18 @@
                     const pathMap = new Map();
                     for(let item of node){
                         const name = item.getAttribute('data-alpaca-field-path');
-                        //console.error(name)
                         pathMap.set(name, item);
                     }
-
                     this.authorizationList.forEach((a) =>{
                         let replaced = a.replace(/\./g, '/').replace('$', '');
                         if(pathMap.has(replaced)){
                             pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].style.color = '#2449AD';
-                            //pathMap.get(replaced).getElementsByClassName('control-label')[0].style.color = '#2449AD';
                         } else {
                             Array.from(pathMap.keys()).forEach((p) =>{
                                 if(p.includes('[') && p.includes(']')){
                                     let num = p.split('[')[1].split(']')[0];
                                     if(p.replace(num, '*') === replaced){
                                         pathMap.get(p).getElementsByClassName('alpaca-control')[0].style.color = '#2449AD';
-                                        //pathMap.get(p).getElementsByClassName('control-label')[0].style.color = '#2449AD';
                                     }
                                 }
                             })
@@ -1090,14 +1110,12 @@
                         if(pathMap.has(replaced)){
                             pathMap.get(replaced).style.color = 'yellow';
                             pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].style.color = '#FF6200';
-                            //pathMap.get(replaced).getElementsByClassName('control-label')[0].style.color = '#FF6200';
                         } else {
                             Array.from(pathMap.keys()).forEach((p) =>{
                                 if(p.includes('[') && p.includes(']')){
                                     let num = p.split('[')[1].split(']')[0];
                                     if(p.replace(num, '*') === replaced){
                                         pathMap.get(p).getElementsByClassName('alpaca-control')[0].style.color = '#FF6200';
-                                        //pathMap.get(p).getElementsByClassName('control-label')[0].style.color = '#FF6200';
                                     }
                                 }
                             })
@@ -1108,8 +1126,8 @@
             },
             //添加密文注释
             drawNoteNode(){
-                setTimeout(()=>{
-                    let node = this.getElementByAttr('div','data-alpaca-container-item-name');
+                setTimeout(() =>{
+                    let node = this.getElementByAttr('div', 'data-alpaca-container-item-name');
                     if(node && node.length){
                         const container = document.createElement('div');
                         container.className = 'note_container';
@@ -1134,26 +1152,7 @@
                         node[0].style.position = 'relative';
 
                     }
-                },300)
-            },
-            //添加查验状态
-            drawCheckoutNode(){
-                /*setTimeout(()=>{
-                    let node = this.getCheckElement('div','data-alpaca-field-path', /^\//);
-                    for(let item of node){
-                        const path = item.getAttribute('data-alpaca-field-path')
-                        let status = document.createElement('span');
-                        status.className = 'check_status';
-                        status.innerHTML = '未查验';
-                        item.appendChild(status);
-                        let btn = document.createElement('span');
-                        btn.className = 'check_btn';
-                        btn.innerHTML = '查验';
-                        btn.onclick = this.handleCheck.bind(this, path);
-                        item.appendChild(btn);
-
-                    }
-                },300)*/
+                }, 300)
             },
             renderUI(){
                 $("#detail_json_schema_node").alpaca({
@@ -1163,7 +1162,6 @@
                 });
                 this.setSecretFieldStyle();
                 this.drawNoteNode();
-                this.drawCheckoutNode();
             },
             getAssetTransList(page){
                 axios.get({
@@ -1211,6 +1209,9 @@
                     }
                 }
                 this.totalTransCount = data.total;
+                if(data.data.length > 0){
+                    this.transLatestUpdateTime = formatTimestamp(data.data[0].update_at)
+                }
                 this.transferData = data.data.map((t) =>{
                     return {
                         id : t.nft_id,
@@ -1224,7 +1225,6 @@
                         provider : t.provider,
                         showAcceptBtn : t.status === constant.ASSET_LIST_STATUS.APPLYING && t.provider === this.$accountHelper.getAccount().address,
                         showTransBtn : t.status === constant.ASSET_LIST_STATUS.ACCEPT && t.consumer === this.$accountHelper.getAccount().address,
-                        latestUpdateTime:formatTimestamp(t.update_at),
                     }
                 })
             },
@@ -1251,6 +1251,9 @@
                     this.nftId = data.data[0].nft_id;
                     this.accountApplyAuthorizeStatus = data.data[0].status;
                 }
+                if(data.data.length > 0){
+                    this.authLatestUpdateTime = formatTimestamp(data.data[0].update_at)
+                }
                 this.applyAndAuthDataList = data.data.map((a) =>{
                     return {
                         id : a.nft_id,
@@ -1261,7 +1264,6 @@
                         showAuthBtn : a.status === constant.AUTHORIZATION_STATUS.APPLYING && a.provider === this.$accountHelper.getAccount().address,
                         provider : a.provider,
                         consumer : a.consumer,
-                        latestUpdateTime:formatTimestamp(a.update_at),
                     }
                 })
             },
@@ -1367,11 +1369,11 @@
                 }
                 .btn {
                     width: 136px;
-                    height:34px;
+                    height: 34px;
                 }
-                .edit_btn_container{
+                .edit_btn_container {
                     .flexRow;
-                    justify-content:flex-end;
+                    justify-content: flex-end;
                 }
             }
             .asset_details_trans_container {
@@ -1391,10 +1393,10 @@
             }
             .schema_container {
                 position: relative;
-                height:400px;
+                height: 400px;
                 overflow-y: auto;
-                pre{
-                    border:none;
+                pre {
+                    border: none;
                 }
                 .note_container {
                     position: absolute;
@@ -1406,7 +1408,7 @@
                         font-size: 12px;
                         color: #464646;
                         margin-right: 20px;
-                        line-height:14px;
+                        line-height: 14px;
                     }
                     .auth_color {
                         width: 10px;
@@ -1418,7 +1420,7 @@
                     .secret_title {
                         font-size: 12px;
                         color: #464646;
-                        line-height:14px;
+                        line-height: 14px;
                     }
                     .secret_color {
                         width: 10px;
@@ -1447,8 +1449,8 @@
                         font-weight: 400;
                         color: #9E9E9E;
                         margin-right: 10px;
-                        display:inline-block;
-                        width:140px;
+                        display: inline-block;
+                        width: 140px;
                     }
                     .alpaca-required-indicator {
                         display: none;
@@ -1462,7 +1464,6 @@
                     .check_status {
                         font-size: 14px;
                         color: @mainFontColor;
-                        margin-left: 30px;
                     }
                     .check_btn {
                         cursor: pointer;
@@ -1472,10 +1473,10 @@
                         margin-left: 30px;
                     }
                 }
-                #detail_json_schema_node{
+                #detail_json_schema_node {
 
-                    .alpaca-field-object.alpaca-top, .alpaca-field-object.alpaca-top .alpaca-container{
-                        padding:0;
+                    .alpaca-field-object.alpaca-top, .alpaca-field-object.alpaca-top .alpaca-container {
+                        padding: 0;
                     }
                 }
             }
@@ -1493,20 +1494,33 @@
                 position: relative;
                 .auth_refresh_btn {
                     position: absolute;
-                    top: 10px;
+                    top: 16px;
                     right: 20px;
                     z-index: 10;
                     .flexRow;
                     align-items: center;
-                    cursor:pointer;
-                    .refresh_icon{
-                        width:17px;
-                        height:14px;
+                    cursor: pointer;
+                    .refresh_icon {
+                        width: 17px;
+                        height: 14px;
                     }
-                    .auth_refresh_btn_refresh{
-                        font-size:14px;
-                        color:@themeColor;
-                        margin-left:8px;
+                    .auth_refresh_btn_refresh {
+                        font-size: 14px;
+                        color: @themeColor;
+                        margin-left: 8px;
+                    }
+                    .latest_update_time_container{
+                        .flexRow;
+                        margin-right:20px;
+                        .latest_update_title{
+                            font-size:14px;
+                            margin-right:10px;
+                            color: @mainFontColor;
+                        }
+                        .latest_update_content{
+                            font-size:14px;
+                            color: @mainFontColor;
+                        }
                     }
 
                 }

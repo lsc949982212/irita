@@ -77,7 +77,7 @@
                 </el-button>
             </div>
             <div class="btn_container" v-show="step === 2">
-                <el-button class="btn" size="medium" @click="changeStep(1)">上一步</el-button>
+                <el-button class="btn" size="medium" @click="changeStep(1)" type="default">上一步</el-button>
                 <el-button size="medium"
                            @click="checkData"
                            class="btn" type="primary">下一步
@@ -85,7 +85,7 @@
                 <el-button class="btn" size="medium" @click="handleCancelClick">取消</el-button>
             </div>
             <div class="btn_container" v-show="step === 3">
-                <el-button class="btn" size="medium" @click="handleThirdStepPre">上一步</el-button>
+                <el-button class="btn" size="medium" @click="handleThirdStepPre" type="default">上一步</el-button>
                 <el-button size="medium"
                            @click="save"
                            class="btn" type="primary">保存
@@ -161,7 +161,9 @@
                         document.getElementsByClassName('alpaca-required-indicator').forEach((node) =>{
                             node.innerHTML = '(必填)';
                         });
-                        document.getElementsByName('basicInfo_assetType')[0].setAttribute('disabled',true)
+                        if(document.getElementsByName('basicInfo_assetType')){
+                            document.getElementsByName('basicInfo_assetType')[0].setAttribute('disabled',true)
+                        }
                     }, 100)
                 }
             },

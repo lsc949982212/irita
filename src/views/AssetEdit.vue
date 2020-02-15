@@ -180,6 +180,20 @@
                     "schemaSource" : schema,
                     "dataSource" : this.jsonData
                 });
+                setTimeout(() =>{
+                    document.getElementsByClassName('alpaca-required-indicator').forEach((node) =>{
+                        node.innerHTML = '(必填)';
+                    });
+                    let assetNode = document.getElementsByName('basicInfo_assetType');
+                    let ownerNode = document.getElementsByName('basicInfo_assetType');
+                    if(assetNode && assetNode.length){
+                        document.getElementsByName('basicInfo_assetType')[0].setAttribute('disabled',true)
+                    }
+                    if(ownerNode && ownerNode.length){
+                        document.getElementsByName('basicInfo_assetOwner')[0].setAttribute('disabled',true)
+                    }
+
+                }, 300)
             },
             setAuthListUI(){
                 let jsonData = $("#edit_json_schema_node").alpaca().getValue();
