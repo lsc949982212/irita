@@ -70,9 +70,9 @@ export default class JsonSchemaHelper {
     }
 
     setEditFormatAuthData(){
-        console.error('json data',this.data);
+        console.log('json data',this.data);
         this.setAddFormatAuthData();
-        console.error('auth list',this.getAddAuthDataList());
+        console.log('auth list',this.getAddAuthDataList());
         let addAuthDataList = this.getAddAuthDataList();
         addAuthDataList.forEach((a)=>{
             if(this.authorizationProperties && this.authorizationProperties.length){

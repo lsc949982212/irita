@@ -51,7 +51,7 @@
                 <el-button size="medium"
                            @click="previous"
                            v-show="step === 2"
-                           class="btn" type="primary">上一步
+                           class="btn" type="default">上一步
                 </el-button>
 
                 <el-button class="btn" size="medium" @click="handleCancelClick">取消</el-button>
@@ -77,15 +77,6 @@
         name : 'AssetAdd',
         data(){
             return {
-                options : [{
-                    value : '1',
-                    label : '应收账款'
-                }, {
-                    value : '2',
-                    label : '非标资产',
-                    disabled : true
-                }],
-                value : '1',
                 step : 1,
                 authList : [],
                 jsonData : null,
@@ -201,7 +192,6 @@
             },
             setAuthListUI(){
                 let jsonData = $("#edit_json_schema_node").alpaca().getValue();
-                console.error(this.authorizationProperties,this.secretProperties)
                 this.authList = new JsonSchema(jsonData,this.authorizationProperties,this.secretProperties).setEditFormatAuthData().getEditAuthDataList();
             }
         }
