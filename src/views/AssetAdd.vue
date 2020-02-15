@@ -99,7 +99,7 @@
 
 <script>
     import Select from '../components/Select';
-    import schema from '../schema/schema';
+    import schema_receivable from '../schema/schema_receivable';
     import { dictionary } from '../constant/dictionary';
     import JsonSchema from '../helper/JsonSchemaHelper';
     import axios from '../helper/httpHelper';
@@ -112,6 +112,10 @@
     if(sessionStorage.getItem('token')){
         tempData.basicInfo.assetOwner = JSON.parse(sessionStorage.getItem('token')).name;
     }
+
+    const schemaFile = {
+        schema_receivable:schema_receivable,
+    };
 
 
     export default {
@@ -154,7 +158,7 @@
                         el.removeChild(childs[i]);
                     }
                     $("#json_schema_node").alpaca({
-                        "schemaSource" : schema,
+                        "schemaSource" : schemaFile[`schema_${this.value}`],
                         "dataSource" : reader.result
                     });
                     setTimeout(() =>{
@@ -204,8 +208,9 @@
                         el.removeChild(childs[i]);
                     }
                 }else if(step === 2){
+                    console.error(this.value)
                     $("#json_schema_node").alpaca({
-                        "schemaSource" : schema,
+                        "schemaSource" : schemaFile[`schema_${this.value}`],
                         "dataSource" : tempData
                     });
                     setTimeout(() =>{

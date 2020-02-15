@@ -63,12 +63,15 @@
 
 <script>
     import Select from '../components/Select';
-    import schema from '../schema/schema';
+    import schema_receivable from '../schema/schema_receivable';
     import { dictionary } from '../constant/dictionary';
     import JsonSchema from '../helper/JsonSchemaHelper';
     import axios from '../helper/httpHelper';
     import { Message } from 'element-ui';
     import { getErrorMsgByErrorCode } from '../helper/errorCodeHelper';
+    const schemaFile = {
+        schema_receivable:schema_receivable,
+    };
 
     export default {
         name : 'AssetAdd',
@@ -89,6 +92,7 @@
                 dictionary,
                 authorizationProperties:[],
                 secretProperties:[],
+                assetType:this.$route.query.asset_type
 
             }
         },
@@ -177,7 +181,7 @@
             },
             renderUI(){
                 $("#edit_json_schema_node").alpaca({
-                    "schemaSource" : schema,
+                    "schemaSource" : schemaFile[`schema_${this.assetType}`],
                     "dataSource" : this.jsonData
                 });
                 setTimeout(() =>{

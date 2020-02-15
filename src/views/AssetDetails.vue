@@ -283,7 +283,7 @@
                                 fixed
                                 prop="txType"
                                 label="交易类型"
-                                min-width="50">
+                                min-width="60">
                         </el-table-column>
                         <el-table-column
                                 label="交易哈希"
@@ -301,7 +301,7 @@
                         </el-table-column>
                         <el-table-column
                                 label="发起地址"
-                                min-width="80">
+                                min-width="70">
                             <template slot-scope="scope">
                                 <span class="link_url" @click="toExplorer('address',scope.row.senderAddr)">
                                     {{ getFormatAddress(scope.row.senderAddr) }}
@@ -310,7 +310,7 @@
                         </el-table-column>
                         <el-table-column
                                 label="接收地址"
-                                min-width="80">
+                                min-width="70">
                             <template slot-scope="scope">
                                 <span class="link_url" @click="toExplorer('address',scope.row.receiverAddr)">
                                     {{ getFormatAddress(scope.row.receiverAddr) }}
@@ -325,6 +325,11 @@
                                     {{ scope.row.height }}
                                 </span>
                             </template>
+                        </el-table-column>
+                        <el-table-column
+                                prop="tokenUrl"
+                                label="token_url"
+                                min-width="80">
                         </el-table-column>
 
                     </el-table>
@@ -447,7 +452,7 @@
 </template>
 
 <script>
-    import schema from '../schema/detailSchema';
+    import schema from '../schema/detail_receivable';
     import { constant } from '../constant/constant';
     import axios from '../helper/httpHelper';
     import cfg from '../config/config';
@@ -615,7 +620,7 @@
                 }
             },
             edit(){
-                this.$router.push(`/asset_edit?nft_id=${this.$route.query.nft_id}`);
+                this.$router.push(`/asset_edit?nft_id=${this.$route.query.nft_id}&asset_type=${this.assetType}`);
             },
             applyCheck(){
                 this.applyBtnLoading = true;
