@@ -300,7 +300,7 @@
                                 label="操作"
                                 min-width="60">
                             <template slot-scope="scope">
-                                <el-button @click="postCheckData(scope.row)"
+                                <el-button @click="handleCheckClick(scope.row)"
                                            v-show="scope.row.status === 0 && isOwner"
                                            type="text" size="small">
                                     查验
@@ -524,6 +524,9 @@
 
 <script>
     import schema from '../schema/detail_receivable';
+    import detail_receivable from '../schema/detail_receivable';
+    import detail_car from '../schema/detail_car';
+    import detail_registration from '../schema/detail_registration';
     import { constant } from '../constant/constant';
     import axios from '../helper/httpHelper';
     import cfg from '../config/config';
@@ -532,6 +535,12 @@
     import { getErrorMsgByErrorCode } from '../helper/errorCodeHelper';
     import { conversionHelper } from '../helper/conversionHelper';
     import jp from 'jsonpath';
+
+    const schemaFile = {
+        detail_receivable:detail_receivable,
+        detail_car:detail_car,
+        detail_registration:detail_registration,
+    };
 
     export default {
         name : 'AssetAdd',
@@ -601,11 +610,11 @@
                 authorizationList : [],
                 secretList : [],
                 showJsonData : false,
-                assetType : 'receivable',
+                assetType : this.$route.query.query_type,
                 needSavedData : null,
-                checkData : null,
                 authLatestUpdateTime : '',
                 transLatestUpdateTime : '',
+                checkData : null,
             }
         },
         components : {},
@@ -638,7 +647,6 @@
             loadData(){
                 this.getAssetTransList(1);
                 this.getAssetAuthList(1);
-                this.getCheckList(1);
                 this.onAssetTxPaginationClick(1);
 
             },
@@ -647,17 +655,14 @@
             },
             postCheckData(data){
                 console.log(data)
+                this.loading = true;
                 axios.post({
                     url : `/assets_check/${this.$route.query.nft_id}`,
-                    body:{
-                        req_data_path:data.path,
-                        interact_type:data.interactType,
-                        checker_addr:this.$accountHelper.getAccount().address,
-                    },
+                    body:this.checkData,
                     ctx : this
                 }).then((data) =>{
                     console.log(data);
-
+                    this.centerDialogVisible = false;
                     if(data && data.data && data.data.status === 'success'){
                         Message({
                             message : '查验已提交成功,请耐心等待',
@@ -799,6 +804,17 @@
                 this.operateNftId = row.id;
                 this.requestId = row.requestId;
             },
+            handleCheckClick(row){
+                this.centerDialogVisible = true;
+                this.dialogTitle = '确认查验';
+                this.dialogType = 6;
+                this.checkData = {
+                    req_data_path:row.path,
+                    interact_type:row.interactType,
+                    checker_addr:cfg.checkerAddress,
+                }
+            },
+
             handleConfirmBtnClick(){
                 if(this.dialogType === 0){
                     this.transfer();
@@ -812,6 +828,8 @@
                     this.acceptAuth();
                 } else if(this.dialogType === 5){
                     this.refuseAuth();
+                } else if(this.dialogType === 6){
+                    this.postCheckData();
                 }
             },
 
@@ -834,7 +852,7 @@
             },
             onCheckPaginationClick(page){
                 this.checkCurrentPage = page
-                this.getCheckList(page);
+                this.getCheckStatus(page);
             },
 
             onAssetTxPaginationClick(page){
@@ -1097,7 +1115,7 @@
                         document.getElementById('locked_detail_json_schema_node').style.display = 'block';
                         setTimeout(() =>{
                             $("#locked_detail_json_schema_node").alpaca({
-                                "schemaSource" : schema,
+                                "schemaSource" : schemaFile[`detail_${this.$route.query.query_type}`],
                                 "dataSource" : JSON.parse(data.data.data),
                                 "view" : "bootstrap-display"
                             });
@@ -1183,13 +1201,13 @@
                     console.error(e)
                 });
             },
-            getCheckStatus(){
-                let url = `/assets_check?pageNum=1&pageSize=10&used_count=false&nft_id=${this.$route.query.nft_id}`;
+            getCheckStatus(page){
+                let url = `/assets_check?pageNum=${page}&pageSize=10&used_count=false&nft_id=${this.$route.query.nft_id}`;
                 axios.get({
                     url,
                     ctx : this
                 }).then((data) =>{
-
+                    console.error(data)
                     if(data && data.data && data.data.length){
                         this.checkDataList = data.data.map((item)=>{
                             let displayStatus = item.status === 1 ? '已查验' : '未查验', displayResult = '';
@@ -1300,8 +1318,10 @@
                 }, 300)
             },
             renderUI(){
+                console.error('====',schemaFile[`detail_${this.$route.query.query_type}`])
+                console.error('====',this.$route.query.query_type)
                 $("#detail_json_schema_node").alpaca({
-                    "schemaSource" : schema,
+                    "schemaSource" : schemaFile[`detail_${this.$route.query.query_type}`],
                     "dataSource" : this.jsonData,
                     "view" : "bootstrap-display"
                 });
@@ -1384,24 +1404,6 @@
                 }).catch(e =>{
                     console.error(e)
                 });
-            },
-            getCheckList(page){
-
-                //查验数据
-
-                axios.get({
-                    url : `/assets_authorization/${this.$route.query.nft_id}/authorization_records?pageNum=${page}&pageSize=10`,
-                    ctx : this
-                }).then((data) =>{
-                    if(data && data.data){
-                        this.handleCheckData(data, page);
-                    }
-                }).catch(e =>{
-                    console.error(e)
-                });
-            },
-            handleCheckData(data,page){
-                console.error(data)
             },
             handleAssetAuthData(data, page){
                 console.log('authorization asset list data', data);

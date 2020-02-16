@@ -64,6 +64,9 @@
 <script>
     import Select from '../components/Select';
     import schema_receivable from '../schema/schema_receivable';
+    import schema_car from '../schema/schema_car';
+    import schema_registration from '../schema/schema_registration';
+
     import { dictionary } from '../constant/dictionary';
     import JsonSchema from '../helper/JsonSchemaHelper';
     import axios from '../helper/httpHelper';
@@ -71,6 +74,8 @@
     import { getErrorMsgByErrorCode } from '../helper/errorCodeHelper';
     const schemaFile = {
         schema_receivable:schema_receivable,
+        schema_car:schema_car,
+        schema_registration:schema_registration,
     };
 
     export default {
@@ -171,6 +176,7 @@
 
             },
             renderUI(){
+                console.error('======',schemaFile[`schema_${this.assetType}`])
                 $("#edit_json_schema_node").alpaca({
                     "schemaSource" : schemaFile[`schema_${this.assetType}`],
                     "dataSource" : this.jsonData

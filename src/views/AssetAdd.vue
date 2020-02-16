@@ -102,6 +102,7 @@
     import Select from '../components/Select';
     import schema_receivable from '../schema/schema_receivable';
     import schema_car from '../schema/schema_car';
+    import schema_registration from '../schema/schema_registration';
     import { dictionary } from '../constant/dictionary';
     import JsonSchema from '../helper/JsonSchemaHelper';
     import axios from '../helper/httpHelper';
@@ -117,6 +118,7 @@
     const schemaFile = {
         schema_receivable:schema_receivable,
         schema_car:schema_car,
+        schema_registration:schema_registration,
     };
 
 
@@ -224,39 +226,10 @@
                     }
                 }else if(step === 2){
                     console.log('当前选择的资产类型为:',this.value);
-                    if(sessionStorage.getItem('token') && this.value === 'receivable'){
+                    if(sessionStorage.getItem('token')){
                         tempData.basicInfo.assetOwner = JSON.parse(sessionStorage.getItem('token')).name;
+                        tempData.basicInfo.assetType = this.value;
                     }
-                    //添加下载链接
-
-
-                    /*let schemaDownloadNode = document.createElement('a');
-                    schemaDownloadNode.download = 'https://irita.oss-cn-shanghai.aliyuncs.com/demo/schema/receivable_template.json';
-                    //schemaDownloadNode.style.display = 'none';
-                    schemaDownloadNode.className = 'download_node';
-                    schemaDownloadNode.innerHTML = 'JSON Schema';
-                    // 字符内容转变成blob地址
-                    const blob = new Blob(["fsfsdfsdf"]);
-                    schemaDownloadNode.href = URL.createObjectURL(blob);
-                    // 触发点击
-                    document.getElementById('schema_container_id').appendChild(schemaDownloadNode);*/
-                    /*document.body.appendChild(eleLink);
-                    eleLink.click();*/
-
-                    /*axios.withinPrefixGet({url:'https://irita.oss-cn-shanghai.aliyuncs.com/demo/schema/receivable_template.json', ctx : this}).then((data) =>{
-                        console.error(data);
-
-                    }).catch(e =>{
-                        console.error(e);
-                        this.$message.error('请求数据错误');
-                    });*/
-
-
-
-
-
-
-
                     $("#json_schema_node").alpaca({
                         "schemaSource" : schemaFile[`schema_${this.value}`],
                         "dataSource" : tempData
@@ -275,10 +248,10 @@
             checkData(){
                 let jsonData = $("#json_schema_node").alpaca().getValue();
                 console.log(jsonData);
-                if(this.value === 'receivable' && (!jsonData.basicInfo.assetNo || !jsonData.basicInfo.assetType || !jsonData.basicInfo.assetName)){
+                /*if(this.value === 'receivable' && (!jsonData.basicInfo.assetNo || !jsonData.basicInfo.assetType || !jsonData.basicInfo.assetName)){
                     this.$message.error('请填写必填项');
                     return;
-                }
+                }*/
                 this.authList = new JsonSchema(jsonData).setAddFormatAuthData().getAddAuthDataList();
                 console.log('auth list:', this.authList)
                 jsonData.authorizationProperties = [];

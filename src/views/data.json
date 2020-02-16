@@ -1,8 +1,5 @@
 {
   "basicInfo": {
-    "assetNo": "",
-    "assetType": "receivable",
-    "assetName": "",
-    "assetOwner": ""
+    "assetType": "receivable"
   }
 }
