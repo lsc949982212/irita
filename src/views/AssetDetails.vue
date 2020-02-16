@@ -282,17 +282,17 @@
                         <el-table-column type="expand">
                             <template slot-scope="props">
                                 <el-form label-position="left" inline class="demo-table-expand">
-                                    hello world
+                                   <pre>{{ props.row.expandData }}</pre>
                                 </el-form>
                             </template>
                         </el-table-column>
                         <el-table-column
-                                prop="result"
+                                prop="displayResult"
                                 label="查验结果"
                                 min-width="80">
                         </el-table-column>
                         <el-table-column
-                                prop="status"
+                                prop="displayStatus"
                                 label="查验状态"
                                 min-width="80">
                         </el-table-column>
@@ -301,6 +301,7 @@
                                 min-width="60">
                             <template slot-scope="scope">
                                 <el-button @click="postCheckData(scope.row)"
+                                           v-show="scope.row.status === 0 && isOwner"
                                            type="text" size="small">
                                     查验
                                 </el-button>
@@ -530,6 +531,7 @@
     import { formatTimestamp, getFormatAddress } from '../util/util';
     import { getErrorMsgByErrorCode } from '../helper/errorCodeHelper';
     import { conversionHelper } from '../helper/conversionHelper';
+    import jp from 'jsonpath';
 
     export default {
         name : 'AssetAdd',
@@ -549,10 +551,7 @@
                 jsonData : null,
                 transferData : [],
                 applyAndAuthDataList : [],
-                checkDataList : [{
-                    result:'哈哈哈',
-                    status:'未查验'
-                }],
+                checkDataList : [],
                 assetListData : [],
                 serviceListData : [],
                 tab : 0,
@@ -612,7 +611,6 @@
         components : {},
         mounted(){
             this.loadData();
-            //this.getCheckout();
         },
         computed : {
             editBtnShow(){
@@ -642,12 +640,40 @@
                 this.getAssetAuthList(1);
                 this.getCheckList(1);
                 this.onAssetTxPaginationClick(1);
+
             },
             getFormatAddress(address){
                 return getFormatAddress(address)
             },
             postCheckData(data){
                 console.log(data)
+                axios.post({
+                    url : `/assets_check/${this.$route.query.nft_id}`,
+                    body:{
+                        req_data_path:data.path,
+                        interact_type:data.interactType,
+                        checker_addr:this.$accountHelper.getAccount().address,
+                    },
+                    ctx : this
+                }).then((data) =>{
+                    console.log(data);
+
+                    if(data && data.data && data.data.status === 'success'){
+                        Message({
+                            message : '查验已提交成功,请耐心等待',
+                            type : 'success'
+                        });
+                        this.loadData();
+                    } else if(data && data.data && data.data.status === 'fail'){
+                        this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
+                    } else {
+                        this.$message.error('查验提交失败');
+                    }
+                }).catch(e =>{
+                    this.applyBtnLoading = false;
+                    console.error(e);
+                    this.$message.error('查验提交失败');
+                });
             },
             refreshList(type){
                 switch (type){
@@ -659,7 +685,7 @@
                         this.getAssetAuthList(1);
                     case 'check':
                         this.checkCurrentPage = 1;
-                        this.getCheckList(1);
+                        this.getCheckStatus(1);
                     case 'list':
                         this.assetTxCurrentPage = 1;
                         this.authCurrentPage = 1;
@@ -1163,10 +1189,23 @@
                     url,
                     ctx : this
                 }).then((data) =>{
-                    res(data)
+
+                    if(data && data.data && data.data.length){
+                        this.checkDataList = data.data.map((item)=>{
+                            let displayStatus = item.status === 1 ? '已查验' : '未查验', displayResult = '';
+                            return {
+                                displayStatus,
+                                displayResult,
+                                path:item.req_data_path,
+                                interactType:item.interact_type,
+                                expandData:jp.query(this.jsonData, item.req_data_path),
+                                status:item.status,
+                            }
+                        })
+                    }
                 }).catch(e =>{
                     console.error(e);
-                    rej(e);
+
                 });
             },
             handleDetailData(data){
@@ -1181,6 +1220,8 @@
                     this.secretList = JSON.parse(data.asset_info).secretProperties;
                     this.hasSecret = this.jsonData.authorizationProperties.length > 0 && !this.$accountHelper.isOwner(data.chain_info.owner)
                     this.renderUI();
+                    //获取完json数据才能获取查验信息
+                    this.getCheckStatus();
                 }
                 if(data && data.chain_info){
                     this.chainInfo = data.chain_info;
@@ -1444,22 +1485,6 @@
                     }
                 })
             },
-            getCheckout(){
-                axios.get({
-                    url : `/assets_check/${this.$route.query.nft_id}?examine_no=hello&address=faa1fwgw9ej3yzq6frn8rq7pswfhkdcsq8szgx0xkq`,
-                    ctx : this
-                }).then((data) =>{
-                    if(data && data.status && data.status === 'success'){
-                        Message({
-                            message : '查验已提交成功,请耐心等待',
-                            type : 'success'
-                        });
-                    }
-                }).catch(e =>{
-                    console.error(e)
-                });
-            }
-
 
         }
     }

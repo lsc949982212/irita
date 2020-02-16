@@ -109,6 +109,7 @@
     import { getErrorMsgByErrorCode } from '../helper/errorCodeHelper';
     import { isJson } from '../util/util';
     import data from './data';
+    import schemaConfig from '../schema/config';
 
     let tempData = JSON.parse(JSON.stringify(data));
 
@@ -154,10 +155,10 @@
                         this.$message.error('json数据格式有误,请重新上传');
                         return;
                     }
-                    console.error(reader.result)
+                    console.log(reader.result)
 
-                    if(reader.result.dataInteract){
-                        this.dataInteract = reader.result.dataInteract
+                    if(JSON.parse(reader.result).dataInteract){
+                        this.dataInteract = JSON.parse(reader.result).dataInteract
                     }
 
 
@@ -190,11 +191,14 @@
                     console.log(data);
                     if(data && data.status === 'success'){
                         if(data && data.data){
-                            this.options = data.data.map((item, index) =>{
-                                return {
-                                    value : `'${index + 1}'`,
-                                    label : item
-                                }
+
+                             data.data.forEach((item, index) =>{
+                                 if(schemaConfig.denomList.includes(item)){
+                                     this.options.push({
+                                         value : item,
+                                         label : item
+                                     })
+                                 }
                             });
                             if(data.data.length > 0){
                                 this.value = data.data[0]
@@ -287,6 +291,7 @@
                 let secret = this.authList.filter((a) => a.value === '3');
                 this.jsonData.authorizationProperties = [];
                 this.jsonData.secretProperties = [];
+                this.jsonData.dataInteract = this.dataInteract;
                 authorization.forEach((a) => this.jsonData.authorizationProperties.push(a.str));
                 secret.forEach((a) => this.jsonData.secretProperties.push(a.str));
                 this.postData();
