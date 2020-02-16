@@ -49,4 +49,11 @@ export default {
             });
         })
     },
+    withinPrefixGet(params){
+        const{url} = params;
+        return new Promise((res,rej)=>{
+            axios.get(url, {timeout:constant.TIME_OUT}).then(result => res(result.data)).catch((e)=>rej(e));
+        })
+    }
+
 }

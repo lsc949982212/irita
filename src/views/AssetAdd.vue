@@ -23,18 +23,18 @@
             <div class="add_schema_container step_second" v-show="step === 2">
 
                 <div class="add_schema_download_container">
-                    <div class="download_container">
+                    <div class="download_container" id="schema_container_id">
                         <img src="../assets/download.png" class="download_icon">
-                        <a class="download_node"
+                        <!--<a class="download_node"
                            href="https://irita.oss-cn-shanghai.aliyuncs.com/demo/schema/receivable_schema.json"
-                           download>JSON Schema</a>
+                           download>JSON Schema</a>-->
                     </div>
-                    <div class="download_container">
+                    <div class="download_container" id="data_container_id">
                         <img src="../assets/download.png" class="download_icon">
-                        <a target="_blank"
+                        <!--<a target="_blank"
                            class="download_node"
                            href="https://irita.oss-cn-shanghai.aliyuncs.com/demo/schema/receivable_template.json"
-                           download>资产数据文本样例</a>
+                           download>资产数据文本样例</a>-->
                     </div>
                     <input type="file" id="files" style="display:none;margin-left:20px;" @change="fileImport" accept=".json">
                     <el-button size="medium"
@@ -129,6 +129,7 @@
                 authList : [],
                 jsonData : null,
                 dictionary,
+                dataInteract:[],
             }
         },
         components : {
@@ -153,6 +154,13 @@
                         this.$message.error('json数据格式有误,请重新上传');
                         return;
                     }
+                    console.error(reader.result)
+
+                    if(reader.result.dataInteract){
+                        this.dataInteract = reader.result.dataInteract
+                    }
+
+
                     const el = document.getElementById('json_schema_node');
                     const childs = el.childNodes;
                     for(let i = childs.length - 1 ; i >= 0 ; i--){
@@ -189,8 +197,8 @@
                                 }
                             });
                             if(data.data.length > 0){
-                                //this.value = data.data[0]
-                                this.value = 'car'
+                                this.value = data.data[0]
+                                //this.value = 'car'
                             }
 
                         }
@@ -215,6 +223,36 @@
                     if(sessionStorage.getItem('token') && this.value === 'receivable'){
                         tempData.basicInfo.assetOwner = JSON.parse(sessionStorage.getItem('token')).name;
                     }
+                    //添加下载链接
+
+
+                    /*let schemaDownloadNode = document.createElement('a');
+                    schemaDownloadNode.download = 'https://irita.oss-cn-shanghai.aliyuncs.com/demo/schema/receivable_template.json';
+                    //schemaDownloadNode.style.display = 'none';
+                    schemaDownloadNode.className = 'download_node';
+                    schemaDownloadNode.innerHTML = 'JSON Schema';
+                    // 字符内容转变成blob地址
+                    const blob = new Blob(["fsfsdfsdf"]);
+                    schemaDownloadNode.href = URL.createObjectURL(blob);
+                    // 触发点击
+                    document.getElementById('schema_container_id').appendChild(schemaDownloadNode);*/
+                    /*document.body.appendChild(eleLink);
+                    eleLink.click();*/
+
+                    /*axios.withinPrefixGet({url:'https://irita.oss-cn-shanghai.aliyuncs.com/demo/schema/receivable_template.json', ctx : this}).then((data) =>{
+                        console.error(data);
+
+                    }).catch(e =>{
+                        console.error(e);
+                        this.$message.error('请求数据错误');
+                    });*/
+
+
+
+
+
+
+
                     $("#json_schema_node").alpaca({
                         "schemaSource" : schemaFile[`schema_${this.value}`],
                         "dataSource" : tempData
