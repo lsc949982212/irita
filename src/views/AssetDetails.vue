@@ -859,12 +859,15 @@
                     } else {
                         this.$message.error('接受申请失败');
                         this.centerDialogVisible = false;
+                        //接受失败以后重新请求转让状态,修改可操作按钮
+                        this.getAssetTransList(1);
                     }
                 }).catch(e =>{
                     console.error(e);
                     this.loading = false;
                     this.$message.error('接受申请失败');
                     this.centerDialogVisible = false;
+                    this.getAssetTransList(1);
                 });
 
             },
@@ -1081,9 +1084,8 @@
                         this.centerDialogVisible = false;
                     } else {
                         this.$message.error('解密失败');
-                        setTimeout(()=>{
-                            window.location.reload();
-                        },1000)
+                        //失败以后重新请求授权状态,如果状态改变则修改按钮展示
+                        this.getAssetAuthList();
                     }
                 }).catch(e =>{
                     console.error(e);
