@@ -16,7 +16,7 @@ export default class JsonSchemaHelper {
 
     setAddFormatAuthData(data = this.data, prop = ''){
         for(let key in data){
-            if(key === 'authorizationProperties' || key === 'secretProperties') continue;
+            if(key === 'authorizationProperties' || key === 'secretProperties' || key === 'dataInteract') continue;
             if(data[key] instanceof Array){
                 if(data[key].length > 0){
                     let str = key;

@@ -255,6 +255,76 @@
                         :total="totalApplyCount">
                 </el-pagination>
             </div>
+
+
+            <div class="content_container">
+                <p class="content_chain_info">
+                    查验数据
+                </p>
+                <div class="auth_refresh_btn" @click="refreshList('check')">
+                    <!--<div class="latest_update_time_container" v-show="authLatestUpdateTime">
+                        <span class="latest_update_title">
+                            最后更新时间
+                        </span>
+                        <span class="latest_update_content">
+                            {{ authLatestUpdateTime }}
+                        </span>
+                    </div>-->
+                    <img src="../assets/refresh.png" class="refresh_icon">
+                    <span class="auth_refresh_btn_refresh">
+                        刷新
+                    </span>
+                </div>
+                <div class="content_table_wrap">
+                    <el-table
+                            :data="checkDataList"
+                            style="width: 100%">
+                        <el-table-column type="expand">
+                            <template slot-scope="props">
+                                <el-form label-position="left" inline class="demo-table-expand">
+                                    hello world
+                                </el-form>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                prop="result"
+                                label="查验结果"
+                                min-width="80">
+                        </el-table-column>
+                        <el-table-column
+                                prop="status"
+                                label="查验状态"
+                                min-width="80">
+                        </el-table-column>
+                        <el-table-column
+                                label="操作"
+                                min-width="60">
+                            <template slot-scope="scope">
+                                <el-button @click="postCheckData(scope.row)"
+                                           type="text" size="small">
+                                    查验
+                                </el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+
+
+                </div>
+            </div>
+            <div class="pagination_container" v-show="totalcheckCount > 5">
+                <span class="total_page">
+                    共{{ totalcheckCount }}条
+                </span>
+                <el-pagination
+                        background
+                        @current-change="onCheckPaginationClick"
+                        :current-page="checkCurrentPage"
+                        layout="prev, pager, next"
+                        :total="totalcheckCount">
+                </el-pagination>
+            </div>
+
+
             <div class="content_container">
                 <div class="content_tab_container">
                     <span class="content_tab_item"
@@ -327,8 +397,8 @@
                             </template>
                         </el-table-column>
                         <el-table-column
-                                prop="tokenUrl"
-                                label="token_url"
+                                prop="tokenUri"
+                                label="token_uri"
                                 min-width="80">
                         </el-table-column>
 
@@ -479,11 +549,16 @@
                 jsonData : null,
                 transferData : [],
                 applyAndAuthDataList : [],
+                checkDataList : [{
+                    result:'哈哈哈',
+                    status:'未查验'
+                }],
                 assetListData : [],
                 serviceListData : [],
                 tab : 0,
                 totalTransCount : 1,
                 totalApplyCount : 1,
+                totalcheckCount : 1,
                 totalTxListCount : 1,
                 totalServiceListCount : 1,
                 options : [{
@@ -496,6 +571,7 @@
                 dialogType : 1,
                 transCurrentPage : 1,
                 authCurrentPage : 1,
+                checkCurrentPage : 1,
                 assetTxCurrentPage : 1,
                 serviceTxCurrentPage : 1,
                 hasSecret : true,
@@ -529,8 +605,8 @@
                 assetType : 'receivable',
                 needSavedData : null,
                 checkData : null,
-                authLatestUpdateTime:'',
-                transLatestUpdateTime:'',
+                authLatestUpdateTime : '',
+                transLatestUpdateTime : '',
             }
         },
         components : {},
@@ -564,10 +640,14 @@
             loadData(){
                 this.getAssetTransList(1);
                 this.getAssetAuthList(1);
+                this.getCheckList(1);
                 this.onAssetTxPaginationClick(1);
             },
             getFormatAddress(address){
                 return getFormatAddress(address)
+            },
+            postCheckData(data){
+                console.log(data)
             },
             refreshList(type){
                 switch (type){
@@ -577,6 +657,9 @@
                     case 'auth':
                         this.authCurrentPage = 1;
                         this.getAssetAuthList(1);
+                    case 'check':
+                        this.checkCurrentPage = 1;
+                        this.getCheckList(1);
                     case 'list':
                         this.assetTxCurrentPage = 1;
                         this.authCurrentPage = 1;
@@ -723,6 +806,11 @@
                 this.authCurrentPage = page
                 this.getAssetAuthList(page);
             },
+            onCheckPaginationClick(page){
+                this.checkCurrentPage = page
+                this.getCheckList(page);
+            },
+
             onAssetTxPaginationClick(page){
                 this.assetTxCurrentPage = page;
                 this.getAssetTxList(page);
@@ -741,8 +829,14 @@
 
             },
             postAcceptTrans(){
+                let token = sessionStorage.getItem('token');
+                let displayUserName = '';
+                if(token){
+                    displayUserName = JSON.parse(token).name;
+                }
                 const body = {
                     request_id : this.requestId,
+                    owner_name:displayUserName,
                 };
                 this.loading = true;
                 axios.post({
@@ -1245,6 +1339,24 @@
                     console.error(e)
                 });
             },
+            getCheckList(page){
+
+                //查验数据
+
+                axios.get({
+                    url : `/assets_authorization/${this.$route.query.nft_id}/authorization_records?pageNum=${page}&pageSize=10`,
+                    ctx : this
+                }).then((data) =>{
+                    if(data && data.data){
+                        this.handleCheckData(data, page);
+                    }
+                }).catch(e =>{
+                    console.error(e)
+                });
+            },
+            handleCheckData(data,page){
+                console.error(data)
+            },
             handleAssetAuthData(data, page){
                 console.log('authorization asset list data', data);
                 this.totalApplyCount = data.total;
@@ -1295,7 +1407,8 @@
                         time : formatTimestamp(item.time),
                         senderAddr : item.consumer,
                         receiverAddr : item.provider,
-                        height : item.height
+                        height : item.height,
+                        tokenUri : item.token_uri
                     }
                 })
             },
@@ -1514,16 +1627,16 @@
                         color: @themeColor;
                         margin-left: 8px;
                     }
-                    .latest_update_time_container{
+                    .latest_update_time_container {
                         .flexRow;
-                        margin-right:20px;
-                        .latest_update_title{
-                            font-size:14px;
-                            margin-right:10px;
+                        margin-right: 20px;
+                        .latest_update_title {
+                            font-size: 14px;
+                            margin-right: 10px;
                             color: @mainFontColor;
                         }
-                        .latest_update_content{
-                            font-size:14px;
+                        .latest_update_content {
+                            font-size: 14px;
                             color: @mainFontColor;
                         }
                     }

@@ -25,14 +25,15 @@
                 <div class="add_schema_download_container">
                     <div class="download_container">
                         <img src="../assets/download.png" class="download_icon">
-                        <a target="_blank"
-                           class="download_node"
+                        <a class="download_node"
+                           href="https://irita.oss-cn-shanghai.aliyuncs.com/demo/schema/receivable_schema.json"
                            download>JSON Schema</a>
                     </div>
                     <div class="download_container">
                         <img src="../assets/download.png" class="download_icon">
                         <a target="_blank"
                            class="download_node"
+                           href="https://irita.oss-cn-shanghai.aliyuncs.com/demo/schema/receivable_template.json"
                            download>资产数据文本样例</a>
                     </div>
                     <input type="file" id="files" style="display:none;margin-left:20px;" @change="fileImport" accept=".json">
@@ -52,11 +53,11 @@
                         <div class="content_visibility_item"
                              :class="info.type ? 'first_item' : ''"
                              v-for="(info, index) in authList">
-                            <span class="content_visibility_type" v-if="info.type">
+                            <!--<span class="content_visibility_type" v-if="info.type">
                                 {{ dictionary.get(info.type) }}
-                            </span>
+                            </span>-->
                             <span class="content_visibility_title">
-                                {{ info.title }}
+                                {{ info.str.split('.')[info.str.split('.').length - 1] }}
                             </span>
                             <Select :options="info.data" :index="index"
                                     @closeOtherOps="closeOtherOps"
@@ -100,6 +101,7 @@
 <script>
     import Select from '../components/Select';
     import schema_receivable from '../schema/schema_receivable';
+    import schema_car from '../schema/schema_car';
     import { dictionary } from '../constant/dictionary';
     import JsonSchema from '../helper/JsonSchemaHelper';
     import axios from '../helper/httpHelper';
@@ -109,12 +111,11 @@
     import data from './data';
 
     let tempData = JSON.parse(JSON.stringify(data));
-    if(sessionStorage.getItem('token')){
-        tempData.basicInfo.assetOwner = JSON.parse(sessionStorage.getItem('token')).name;
-    }
+
 
     const schemaFile = {
         schema_receivable:schema_receivable,
+        schema_car:schema_car,
     };
 
 
@@ -165,10 +166,11 @@
                         document.getElementsByClassName('alpaca-required-indicator').forEach((node) =>{
                             node.innerHTML = '(必填)';
                         });
-                        if(document.getElementsByName('basicInfo_assetType')){
-                            document.getElementsByName('basicInfo_assetType')[0].setAttribute('disabled',true)
+                        const assetType = document.getElementsByName('basicInfo_assetType');
+                        if(assetType && assetType.length){
+                            assetType[0].setAttribute('disabled',true)
                         }
-                    }, 100)
+                    }, 300)
                 }
             },
             handleCancelClick(){
@@ -187,7 +189,8 @@
                                 }
                             });
                             if(data.data.length > 0){
-                                this.value = data.data[0]
+                                //this.value = data.data[0]
+                                this.value = 'car'
                             }
 
                         }
@@ -208,7 +211,10 @@
                         el.removeChild(childs[i]);
                     }
                 }else if(step === 2){
-                    console.error(this.value)
+                    console.log('当前选择的资产类型为:',this.value);
+                    if(sessionStorage.getItem('token') && this.value === 'receivable'){
+                        tempData.basicInfo.assetOwner = JSON.parse(sessionStorage.getItem('token')).name;
+                    }
                     $("#json_schema_node").alpaca({
                         "schemaSource" : schemaFile[`schema_${this.value}`],
                         "dataSource" : tempData
@@ -217,14 +223,17 @@
                         document.getElementsByClassName('alpaca-required-indicator').forEach((node) =>{
                             node.innerHTML = '(必填)';
                         });
-                        document.getElementsByName('basicInfo_assetType')[0].setAttribute('disabled',true)
+                        const assetType = document.getElementsByName('basicInfo_assetType');
+                        if(assetType && assetType.length){
+                            assetType[0].setAttribute('disabled',true)
+                        }
                     }, 100);
                 }
             },
             checkData(){
                 let jsonData = $("#json_schema_node").alpaca().getValue();
                 console.log(jsonData);
-                if(!jsonData.basicInfo.assetNo || !jsonData.basicInfo.assetType || !jsonData.basicInfo.assetName){
+                if(this.value === 'receivable' && (!jsonData.basicInfo.assetNo || !jsonData.basicInfo.assetType || !jsonData.basicInfo.assetName)){
                     this.$message.error('请填写必填项');
                     return;
                 }
