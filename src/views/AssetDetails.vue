@@ -1081,6 +1081,9 @@
                         this.centerDialogVisible = false;
                     } else {
                         this.$message.error('解密失败');
+                        setTimeout(()=>{
+                            window.location.reload();
+                        },1000)
                     }
                 }).catch(e =>{
                     console.error(e);
