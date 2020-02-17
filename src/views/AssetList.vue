@@ -19,12 +19,12 @@
                     <el-table-column
                             prop="name"
                             label="资产名称"
-                            min-width="120">
+                            min-width="110">
                     </el-table-column>
                     <el-table-column
                             prop="type"
                             label="资产类型"
-                            min-width="60">
+                            min-width="70">
                     </el-table-column>
                     <el-table-column
                             label="操作者地址"
@@ -48,11 +48,11 @@
                     <el-table-column
                             prop="displayTransStatus"
                             label="转让状态"
-                            min-width="60">
+                            min-width="80">
                     </el-table-column>
                     <el-table-column
                             label="操作"
-                            min-width="90">
+                            min-width="70">
                         <template slot-scope="scope">
                             <el-button @click="handleCheckClick(scope.row)" type="text" size="small">
                                 查看

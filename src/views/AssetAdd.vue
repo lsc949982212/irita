@@ -25,16 +25,16 @@
                 <div class="add_schema_download_container">
                     <div class="download_container" id="schema_container_id">
                         <img src="../assets/download.png" class="download_icon">
-                        <!--<a class="download_node"
+                        <a class="download_node"
                            href="https://irita.oss-cn-shanghai.aliyuncs.com/demo/schema/receivable_schema.json"
-                           download>JSON Schema</a>-->
+                           download>JSON Schema</a>
                     </div>
                     <div class="download_container" id="data_container_id">
                         <img src="../assets/download.png" class="download_icon">
-                        <!--<a target="_blank"
+                        <a target="_blank"
                            class="download_node"
                            href="https://irita.oss-cn-shanghai.aliyuncs.com/demo/schema/receivable_template.json"
-                           download>资产数据文本样例</a>-->
+                           download>资产数据文本样例</a>
                     </div>
                     <input type="file" id="files" style="display:none;margin-left:20px;" @change="fileImport" accept=".json">
                     <el-button size="medium"
@@ -100,11 +100,9 @@
 
 <script>
     import Select from '../components/Select';
-    import schema_receivable from '../schema/schema_receivable';
-    import schema_car from '../schema/schema_car';
-    import schema_registration from '../schema/schema_registration';
     import { dictionary } from '../constant/dictionary';
-    import JsonSchema from '../helper/JsonSchemaHelper';
+    import JsonSchema from '../helper/JsonDataHelper';
+    import JsonSchemaHelper from '../helper/JsonSchemaHelper';
     import axios from '../helper/httpHelper';
     import { Message } from 'element-ui';
     import { getErrorMsgByErrorCode } from '../helper/errorCodeHelper';
@@ -113,14 +111,6 @@
     import schemaConfig from '../schema/config';
 
     let tempData = JSON.parse(JSON.stringify(data));
-
-
-    const schemaFile = {
-        schema_receivable:schema_receivable,
-        schema_car:schema_car,
-        schema_registration:schema_registration,
-    };
-
 
     export default {
         name : 'AssetAdd',
@@ -170,7 +160,7 @@
                         el.removeChild(childs[i]);
                     }
                     $("#json_schema_node").alpaca({
-                        "schemaSource" : schemaFile[`schema_${this.value}`],
+                        "schemaSource" : JsonSchemaHelper.getFormatSchemaFile(require(`../schema/schema_${this.value}`)),
                         "dataSource" : reader.result
                     });
                     setTimeout(() =>{
@@ -231,7 +221,7 @@
                         tempData.basicInfo.assetType = this.value;
                     }
                     $("#json_schema_node").alpaca({
-                        "schemaSource" : schemaFile[`schema_${this.value}`],
+                        "schemaSource" : JsonSchemaHelper.getFormatSchemaFile(require(`../schema/schema_${this.value}`)),
                         "dataSource" : tempData
                     });
                     setTimeout(() =>{

@@ -287,6 +287,15 @@
                             </template>
                         </el-table-column>
                         <el-table-column
+                                label="数据信息"
+                                min-width="60">
+                            <template>
+                                <span>
+                                    数据信息
+                                </span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
                                 prop="displayResult"
                                 label="查验结果"
                                 min-width="80">
@@ -524,23 +533,15 @@
 
 <script>
 
-    import schema_receivable from '../schema/schema_receivable';
-    import schema_car from '../schema/schema_car';
-    import schema_registration from '../schema/schema_registration';
     import { constant } from '../constant/constant';
     import axios from '../helper/httpHelper';
+    import JsonSchemaHelper from '../helper/JsonSchemaHelper';
     import cfg from '../config/config';
     import { Message } from 'element-ui';
     import { formatTimestamp, getFormatAddress } from '../util/util';
     import { getErrorMsgByErrorCode } from '../helper/errorCodeHelper';
     import { conversionHelper } from '../helper/conversionHelper';
     import jp from 'jsonpath';
-
-    const schemaFile = {
-        schema_receivable:schema_receivable,
-        schema_car:schema_car,
-        schema_registration:schema_registration,
-    };
 
     export default {
         name : 'AssetAdd',
@@ -1115,7 +1116,7 @@
                         document.getElementById('locked_detail_json_schema_node').style.display = 'block';
                         setTimeout(() =>{
                             $("#locked_detail_json_schema_node").alpaca({
-                                "schemaSource" : schemaFile[`schema_${this.$route.query.query_type}`],
+                                "schemaSource" : JsonSchemaHelper.getFormatSchemaFile(require(`../schema/schema_${this.$route.query.query_type}`)),
                                 "dataSource" : JSON.parse(data.data.data),
                                 "view" : "bootstrap-display"
                             });
@@ -1212,11 +1213,11 @@
                         this.checkDataList = data.data.map((item)=>{
                             let displayStatus = '', displayResult = item.check_result ? '已查验' : '未查验';
                             if(item.status === constant.CHECK_STATUS.NOT_CALL){
-                                displayStatus = '未调用';
+                                displayStatus = '未查验';
                             }else if(item.status === constant.CHECK_STATUS.CALLING){
-                                displayStatus = '调用中';
+                                displayStatus = '查验中';
                             }else if(item.status === constant.CHECK_STATUS.RESPONSED){
-                                displayStatus = '已响应';
+                                displayStatus = '已查验';
                             }else if(item.status === constant.CHECK_STATUS.EXPIRED){
                                 displayStatus = '已失效';
                             }
@@ -1329,7 +1330,7 @@
             },
             renderUI(){
                 $("#detail_json_schema_node").alpaca({
-                    "schemaSource" : schemaFile[`schema_${this.$route.query.query_type}`],
+                    "schemaSource" : JsonSchemaHelper.getFormatSchemaFile(require(`../schema/schema_${this.$route.query.query_type}`)),
                     "dataSource" : this.jsonData,
                     "view" : "bootstrap-display"
                 });
