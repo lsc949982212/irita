@@ -1561,7 +1561,7 @@
                 }
                 .note_container {
                     position: absolute;
-                    left: 100px;
+                    right: 40px;
                     top: 13px;
                     .flexRow;
                     align-items: center;
