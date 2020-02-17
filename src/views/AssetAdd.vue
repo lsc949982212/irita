@@ -111,7 +111,7 @@
     import { isJson } from '../util/util';
     import data from './data';
     import schemaConfig from '../schema/config';
-
+    import jp from 'jsonpath';
     let tempData = JSON.parse(JSON.stringify(data));
 
     export default {
@@ -177,7 +177,7 @@
                         el.removeChild(childs[i]);
                     }
                     $("#json_schema_node").alpaca({
-                        "schemaSource" : JsonSchemaHelper.getFormatSchemaFile(require(`../schema/schema_${this.value}`)),
+                        "schemaSource" : JsonSchemaHelper.getFormatSchemaFile(require(`../schema/${this.value}`)),
                         "dataSource" : reader.result
                     });
                     setTimeout(() =>{
@@ -238,7 +238,7 @@
                         tempData.basicInfo.assetType = this.value;
                     }
                     $("#json_schema_node").alpaca({
-                        "schemaSource" : JsonSchemaHelper.getFormatSchemaFile(require(`../schema/schema_${this.value}`)),
+                        "schemaSource" : JsonSchemaHelper.getFormatSchemaFile(require(`../schema/${this.value}`)),
                         "dataSource" : tempData
                     });
                     setTimeout(() =>{

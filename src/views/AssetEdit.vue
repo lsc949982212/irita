@@ -175,7 +175,7 @@
             },
             renderUI(){
                 $("#edit_json_schema_node").alpaca({
-                    "schemaSource" : JsonSchemaHelper.getFormatSchemaFile(require(`../schema/schema_${this.assetType}`)),
+                    "schemaSource" : JsonSchemaHelper.getFormatSchemaFile(require(`../schema/${this.assetType}`)),
                     "dataSource" : this.jsonData
                 });
                 setTimeout(() =>{

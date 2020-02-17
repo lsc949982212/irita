@@ -664,6 +664,7 @@
                 }).then((data) =>{
                     console.log(data);
                     this.centerDialogVisible = false;
+                    this.loading = false;
                     if(data && data.data && data.data.status === 'success'){
                         Message({
                             message : '查验已提交成功,请耐心等待',
@@ -677,6 +678,7 @@
                     }
                 }).catch(e =>{
                     this.applyBtnLoading = false;
+                    this.loading = false;
                     console.error(e);
                     this.$message.error('查验提交失败');
                 });
@@ -1116,7 +1118,7 @@
                         document.getElementById('locked_detail_json_schema_node').style.display = 'block';
                         setTimeout(() =>{
                             $("#locked_detail_json_schema_node").alpaca({
-                                "schemaSource" : JsonSchemaHelper.getFormatSchemaFile(require(`../schema/schema_${this.$route.query.query_type}`)),
+                                "schemaSource" : JsonSchemaHelper.getFormatSchemaFile(require(`../schema/${this.$route.query.query_type}`)),
                                 "dataSource" : JSON.parse(data.data.data),
                                 "view" : "bootstrap-display"
                             });
@@ -1330,7 +1332,7 @@
             },
             renderUI(){
                 $("#detail_json_schema_node").alpaca({
-                    "schemaSource" : JsonSchemaHelper.getFormatSchemaFile(require(`../schema/schema_${this.$route.query.query_type}`)),
+                    "schemaSource" : JsonSchemaHelper.getFormatSchemaFile(require(`../schema/${this.$route.query.query_type}`)),
                     "dataSource" : this.jsonData,
                     "view" : "bootstrap-display"
                 });
