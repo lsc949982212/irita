@@ -88,7 +88,8 @@
                 dictionary,
                 authorizationProperties:[],
                 secretProperties:[],
-                assetType:this.$route.query.asset_type
+                assetType:this.$route.query.asset_type,
+                dataInteract:[],
 
             }
         },
@@ -115,6 +116,7 @@
                 let jsonData = $("#edit_json_schema_node").alpaca().getValue();
                 jsonData.authorizationProperties = [];
                 jsonData.secretProperties = [];
+                jsonData.dataInteract = this.dataInteract;
                 authorization.forEach((a) => jsonData.authorizationProperties.push(a.str));
                 secret.forEach((a) => jsonData.secretProperties.push(a.str));
                 this.jsonData = jsonData;
@@ -169,6 +171,10 @@
                 console.log('detail data', data)
                 if(data.asset_info){
                     this.jsonData =  JSON.parse(data.asset_info);
+                    //查验数据需要加上
+                    if(this.jsonData.dataInteract){
+                        this.dataInteract = this.jsonData.dataInteract
+                    }
                     this.authorizationProperties = this.jsonData.authorizationProperties;
                     this.secretProperties = this.jsonData.secretProperties;
                     this.renderUI();
@@ -176,7 +182,7 @@
 
             },
             renderUI(){
-                console.error('======',schemaFile[`schema_${this.assetType}`])
+                console.log(schemaFile[`schema_${this.assetType}`])
                 $("#edit_json_schema_node").alpaca({
                     "schemaSource" : schemaFile[`schema_${this.assetType}`],
                     "dataSource" : this.jsonData
