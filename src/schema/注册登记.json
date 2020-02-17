@@ -3,10 +3,6 @@
   "$id":"http://example.com/root.json",
   "type":"object",
   "title":"注册登记",
-  "required":[
-    "basicInfo",
-    "detailedInfo"
-  ],
   "properties":{
     "basicInfo":{
       "$id":"#/properties/basicInfo",

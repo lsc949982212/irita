@@ -313,7 +313,8 @@
                         margin-bottom: 0;
                     }
                     .alpaca-required-indicator {
-                        display: none;
+                        font-style: normal;
+                        color: red;
                     }
                     .alpaca-control {
                         font-size: 14px;
