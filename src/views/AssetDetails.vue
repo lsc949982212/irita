@@ -310,7 +310,7 @@
                                 min-width="60">
                             <template slot-scope="scope">
                                 <el-button @click="handleCheckClick(scope.row)"
-                                           v-show="!scope.row.result && isOwner"
+                                           v-show="(scope.row.status === 0 || scope.row.status === 3) && isOwner"
                                            type="text" size="small">
                                     查验
                                 </el-button>
@@ -1213,7 +1213,7 @@
                     console.error(data)
                     if(data && data.data && data.data.length){
                         this.checkDataList = data.data.map((item)=>{
-                            let displayStatus = '', displayResult = item.check_result ? '已查验' : '未查验';
+                            let displayStatus = '', displayResult = item.check_result ? '通过' : '不通过';
                             if(item.status === constant.CHECK_STATUS.NOT_CALL){
                                 displayStatus = '未查验';
                             }else if(item.status === constant.CHECK_STATUS.CALLING){

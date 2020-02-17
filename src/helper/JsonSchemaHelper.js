@@ -20,8 +20,13 @@ export default class JsonSchemaHelper {
         return tempSchema;
     }
 
-    static getTitleByJSONPath(schema, pathList){
-        //console.log(schema, pathList)
+    static getTitleByJSONPath(schema, path){
+        if('properties' in schema){
+            schema = schema.properties[path];
+        }else if('items' in schema){
+            console.error(path)
+            schema = schema.items[path];
+        }
 
     }
 
