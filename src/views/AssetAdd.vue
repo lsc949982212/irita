@@ -26,17 +26,20 @@
                     <div class="download_container" id="schema_container_id">
                         <img src="../assets/download.png" class="download_icon">
                         <a class="download_node"
-                           href="https://irita.oss-cn-shanghai.aliyuncs.com/demo/schema/receivable_schema.json"
+                           target="_blank"
+                           :href="schemaDownloadUrl"
                            download>JSON Schema</a>
                     </div>
                     <div class="download_container" id="data_container_id">
                         <img src="../assets/download.png" class="download_icon">
                         <a target="_blank"
                            class="download_node"
-                           href="https://irita.oss-cn-shanghai.aliyuncs.com/demo/schema/receivable_template.json"
+                           target="_blank"
+                           :href="dataDownloadUrl"
                            download>资产数据文本样例</a>
                     </div>
-                    <input type="file" id="files" style="display:none;margin-left:20px;" @change="fileImport" accept=".json">
+                    <input type="file" id="files" style="display:none;margin-left:20px;" @change="fileImport"
+                           accept=".json">
                     <el-button size="medium"
                                @click="handleImportClick"
                                class="btn" type="primary">导入资产
@@ -122,7 +125,8 @@
                 authList : [],
                 jsonData : null,
                 dictionary,
-                dataInteract:[],
+                dataInteract : [],
+                downloadUrl : null,
             }
         },
         components : {
@@ -130,6 +134,22 @@
         },
         mounted(){
             this.getAssetType();
+        },
+        computed:{
+            schemaDownloadUrl(){
+                if(this.value && this.downloadUrl){
+                    return this.downloadUrl[this.value].schema;
+                }else{
+                    return '';
+                }
+            },
+            dataDownloadUrl(){
+                if(this.value && this.downloadUrl){
+                    return this.downloadUrl[this.value].template;
+                }else{
+                    return '';
+                }
+            },
         },
         methods : {
             add(){
@@ -147,8 +167,6 @@
                         this.$message.error('json数据格式有误,请重新上传');
                         return;
                     }
-                    console.log(reader.result)
-
                     if(JSON.parse(reader.result).dataInteract){
                         this.dataInteract = JSON.parse(reader.result).dataInteract
                     }
@@ -169,7 +187,7 @@
                         });
                         const assetType = document.getElementsByName('basicInfo_assetType');
                         if(assetType && assetType.length){
-                            assetType[0].setAttribute('disabled',true)
+                            assetType[0].setAttribute('disabled', true)
                         }
                     }, 300)
                 }
@@ -182,18 +200,18 @@
                 axios.get({url, ctx : this}).then((data) =>{
                     console.log(data);
                     if(data && data.status === 'success'){
-                        if(data && data.data){
-
-                             data.data.forEach((item, index) =>{
-                                 if(schemaConfig.denomList.includes(item)){
-                                     this.options.push({
-                                         value : item,
-                                         label : item
-                                     })
-                                 }
+                        if(data && data.data && data.data.denoms){
+                            data.data.denoms.forEach((item, index) =>{
+                                if(schemaConfig.denomList.includes(item)){
+                                    this.options.push({
+                                        value : item,
+                                        label : item
+                                    })
+                                }
                             });
-                            if(data.data.length > 0){
-                                this.value = data.data[0]
+                            this.downloadUrl = data.data.download_url;
+                            if(data.data.denoms.length > 0){
+                                this.value = data.data.denoms[0]
                                 //this.value = 'car'
                             }
 
@@ -214,8 +232,8 @@
                     for(let i = childs.length - 1 ; i >= 0 ; i--){
                         el.removeChild(childs[i]);
                     }
-                }else if(step === 2){
-                    console.log('当前选择的资产类型为:',this.value);
+                } else if(step === 2){
+                    console.log('当前选择的资产类型为:', this.value);
                     if(sessionStorage.getItem('token')){
                         tempData.basicInfo.assetOwner = JSON.parse(sessionStorage.getItem('token')).name;
                         tempData.basicInfo.assetType = this.value;
@@ -230,7 +248,7 @@
                         });
                         const assetType = document.getElementsByName('basicInfo_assetType');
                         if(assetType && assetType.length){
-                            assetType[0].setAttribute('disabled',true)
+                            assetType[0].setAttribute('disabled', true)
                         }
                     }, 100);
                 }
@@ -388,34 +406,32 @@
                 .add_schema_download_container {
                     .flexRow;
                     justify-content: flex-end;
-                    .download_container{
-                        cursor:pointer;
-                        .download_icon{
-                            width:14px;
-                            height:13px;
-                            margin-right:10px;
+                    .download_container {
+                        cursor: pointer;
+                        .download_icon {
+                            width: 14px;
+                            height: 13px;
+                            margin-right: 10px;
                         }
-                        .download_node{
-                            font-size:14px;
-                            color:@themeColor;
+                        .download_node {
+                            font-size: 14px;
+                            color: @themeColor;
 
                         }
                     }
 
-                    .download_node{
-                        margin-right:20px;
-                        line-height:36px;
+                    .download_node {
+                        margin-right: 20px;
+                        line-height: 36px;
                     }
-
 
                 }
-                #json_schema_node{
-                    .alpaca-top{
-                        padding:0;
-                        margin:10px 0;
+                #json_schema_node {
+                    .alpaca-top {
+                        padding: 0;
+                        margin: 10px 0;
                     }
                 }
-
 
                 .alpaca-container-item {
                     background: rgba(248, 248, 248, 1) !important;
