@@ -83,7 +83,7 @@ export default class JsonDataHelper {
                     value : '1',
                     str:`$.${str}`,
                 };
-                JsonSchemaHelper.getTitleByJSONPath(this.schema,str)
+                JsonSchemaHelper.getTitleByJSONPath(this.schema,str.split('.'));
                 if(key === Object.keys(data)[0]){
                     const nodeLevelStrList = str.split('.');
                     let type = nodeLevelStrList[nodeLevelStrList.findIndex((n)=>n === Object.keys(data)[0] || `${n}[0]` === Object.keys(data)[0]) - 1]

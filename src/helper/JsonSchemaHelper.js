@@ -20,8 +20,8 @@ export default class JsonSchemaHelper {
         return tempSchema;
     }
 
-    static getTitleByJSONPath(schema, path){
-        //console.log(schema, path)
+    static getTitleByJSONPath(schema, pathList){
+        //console.log(schema, pathList)
 
     }
 
