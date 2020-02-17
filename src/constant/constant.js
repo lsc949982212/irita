@@ -38,10 +38,17 @@ export const constant = {
         INVALID:3,
         EXPIRED:4
     },
-    CHECK_STATUS:{
+    CHECK_RESULT:{
         NOT_CHECK:0,
         CHECKED:1,
         CHECK_FAILED:2
-    }
+    },
+    CHECK_STATUS:{
+        NOT_CALL:0,
+        CALLING:1,
+        RESPONSED:2,
+        EXPIRED:2,
+    },
+
 
 };

@@ -301,7 +301,7 @@
                                 min-width="60">
                             <template slot-scope="scope">
                                 <el-button @click="handleCheckClick(scope.row)"
-                                           v-show="scope.row.status === 0 && isOwner"
+                                           v-show="!scope.row.result && isOwner"
                                            type="text" size="small">
                                     查验
                                 </el-button>
@@ -523,10 +523,10 @@
 </template>
 
 <script>
-    import schema from '../schema/detail_receivable';
-    import detail_receivable from '../schema/detail_receivable';
-    import detail_car from '../schema/detail_car';
-    import detail_registration from '../schema/detail_registration';
+
+    import schema_receivable from '../schema/schema_receivable';
+    import schema_car from '../schema/schema_car';
+    import schema_registration from '../schema/schema_registration';
     import { constant } from '../constant/constant';
     import axios from '../helper/httpHelper';
     import cfg from '../config/config';
@@ -537,9 +537,9 @@
     import jp from 'jsonpath';
 
     const schemaFile = {
-        detail_receivable:detail_receivable,
-        detail_car:detail_car,
-        detail_registration:detail_registration,
+        schema_receivable:schema_receivable,
+        schema_car:schema_car,
+        schema_registration:schema_registration,
     };
 
     export default {
@@ -1115,7 +1115,7 @@
                         document.getElementById('locked_detail_json_schema_node').style.display = 'block';
                         setTimeout(() =>{
                             $("#locked_detail_json_schema_node").alpaca({
-                                "schemaSource" : schemaFile[`detail_${this.$route.query.query_type}`],
+                                "schemaSource" : schemaFile[`schema_${this.$route.query.query_type}`],
                                 "dataSource" : JSON.parse(data.data.data),
                                 "view" : "bootstrap-display"
                             });
@@ -1210,7 +1210,16 @@
                     console.error(data)
                     if(data && data.data && data.data.length){
                         this.checkDataList = data.data.map((item)=>{
-                            let displayStatus = item.status === 1 ? '已查验' : '未查验', displayResult = '';
+                            let displayStatus = '', displayResult = item.check_result ? '已查验' : '未查验';
+                            if(item.status === constant.CHECK_STATUS.NOT_CALL){
+                                displayStatus = '未调用';
+                            }else if(item.status === constant.CHECK_STATUS.CALLING){
+                                displayStatus = '调用中';
+                            }else if(item.status === constant.CHECK_STATUS.RESPONSED){
+                                displayStatus = '已响应';
+                            }else if(item.status === constant.CHECK_STATUS.EXPIRED){
+                                displayStatus = '已失效';
+                            }
                             return {
                                 displayStatus,
                                 displayResult,
@@ -1218,6 +1227,7 @@
                                 interactType:item.interact_type,
                                 expandData:jp.query(this.jsonData, item.req_data_path),
                                 status:item.status,
+                                result:item.check_result,
                             }
                         })
                     }
@@ -1239,7 +1249,7 @@
                     this.hasSecret = this.jsonData.authorizationProperties.length > 0 && !this.$accountHelper.isOwner(data.chain_info.owner)
                     this.renderUI();
                     //获取完json数据才能获取查验信息
-                    this.getCheckStatus();
+                    this.getCheckStatus(1);
                 }
                 if(data && data.chain_info){
                     this.chainInfo = data.chain_info;
@@ -1318,10 +1328,8 @@
                 }, 300)
             },
             renderUI(){
-                console.error('====',schemaFile[`detail_${this.$route.query.query_type}`])
-                console.error('====',this.$route.query.query_type)
                 $("#detail_json_schema_node").alpaca({
-                    "schemaSource" : schemaFile[`detail_${this.$route.query.query_type}`],
+                    "schemaSource" : schemaFile[`schema_${this.$route.query.query_type}`],
                     "dataSource" : this.jsonData,
                     "view" : "bootstrap-display"
                 });

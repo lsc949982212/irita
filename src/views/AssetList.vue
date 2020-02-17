@@ -122,11 +122,11 @@
             },
             getDisplayCheckStatus(status){
                 switch (status){
-                    case constant.CHECK_STATUS.NOT_CHECK:
+                    case constant.CHECK_RESULT.NOT_CHECK:
                         return '未查验';
-                    case constant.CHECK_STATUS.CHECKED:
+                    case constant.CHECK_RESULT.CHECKED:
                         return '已查验';
-                    case constant.CHECK_STATUS.CHECK_FAILED:
+                    case constant.CHECK_RESULT.CHECK_FAILED:
                         return '查验失败';
 
                 }

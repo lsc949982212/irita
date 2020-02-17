@@ -93,9 +93,13 @@
         data(){
             let activeTab;
             if(this.$route.path === '/asset_list'){
-                activeTab = 1;
-            } else {
+                activeTab = 2;
+            }else if(this.$route.path === '/login'){
                 activeTab = 0;
+            }else if(this.$route.path === '/asset_add'){
+                activeTab = 1;
+            }else{
+                activeTab = 2;
             }
             let token = sessionStorage.getItem('token');
             let displayUserName = '';
