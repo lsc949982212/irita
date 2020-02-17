@@ -1,16 +1,18 @@
 import { dictionary } from '../constant/dictionary';
+import JsonSchemaHelper from './JsonSchemaHelper';
 
 /**
  * created by lvshenchao
  * get display format data
  */
 export default class JsonDataHelper {
-    constructor(jsonData,authorizationProperties,secretProperties){
+    constructor(jsonData,authorizationProperties,secretProperties,schema){
         this.data = jsonData;
         this.addAuthDataList = [];
         this.editAuthDataList = [];
         this.authorizationProperties = authorizationProperties;
         this.secretProperties = secretProperties;
+        this.schema = schema;
         //this.setAddFormatAuthData();
     }
 
@@ -81,6 +83,7 @@ export default class JsonDataHelper {
                     value : '1',
                     str:`$.${str}`,
                 };
+                JsonSchemaHelper.getTitleByJSONPath(this.schema,str)
                 if(key === Object.keys(data)[0]){
                     const nodeLevelStrList = str.split('.');
                     let type = nodeLevelStrList[nodeLevelStrList.findIndex((n)=>n === Object.keys(data)[0] || `${n}[0]` === Object.keys(data)[0]) - 1]
@@ -98,6 +101,8 @@ export default class JsonDataHelper {
     getAddAuthDataList(){
         return this.addAuthDataList;
     }
+
+
 
     setEditFormatAuthData(){
         console.log('json data',this.data);
