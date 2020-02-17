@@ -34,7 +34,6 @@
                         <img src="../assets/download.png" class="download_icon">
                         <a target="_blank"
                            class="download_node"
-                           target="_blank"
                            :href="dataDownloadUrl"
                            download>资产数据文本样例</a>
                     </div>
