@@ -117,6 +117,22 @@
               "examples": ["string"],
               "pattern": "^(.*)$"
             },
+            "receiverCode": {
+              "$id": "#/properties/detailedInfo/properties/contracts/items/properties/receiverCode",
+              "type": "string",
+              "title": "收款人代码",
+              "default": "",
+              "examples": ["string"],
+              "pattern": "^(.*)$"
+            },
+            "receiverName": {
+              "$id": "#/properties/detailedInfo/properties/contracts/items/properties/receiverName",
+              "type": "string",
+              "title": "收款人名称",
+              "default": "",
+              "examples": ["string"],
+              "pattern": "^(.*)$"
+            },
             "paymentMethod": {
               "$id": "#/properties/detailedInfo/properties/receivable/properties/paymentMethod",
               "type": "string",
@@ -173,6 +189,14 @@
                 "title": "金额",
                 "default": "",
                 "examples": [1234.45]
+              },
+              "currency": {
+                "$id": "#/properties/detailedInfo/properties/contracts/items/properties/currency",
+                "type": "string",
+                "title": "币种",
+                "default": "",
+                "examples": ["enum string"],
+                "enum":["CAD","AUD","CHF","CNH","GBP","HKD","SGD","CNY","EUR","JPY","USD","SEK","NOK","DKK"]
               },
               "stage": {
                 "$id": "#/properties/detailedInfo/properties/payments/items/properties/stage",
