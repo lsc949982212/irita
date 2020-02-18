@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import Login from '../views/Login';
+import Home from '../views/Home';
 import AssetList from '../views/AssetList';
 import AssetAdd from '../views/AssetAdd';
 import AssetDetails from '../views/AssetDetails';
@@ -18,6 +19,11 @@ const routes = [
     {
         path : '/',
         redirect:'/login',
+    },
+    {
+        path : '/home',
+        name : 'home',
+        component : Home
     },
 
     {

@@ -22,8 +22,6 @@
                               :class="activeTab === 2 ? 'active' : ''">
                             资产列表
                         </span>
-
-
                     </div>
 
                     <div class="login_container"
@@ -94,7 +92,7 @@
             let activeTab;
             if(this.$route.path === '/asset_list'){
                 activeTab = 2;
-            }else if(this.$route.path === '/login'){
+            }else if(this.$route.path === '/home'){
                 activeTab = 0;
             }else if(this.$route.path === '/asset_add'){
                 activeTab = 1;
@@ -118,7 +116,7 @@
         watch : {
             $route(to){
                 if(to.path === '/login'){
-                    this.activeTab = 0
+                    //this.activeTab = 0
                 } else {
                     let token = sessionStorage.getItem('token');
                     let displayUserName = '';
@@ -130,6 +128,8 @@
                         this.activeTab = 2
                     }else if(to.path === '/asset_add'){
                         this.activeTab = 1
+                    }else if(to.path === '/home'){
+                        this.activeTab = 0
                     }
                 }
             },
@@ -154,8 +154,10 @@
                 this.$store.commit('SET_OFFSET_LEFT', offsetLeft2.offsetLeft)
             });
             if(this.$route.path === '/login'){
+                //this.activeTab = 0
+            } else if(this.$route.path === '/home'){
                 this.activeTab = 0
-            } else if(this.$route.path === '/asset_add'){
+            }  else if(this.$route.path === '/asset_add'){
                 this.activeTab = 1
             } else  if(this.$route.path === '/asset_list'){
                 this.activeTab = 2
@@ -167,10 +169,10 @@
         methods : {
             handleTabClick(tab){
                 if(tab === 0){
-                    if(this.$route.path === '/login'){
+                    if(this.$route.path === '/home'){
                         return;
                     }
-                    this.$router.replace('/login')
+                    this.$router.replace('/home')
                 } else if(tab === 1){
                     if(this.$route.path === '/asset_add'){
                         return;
