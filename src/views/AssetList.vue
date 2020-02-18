@@ -170,8 +170,8 @@
                 label: '全部资产类型'
             });
 
-            let assetStatusValue = this.$route.query.asset_status_value ? this.$route.query.asset_status_value : '',
-                userAccountValue = this.$route.query.user_account_value ? this.$route.query.user_account_value : '';
+            let assetStatusValue = this.$route.query.asset_status_value ? Number(this.$route.query.asset_status_value) : constant.ASSET_STATUS_OPTIONS.ALL,
+                userAccountValue = this.$route.query.user_account_value ? Number(this.$route.query.user_account_value) : constant.ASSETS_BELONG.ALL;
             return {
                 tableData : [],
                 totalAssets : 0,
@@ -213,7 +213,7 @@
                 }],
                 assetTypeValue:'',
                 assetStatusValue,
-                checkStatusValue:'',
+                checkStatusValue:constant.CHECK_STATUS_OPTIONS.ALL,
                 userAccountValue,
                 input:'',
 
@@ -270,11 +270,14 @@
                 this.getDataList(page);
             },
             getDataList(page){
-
                 const {assetTypeValue,assetStatusValue,checkStatusValue,userAccountValue,input} = this;
                 console.log(assetTypeValue,assetStatusValue,checkStatusValue,userAccountValue,input);
 
-                axios.get({url : `/assets?pageNum=${page}&pageSize=10&used_count=true`, ctx : this}).then((data) =>{
+                let url =  `/assets/search?pageNum=${page}&pageSize=10&used_count=true&asset_type=${assetTypeValue}&transfer_status=${assetStatusValue}&check_status=${checkStatusValue}&owner=${userAccountValue}`;
+                if(this.input){
+                    url += `&query_data=${input}`
+                }
+                axios.get({url, ctx : this}).then((data) =>{
                     if(data && data.data){
                         this.handleData(data);
                     }
@@ -285,6 +288,7 @@
             handleData(data){
                 console.log(data)
                 this.totalTxCount = data.total;
+                this.totalAssets = data.total;
                 this.tableData = data.data.map((asset) =>{
                     return {
                         number : asset.number,

@@ -50,20 +50,20 @@ export const constant = {
         EXPIRED:2,
     },
     ASSET_STATUS_OPTIONS:{
-        ALL:'',
-        NORMAL:'0',
-        APPLYING:'1',
-        ACCEPT:'2'
+        ALL:-1,
+        NORMAL:0,
+        APPLYING:1,
+        ACCEPT:2
     },
     CHECK_STATUS_OPTIONS:{
-        ALL:'',
-        CHECKED:'0',
-        NOT_CHECK:'1'
+        ALL:-1,
+        CHECKED:1,
+        NOT_CHECK:0
     },
     ASSETS_BELONG:{
-        ALL:'',
-        MINE:'0',
-        OTHERS:'1'
+        ALL:0,
+        MINE:1,
+        OTHERS:2
     },
     AUTH_STATUS:{
         ALL:-1,

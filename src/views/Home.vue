@@ -288,7 +288,7 @@
                 });
             },
             handleDynamicData(data){
-                console.error(data)
+                console.log(data)
                 this.dynamicList = data.map((item) =>{
                     let name = '';
                     if(constant.DYNAMIC.ASSETS.includes(item.type)){
@@ -306,6 +306,7 @@
                         displayTimePassed:this.formatTime(new Date().getTime() - item.time*1000),
                         assetname:item.assetname,
                         servicename:item.servicename,
+                        hash:item.tx_hash,
                     }
 
                 })
@@ -337,7 +338,7 @@
                 window.open(`${cfg.app.explorer}/#/txs`);
             },
             handleTimeClick(item){
-                //window.open(`${cfg.app.explorer}/#//tx?txHash=${item.hash}`);
+                window.open(`${cfg.app.explorer}/#/tx?txHash=${item.hash}`);
             },
 
         }
