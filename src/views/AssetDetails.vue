@@ -1270,12 +1270,14 @@
                         let replaced = a.replace(/\./g, '/').replace('$', '');
                         if(pathMap.has(replaced)){
                             pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].style.color = '#2449AD';
+                            pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
                         } else {
                             Array.from(pathMap.keys()).forEach((p) =>{
                                 if(p.includes('[') && p.includes(']')){
                                     let num = p.split('[')[1].split(']')[0];
                                     if(p.replace(num, '*') === replaced){
                                         pathMap.get(p).getElementsByClassName('alpaca-control')[0].style.color = '#2449AD';
+                                        pathMap.get(p).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
                                     }
                                 }
                             })
@@ -1286,12 +1288,14 @@
                         if(pathMap.has(replaced)){
                             pathMap.get(replaced).style.color = 'yellow';
                             pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].style.color = '#FF6200';
+                            pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
                         } else {
                             Array.from(pathMap.keys()).forEach((p) =>{
                                 if(p.includes('[') && p.includes(']')){
                                     let num = p.split('[')[1].split(']')[0];
                                     if(p.replace(num, '*') === replaced){
                                         pathMap.get(p).getElementsByClassName('alpaca-control')[0].style.color = '#FF6200';
+                                        pathMap.get(p).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
                                     }
                                 }
                             })
@@ -1328,7 +1332,7 @@
                         node[0].style.position = 'relative';
 
                     }
-                }, 300)
+                }, 500)
             },
             renderUI(){
                 $("#detail_json_schema_node").alpaca({
@@ -1639,6 +1643,9 @@
                     .alpaca-field-object.alpaca-top, .alpaca-field-object.alpaca-top .alpaca-container {
                         padding: 0;
                     }
+                }
+                .alpaca-message{
+                    display:none;
                 }
             }
             .content_container {
