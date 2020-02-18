@@ -22,6 +22,13 @@
                               :class="activeTab === 2 ? 'active' : ''">
                             资产列表
                         </span>
+                        <span class="tab"
+                              v-show="!expired"
+                              @click="handleTabClick(3)"
+                              :class="activeTab === 3 ? 'active' : ''">
+                            数据授权共享
+                        </span>
+
                     </div>
 
                     <div class="login_container"
@@ -96,6 +103,8 @@
                 activeTab = 0;
             }else if(this.$route.path === '/asset_add'){
                 activeTab = 1;
+            }else if(this.$route.path === '/auth_share'){
+                activeTab = 3;
             }else{
                 activeTab = 2;
             }
@@ -128,6 +137,8 @@
                         this.activeTab = 2
                     }else if(to.path === '/asset_add'){
                         this.activeTab = 1
+                    }else if(to.path === '/auth_share'){
+                        this.activeTab = 3
                     }else if(to.path === '/home'){
                         this.activeTab = 0
                     }
@@ -161,6 +172,8 @@
                 this.activeTab = 1
             } else  if(this.$route.path === '/asset_list'){
                 this.activeTab = 2
+            } else  if(this.$route.path === '/auth_share'){
+                this.activeTab = 3
             }
             if(this.expired){
                 this.$router.push('/login');
@@ -178,46 +191,16 @@
                         return;
                     }
                     this.$router.replace('/asset_add')
-
-
-
-                    /*if(this.$route.path === '/login'){
-                        if(tab === 1){
-                            this.$router.replace('/asset_list')
-                        }else if(tab === 2){
-                            this.$router.replace('/asset_add')
-                        }
-                    }else if(this.$route.path !== '/asset_list'){
-
-                        if(tab === 1){
-                            this.$router.push('/asset_list')
-                        }else if(tab === 2){
-                            this.$router.push('/asset_add')
-                        }
-                    }*/
-
                 } else if(tab === 2){
                     if(this.$route.path === '/asset_list'){
                         return;
                     }
                     this.$router.replace('/asset_list')
-
-
-                    /*if(this.$route.path === '/login'){
-                        if(tab === 1){
-                            this.$router.replace('/asset_list')
-                        }else if(tab === 2){
-
-                        }
-                    }else if(this.$route.path !== '/asset_list'){
-
-                        if(tab === 1){
-                            this.$router.push('/asset_list')
-                        }else if(tab === 2){
-                            this.$router.push('/asset_add')
-                        }
-                    }*/
-
+                } else if(tab === 3){
+                    if(this.$route.path === '/auth_share'){
+                        return;
+                    }
+                    this.$router.replace('/auth_share')
                 }
             },
             handleLoginClick(){
@@ -413,6 +396,14 @@
                 }
                 .el-table--enable-row-transition .el-table__body td {
                     border: none;
+                }
+
+                .el-input__inner {
+                    height: 34px;
+                    line-height: 34px;
+                }
+                .el-button--medium{
+                    height:34px;
                 }
             }
         }

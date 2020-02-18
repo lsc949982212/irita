@@ -3,6 +3,7 @@ import VueRouter from 'vue-router';
 import Login from '../views/Login';
 import Home from '../views/Home';
 import AssetList from '../views/AssetList';
+import DataAuthShared from '../views/DataAuthShared';
 import AssetAdd from '../views/AssetAdd';
 import AssetDetails from '../views/AssetDetails';
 import AssetEdit from '../views/AssetEdit';
@@ -32,6 +33,13 @@ const routes = [
         /* component: () => import('../views/AssetList.vue')*/
         component : AssetList
     },
+    {
+        path : '/auth_share',
+        name : 'auth_share',
+        /* component: () => import('../views/AssetList.vue')*/
+        component : DataAuthShared
+    },
+
     {
         path : '/asset_add',
         name : 'asset_add',

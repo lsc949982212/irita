@@ -201,7 +201,7 @@
                     if(data && data.status === 'success'){
                         if(data && data.data && data.data.denoms){
                             data.data.denoms.forEach((item, index) =>{
-                                if(schemaConfig.denomList.includes(item)){
+                                if(schemaConfig.denoms.includes(item)){
                                     this.options.push({
                                         value : item,
                                         label : item

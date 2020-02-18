@@ -49,6 +49,22 @@ export const constant = {
         RESPONSED:2,
         EXPIRED:2,
     },
+    ASSET_STATUS_OPTIONS:{
+        ALL:'',
+        NORMAL:'0',
+        APPLYING:'1',
+        ACCEPT:'2'
+    },
+    CHECK_STATUS_OPTIONS:{
+        ALL:'',
+        CHECKED:'0',
+        NOT_CHECK:'1'
+    },
+    ASSETS_BELONG:{
+        ALL:'',
+        MINE:'0',
+        OTHERS:'1'
+    }
 
 
 };
