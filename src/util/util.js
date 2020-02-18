@@ -25,8 +25,20 @@ function isJson(str){
     }
 }
 
+function formatDuring(ms) {
+    let s = ms/1000;
+    let days = s / (60 * 60 * 24);
+    let hours = (s % (60 * 60 * 24)) / (60 * 60);
+    let minutes = (s % (60 * 60)) / (60);
+    let seconds = s % 60;
+    return {
+        days,hours,minutes,seconds
+    }
+}
+
 export {
     formatTimestamp,
     getFormatAddress,
     isJson,
+    formatDuring,
 }

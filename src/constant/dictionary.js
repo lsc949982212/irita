@@ -51,3 +51,14 @@ export const dictionary = new Map([
     ['receivable','资产详情'],
     ['basicInfo','基本信息'],
 ]);
+
+export const dynamic = new Map([
+    ['nft_mint','发布了新资产'],
+    ['nft_edit','编辑了资产'],
+    ['nft_transfer','转让了资产'],
+    ['nft_burn','销毁了资产'],
+    ['service_define','定义了跨链服务'],
+    ['service_bind','绑定了跨链服务'],
+    ['service_request','请求了跨链服务'],
+    ['service_response','响应了跨链服务']
+]);

@@ -81,7 +81,7 @@
                 </div>
                 <div class="home_left_content_container home_left_content_container_bottom">
                     <div class="home_left_item_container">
-                        <div class="home_left_item_icon_container">
+                        <div class="home_left_item_icon_container" @click="toAddPage">
                             <img src="../assets/new_assets.png" class="home_left_item_icon">
                             <span class="home_left_item_bottom_title">
                                 新建资产
@@ -99,7 +99,7 @@
                         </span>
                     </div>
                     <div class="home_left_item_container">
-                        <div class="home_left_item_icon_container">
+                        <div class="home_left_item_icon_container" @click="toSharePage">
                             <img src="../assets/share.png" class="home_left_item_icon">
                             <span class="home_left_item_bottom_title">
                                 数据授权共享
@@ -116,7 +116,7 @@
                             {{  }}分钟前
                         </span>
                     </div>
-                    <div class="home_left_item_container">
+                    <div class="home_left_item_container" @click="toExplorer">
                         <div class="home_left_item_icon_container">
                             <img src="../assets/explorer.png" class="home_left_item_icon">
                             <span class="home_left_item_bottom_title">
@@ -127,12 +127,12 @@
                         <span class="home_left_item_content_long">
                             查看IRITA区块链的全部信息
                         </span>
-                        <span class="home_left_item_sub_content">
+                        <!--<span class="home_left_item_sub_content">
                             上次操作{{  }}
                         </span>
                         <span class="home_left_item_sub_content">
                             {{  }}分钟前
-                        </span>
+                        </span>-->
                     </div>
 
                 </div>
@@ -146,7 +146,7 @@
                         </span>
                     </div>
                     <div class="home_right_top_all_container">
-                        <span class="home_right_top_title">
+                        <span class="home_right_top_title" @click="toTransExplorer">
                             查看全部
                         </span>
                         <img src="../assets/arrow_right.png" class="home_right_arrow_icon">
@@ -155,18 +155,18 @@
                 <div class="home_right_item_container">
                     <div class="home_right_item" v-for="item in dynamicList">
                         <div class="home_right_item_content_container">
-                            <span class="home_right_item_link">
-                                {{ item.address }}
+                            <span class="home_right_item_link" @click="handleAddressClick(item.address)">
+                                {{ item.displayAddress }}
                             </span>
                             <span class="home_right_item_content">
                                 {{ item.displayContent }}
                             </span>
-                            <span class="home_right_item_link">
+                            <span class="home_right_item_link" @click="handleNameClick(item)">
                                 {{ item.name }}
                             </span>
                         </div>
-                        <span class="home_right_item_time">
-                            {{ item.displayTimePassed }}
+                        <span class="home_right_item_time" @click="handleTimeClick(item)">
+                            {{ item.displayTimePassed }}前
                         </span>
                     </div>
                 </div>
@@ -177,7 +177,11 @@
 
 <script>
 
-    import {constant} from "../constant/constant";
+    import { constant } from "../constant/constant";
+    import cfg from '../config/config';
+    import axios from '../helper/httpHelper';
+    import { dynamic } from '../constant/dictionary';
+    import { getFormatAddress,formatDuring } from '../util/util';
 
     export default {
         name : 'Home',
@@ -190,17 +194,18 @@
                     displayTimePassed : '3天前',
 
                 }],
-                totalAssets : 22,
-                authApplyWaitDeal : 22,
-                transOutWait : 22,
-                getedSecretAuth : 22,
-                authApplying : 22,
-                confirmWaitAccept : 22,
+                totalAssets : 0,
+                authApplyWaitDeal : 0,
+                transOutWait : 0,
+                getedSecretAuth : 0,
+                authApplying : 0,
+                confirmWaitAccept : 0,
             }
         },
         components : {},
         mounted(){
-
+            this.getDetail();
+            this.getDynamicList();
         },
         computed : {
             expired(){
@@ -210,38 +215,131 @@
         methods : {
             toAssetsList(type, page){
                 let assetStatusValue = constant.ASSET_STATUS_OPTIONS.ALL,
-                    userAccountValue = constant.ASSETS_BELONG.ALL;
+                    userAccountValue = constant.ASSETS_BELONG.ALL,
+                    authStatusValue = constant.AUTH_STATUS.ALL,
+                    relevantStatusValue = constant.RELEVANT.ALL;
 
                 switch (type){
                     case 'totalAsset':
                         userAccountValue = constant.ASSETS_BELONG.MINE;
                         break;
-
                     case 'auth':
-                        //this.assetStatusValue = constant.ASSET_STATUS_OPTIONS.APPLYING;
+                        authStatusValue = constant.AUTH_STATUS.APPLYING;
+                        relevantStatusValue = constant.RELEVANT.MY_RECEIVE;
                         break;
                     case 'trans':
                         userAccountValue = constant.ASSETS_BELONG.MINE;
                         assetStatusValue = constant.ASSET_STATUS_OPTIONS.ACCEPT;
                         break;
                     case 'secret':
-
+                        authStatusValue = constant.AUTH_STATUS.AUTHORIZED;
+                        relevantStatusValue = constant.RELEVANT.MY_POST;
                         break;
                     case 'applying':
+                        authStatusValue = constant.AUTH_STATUS.APPLYING;
+                        relevantStatusValue = constant.RELEVANT.MY_POST;
                         break;
-
                     case 'accept':
                         userAccountValue = constant.ASSETS_BELONG.OTHERS;
                         assetStatusValue = constant.ASSET_STATUS_OPTIONS.APPLYING;
                         break;
                 }
-                console.error(assetStatusValue,userAccountValue)
+                console.error(assetStatusValue, userAccountValue)
                 if(page === 'list'){
                     this.$router.replace(`/asset_list?&asset_status_value=${assetStatusValue}&user_account_value=${userAccountValue}`)
-                }else if(page === 'share'){
-
+                } else if(page === 'share'){
+                    this.$router.replace(`/auth_share?&auth_status_value=${authStatusValue}&relevant_status_value=${relevantStatusValue}`)
                 }
-            }
+            },
+            toAddPage(){
+                this.$router.replace('/asset_add');
+            },
+            toExplorer(){
+                window.open(`${cfg.app.explorer}/#/home`);
+            },
+            toSharePage(){
+                this.$router.replace('/auth_share');
+            },
+            getDetail(){
+                axios.get({url : `/assets/caculate_info`, ctx : this}).then((data) =>{
+                    if(data && data.data){
+                        this.handleData(data.data);
+                    }
+                }).catch(e =>{
+                    console.error(e)
+                });
+            },
+            handleData(data){
+
+                this.totalAssets = data.ownerasset_caculateinfo.total;
+                this.authApplyWaitDeal = data.ownerasset_caculateinfo.apply;
+                this.transOutWait = data.ownerasset_caculateinfo.wait_transfer;
+                this.getedSecretAuth = data.otherasset_caculateinfo.authok;
+                this.authApplying = data.otherasset_caculateinfo.applying;
+                this.confirmWaitAccept = data.otherasset_caculateinfo.wait_accept;
+            },
+            getDynamicList(){
+                axios.get({url : `/txs?pageNum=1&pageSize=5`, ctx : this}).then((data) =>{
+                    if(data && data.data){
+                        this.handleDynamicData(data.data);
+                    }
+                }).catch(e =>{
+                    console.error(e)
+                });
+            },
+            handleDynamicData(data){
+                console.error(data)
+                this.dynamicList = data.map((item) =>{
+                    let name = '';
+                    if(constant.DYNAMIC.ASSETS.includes(item.type)){
+                        name = item.assetname;
+                    } else if(constant.DYNAMIC.SERVICE.includes(item.type)){
+                        name = item.servicename;
+                    }
+
+                    return {
+                        address : item.address,
+                        displayAddress : getFormatAddress(item.address),
+                        displayContent : dynamic.get(item.type),
+                        name,
+                        type:item.type,
+                        displayTimePassed:this.formatTime(new Date().getTime() - item.time*1000),
+                        assetname:item.assetname,
+                        servicename:item.servicename,
+                    }
+
+                })
+            },
+            formatTime(time) {
+                let obj = formatDuring(time);
+                let day = parseInt(obj.days);
+                let hours = parseInt(obj.hours);
+                let min = parseInt(obj.minutes);
+                if (day >= 1) {
+                    return `${day}天`
+                } else if (hours >= 1) {
+                    return `${hours}小时`
+                } else if (hours < 1) {
+                    return `${min}分钟`
+                }
+            },
+            handleAddressClick(address){
+                window.open(`${cfg.app.explorer}/#/address/${address}`);
+            },
+            handleNameClick(item){
+                if(constant.DYNAMIC.ASSETS.includes(item.type)){
+                    window.open(`${cfg.app.explorer}/#/nftAsset`);
+                } else if(constant.DYNAMIC.SERVICE.includes(item.type)){
+                    window.open(`${cfg.app.explorer}/#/service?serviceName=${item.servicename}&chainId=${cfg.chainId}`);
+                }
+            },
+            toTransExplorer(){
+                window.open(`${cfg.app.explorer}/#/txs`);
+            },
+            handleTimeClick(item){
+                //window.open(`${cfg.app.explorer}/#//tx?txHash=${item.hash}`);
+            },
+
         }
     }
 </script>
@@ -419,6 +517,7 @@
                             margin: 8px 0;
                             font-size: 14px;
                             color: #9E9E9E;
+                            cursor: pointer;
                         }
                     }
                 }

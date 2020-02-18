@@ -1123,7 +1123,7 @@
                                 "view" : "bootstrap-display"
                             });
                             this.drawNoteNode();
-                            this.setSecretFieldStyle();
+                            this.setSecretFieldStyle(true);
                         }, 100);
 
                     } else if(data && data.data && data.data.status === 'fail'){
@@ -1258,7 +1258,7 @@
                     this.chainInfo = data.chain_info;
                 }
             },
-            setSecretFieldStyle(){
+            setSecretFieldStyle(showSecret){
                 setTimeout(() =>{
                     let node = this.getCheckElement('div', 'data-alpaca-field-path', /^\//);
                     const pathMap = new Map();
@@ -1270,14 +1270,18 @@
                         let replaced = a.replace(/\./g, '/').replace('$', '');
                         if(pathMap.has(replaced)){
                             pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].style.color = '#2449AD';
-                            pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
+                            if(!showSecret){
+                                pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
+                            }
                         } else {
                             Array.from(pathMap.keys()).forEach((p) =>{
                                 if(p.includes('[') && p.includes(']')){
                                     let num = p.split('[')[1].split(']')[0];
                                     if(p.replace(num, '*') === replaced){
                                         pathMap.get(p).getElementsByClassName('alpaca-control')[0].style.color = '#2449AD';
-                                        pathMap.get(p).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
+                                        if(!showSecret){
+                                            pathMap.get(p).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
+                                        }
                                     }
                                 }
                             })
@@ -1288,14 +1292,18 @@
                         if(pathMap.has(replaced)){
                             pathMap.get(replaced).style.color = 'yellow';
                             pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].style.color = '#FF6200';
-                            pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
+                            if(!showSecret){
+                                pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
+                            }
                         } else {
                             Array.from(pathMap.keys()).forEach((p) =>{
                                 if(p.includes('[') && p.includes(']')){
                                     let num = p.split('[')[1].split(']')[0];
                                     if(p.replace(num, '*') === replaced){
                                         pathMap.get(p).getElementsByClassName('alpaca-control')[0].style.color = '#FF6200';
-                                        pathMap.get(p).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
+                                        if(!showSecret){
+                                            pathMap.get(p).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
+                                        }
                                     }
                                 }
                             })
@@ -1340,7 +1348,7 @@
                     "dataSource" : this.jsonData,
                     "view" : "bootstrap-display"
                 });
-                this.setSecretFieldStyle();
+                this.setSecretFieldStyle(false);
                 this.drawNoteNode();
             },
             getAssetTransList(page){
