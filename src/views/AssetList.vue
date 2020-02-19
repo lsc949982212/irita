@@ -5,7 +5,7 @@
                 <div class="asset_list_title">
                     资产列表
                     <span class="asset_list_filter_total">
-                        (共{{ totalAssets }} 个资产)
+                        (共 {{ totalAssets }} 条记录)
                     </span>
                 </div>
 

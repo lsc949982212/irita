@@ -5,7 +5,7 @@
                 <div class="data_auth_share_list_title">
                     数据授权共享
                     <span class="data_auth_share_list_filter_total">
-                        (共{{ totalAssets }} 个资产)
+                        (共 {{ totalAssets }} 条记录)
                     </span>
                 </div>
 
@@ -50,6 +50,11 @@
                         style="width: 100%">
                     <el-table-column
                             fixed
+                            prop="applyTime"
+                            label="申请时间"
+                            min-width="110">
+                    </el-table-column>
+                    <el-table-column
                             prop="number"
                             label="资产编号"
                             min-width="100">
@@ -60,28 +65,45 @@
                             min-width="110">
                     </el-table-column>
                     <el-table-column
-                            prop="applyTime"
-                            label="申请时间"
-                            min-width="110">
-                    </el-table-column>
-                    <el-table-column
-                            prop="applyer"
                             label="申请者"
                             min-width="70">
+                        <template slot-scope="scope">
+                            <a :href="`${cfg.app.explorer}/#/address/${scope.row.consumer}`"
+                               target="_blank"
+                               class="data_auth_link">
+                                {{ scope.row.applyer }}
+                            </a>
+                        </template>
                     </el-table-column>
                     <el-table-column
-                            prop="responser"
                             label="响应者"
                             min-width="70">
+                        <template slot-scope="scope">
+                            <a :href="`${cfg.app.explorer}/#/address/${scope.row.provider}`"
+                               target="_blank"
+                               class="data_auth_link">
+                                {{ scope.row.responser }}
+                            </a>
+                        </template>
                     </el-table-column>
                     <el-table-column
-                            prop="authStatus"
                             label="授权状态"
                             min-width="70">
+                        <template slot-scope="scope">
+                            <a :href="scope.row.resp_resource_url"
+                               target="_blank"
+                               v-if="scope.row.status === constant.AUTH_STATUS.AUTHORIZED"
+                               class="data_auth_link">
+                                已授权
+                            </a>
+                            <span v-else>
+                                {{ scope.row.authStatus}}
+                            </span>
+                        </template>
                     </el-table-column>
                     <el-table-column
                             prop="lastUpdateTime"
-                            label="最后更新时间"
+                            label="更新时间"
                             min-width="70">
                     </el-table-column>
                     <el-table-column
@@ -167,46 +189,47 @@
                 totalTxCount : 1,
                 txListCurrentPage : 1,
                 authStatus : [{
-                    value: constant.AUTH_STATUS.ALL,
-                    label: '全部授权状态'
-                },{
-                    value: constant.AUTH_STATUS.APPLYING,
-                    label: '申请中'
-                },{
-                    value: constant.AUTH_STATUS.AUTHORIZED,
-                    label: '已授权'
-                },{
-                    value: constant.AUTH_STATUS.REFUSED,
-                    label: '已拒绝'
-                },{
-                    value: constant.AUTH_STATUS.INVALID,
-                    label: '已失效'
-                },{
-                    value: constant.AUTH_STATUS.EXPIRED,
-                    label: '已过期'
+                    value : constant.AUTH_STATUS.ALL,
+                    label : '全部授权状态'
+                }, {
+                    value : constant.AUTH_STATUS.APPLYING,
+                    label : '申请中'
+                }, {
+                    value : constant.AUTH_STATUS.AUTHORIZED,
+                    label : '已授权'
+                }, {
+                    value : constant.AUTH_STATUS.REFUSED,
+                    label : '已拒绝'
+                }, {
+                    value : constant.AUTH_STATUS.INVALID,
+                    label : '已失效'
+                }, {
+                    value : constant.AUTH_STATUS.EXPIRED,
+                    label : '已过期'
                 },],
                 relevantStatus : [{
-                    value: constant.RELEVANT.ALL,
-                    label: '和我有关的全部记录'
-                },{
-                    value: constant.RELEVANT.MY_POST,
-                    label: '我发起申请的'
-                },{
-                    value: constant.RELEVANT.MY_RECEIVE,
-                    label: '向我申请的'
+                    value : constant.RELEVANT.ALL,
+                    label : '和我有关的全部记录'
+                }, {
+                    value : constant.RELEVANT.MY_POST,
+                    label : '我发起申请的'
+                }, {
+                    value : constant.RELEVANT.MY_RECEIVE,
+                    label : '向我申请的'
                 }],
                 authStatusValue,
                 relevantStatusValue,
                 constant,
-                input:'',
-                consumer_pubkey:'',
-                request_id:'',
-                centerDialogVisible:false,
-                loading:false,
-                dialogTitle:'',
-                consumer:'',
-                nftId:'',
-                dialogType:0,//0 授权, 1 拒绝;
+                input : '',
+                consumer_pubkey : '',
+                request_id : '',
+                centerDialogVisible : false,
+                loading : false,
+                dialogTitle : '',
+                consumer : '',
+                nftId : '',
+                dialogType : 0,//0 授权, 1 拒绝;
+                cfg,
 
             }
         },
@@ -249,8 +272,8 @@
                 this.dialogTitle = '确认要拒绝吗';
             },
             handleConfirmBtnClick(){
-                const {request_id, dialogType,consumer} = this;
-                console.error(request_id, dialogType,consumer)
+                const {request_id, dialogType, consumer} = this;
+                console.error(request_id, dialogType, consumer)
                 let body = null, url = '', str = '';
                 if(dialogType === 0){
                     body = {
@@ -259,7 +282,7 @@
                     };
                     url = `/assets_authorization/${this.nftId}/authorization/accept`;
                     str = '授权'
-                }else{
+                } else {
                     body = {
                         "request_id" : request_id,
                     };
@@ -267,7 +290,7 @@
                     str = '拒绝'
                 }
                 this.loading = true;
-                axios.post({url,body, ctx : this}).then((data) =>{
+                axios.post({url, body, ctx : this}).then((data) =>{
                     console.log(data);
                     this.loading = false;
                     if(data && data.data && data.data.status === 'success'){
@@ -308,14 +331,14 @@
                     ctx : this
                 }).then((data) =>{
                     if(data){
-                        this.handleDetailData(data.data,row);
+                        this.handleDetailData(data.data, row);
                     }
                 }).catch(e =>{
                     console.error(e);
                     this.$message.error('获取数据失败');
                 });
             },
-            handleDetailData(data,row){
+            handleDetailData(data, row){
                 console.log('detail data', data.chain_info);
                 if(data && data.chain_info){
                     this.$router.push(`/asset_detail?type=check&nft_id=${row.id}&owner=${data.chain_info.owner}&transStatus=${data.chain_info.transfer_status}&query_type=${data.chain_info.type}&number=${row.number}`);
@@ -330,14 +353,14 @@
             },
             getDataList(page){
 
-                const {relevantStatusValue,authStatusValue,input} = this;
-                console.log(authStatusValue,relevantStatusValue,input);
+                const {relevantStatusValue, authStatusValue, input} = this;
+                console.log(authStatusValue, relevantStatusValue, input);
 
                 let url = `/assets_authorization?pageNum=${page}&pageSize=10&used_count=true&auth_type=${relevantStatusValue}&status=${authStatusValue}`;
                 if(this.input){
                     url += `&query_data=${input}`
                 }
-                axios.get({url , ctx : this}).then((data) =>{
+                axios.get({url, ctx : this}).then((data) =>{
                     if(data && data.data){
                         this.handleData(data);
                     }
@@ -356,16 +379,17 @@
                         name : asset.asset_name,
                         applyTime : formatTimestamp(asset.time),
                         lastUpdateTime : formatTimestamp(asset.update_at),
-                        applyer:getFormatAddress(asset.consumer),
-                        responser:getFormatAddress(asset.provider),
+                        applyer : getFormatAddress(asset.consumer),
+                        responser : getFormatAddress(asset.provider),
                         authStatus : this.getDisplayAuthStatus(asset.status),
                         type : asset.type,
                         owner : asset.nft_owner,
                         provider : asset.provider,
                         transStatus : asset.transfer_status,
-                        status:asset.status,
-                        request_id:asset.request_id,
-                        consumer:asset.consumer,
+                        status : asset.status,
+                        request_id : asset.request_id,
+                        consumer : asset.consumer,
+                        resp_resource_url : asset.resp_resource_url,
                     };
                 })
             },
@@ -427,9 +451,9 @@
                     margin-right: 10px;
                 }
                 .data_auth_share_list_input {
-                    margin-right:10px;
-                    width:300px;
-                    flex:0 0 300px;
+                    margin-right: 10px;
+                    width: 300px;
+                    flex: 0 0 300px;
                 }
 
             }
@@ -444,14 +468,14 @@
                     color: @themeColor;
                     cursor: pointer;
                 }
-                .data_auth_link{
+                .data_auth_link {
                     color: @themeColor;
                     cursor: pointer;
-                    display:inline-block;
-                    margin-right:10px;
+                    display: inline-block;
+                    margin-right: 10px;
                 }
-                .data_auth_link_refuse{
-                    color:#FE2F5D;
+                .data_auth_link_refuse {
+                    color: #FE2F5D;
                 }
             }
             .pagination_container {

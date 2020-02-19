@@ -407,11 +407,16 @@
                             </template>
                         </el-table-column>
                         <el-table-column
-                                prop="tokenUri"
                                 label="token_uri"
                                 min-width="80">
+                            <template slot-scope="scope">
+                                <a class="link_url"
+                                   target="_blank"
+                                   :href="scope.row.tokenUri">
+                                    {{ getFormatAddress(scope.row.tokenUri,8) }}
+                                </a>
+                            </template>
                         </el-table-column>
-
                     </el-table>
                 </div>
                 <div class="content_table_wrap" v-show="tab === 1">
@@ -1216,13 +1221,14 @@
                     console.error(data)
                     if(data && data.data && data.data.length){
                         this.checkDataList = data.data.map((item)=>{
-                            let displayStatus = '', displayResult = item.check_result ? '通过' : '不通过';
+                            let displayStatus = '', displayResult = '';
                             if(item.status === constant.CHECK_STATUS.NOT_CALL){
                                 displayStatus = '未查验';
                             }else if(item.status === constant.CHECK_STATUS.CALLING){
                                 displayStatus = '查验中';
                             }else if(item.status === constant.CHECK_STATUS.RESPONSED){
                                 displayStatus = '已查验';
+                                displayResult = item.check_result ? '通过' : '不通过'
                             }else if(item.status === constant.CHECK_STATUS.EXPIRED){
                                 displayStatus = '已失效';
                             }
@@ -1273,7 +1279,7 @@
                         let replaced = a.replace(/\./g, '/').replace('$', '');
                         if(pathMap.has(replaced)){
                             pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].style.color = '#2449AD';
-                            if(!showSecret){
+                            if(!showSecret && !this.isOwner){
                                 pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
                             }
                         } else {
@@ -1282,7 +1288,7 @@
                                     let num = p.split('[')[1].split(']')[0];
                                     if(p.replace(num, '*') === replaced){
                                         pathMap.get(p).getElementsByClassName('alpaca-control')[0].style.color = '#2449AD';
-                                        if(!showSecret){
+                                        if(!showSecret && !this.isOwner){
                                             pathMap.get(p).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
                                         }
                                     }
@@ -1295,7 +1301,7 @@
                         if(pathMap.has(replaced)){
                             pathMap.get(replaced).style.color = 'yellow';
                             pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].style.color = '#FF6200';
-                            if(!showSecret){
+                            if(!showSecret && !this.isOwner){
                                 pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
                             }
                         } else {
@@ -1304,7 +1310,7 @@
                                     let num = p.split('[')[1].split(']')[0];
                                     if(p.replace(num, '*') === replaced){
                                         pathMap.get(p).getElementsByClassName('alpaca-control')[0].style.color = '#FF6200';
-                                        if(!showSecret){
+                                        if(!showSecret && !this.isOwner){
                                             pathMap.get(p).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
                                         }
                                     }

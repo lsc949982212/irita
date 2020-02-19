@@ -4,8 +4,8 @@ function formatTimestamp(timestamp){
     return moment(timestamp*1000).format('YYYY-MM-DD HH:mm:ss');
 }
 
-function getFormatAddress(address){
-    return address ? `${address.substring(0,3)}...${address.substring(address.length - 8)}` : '';
+function getFormatAddress(address, prefix = 3){
+    return address ? `${address.substring(0,prefix)}...${address.substring(address.length - 8)}` : '';
 }
 
 function isJson(str){

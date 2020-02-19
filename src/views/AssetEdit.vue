@@ -21,11 +21,11 @@
                         <div class="content_visibility_item"
                              :class="info.type ? 'first_item' : ''"
                              v-for="(info, index) in authList">
-                            <span class="content_visibility_type" v-if="info.type">
+                            <!--<span class="content_visibility_type" v-if="info.type">
                                 {{ dictionary.get(info.type) }}
-                            </span>
+                            </span>-->
                             <span class="content_visibility_title">
-                                {{ info.title }}
+                                {{ info.str.split('.')[info.str.split('.').length - 1] }}
                             </span>
                             <Select :options="info.data" :index="index"
                                     @closeOtherOps="closeOtherOps"
@@ -38,11 +38,7 @@
 
             </div>
             <div class="btn_container">
-                <el-button size="medium"
-                           @click="save"
-                           v-show="step === 2"
-                           class="btn" type="primary">保存
-                </el-button>
+
                 <el-button size="medium"
                            @click="next"
                            v-show="step === 1"
@@ -53,7 +49,11 @@
                            v-show="step === 2"
                            class="btn" type="default">上一步
                 </el-button>
-
+                <el-button size="medium"
+                           @click="save"
+                           v-show="step === 2"
+                           class="btn" type="primary">保存
+                </el-button>
                 <el-button class="btn" size="medium" @click="handleCancelClick">取消</el-button>
             </div>
 
