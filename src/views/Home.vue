@@ -279,7 +279,7 @@
                 this.confirmWaitAccept = data.otherasset_caculateinfo.wait_accept;
             },
             getDynamicList(){
-                axios.get({url : `/txs?pageNum=1&pageSize=5`, ctx : this}).then((data) =>{
+                axios.get({url : `/txs?pageNum=1&pageSize=6`, ctx : this}).then((data) =>{
                     if(data && data.data){
                         this.handleDynamicData(data.data);
                     }
@@ -413,7 +413,7 @@
 
                 }
                 .home_left_content_container_bottom {
-                    height: 160px;
+                    height: 192px;
                     .home_left_item_container {
                         .flexColumn;
                         align-items: flex-start;
@@ -500,9 +500,10 @@
                     overflow-y: auto;
                     .home_right_item {
                         border-bottom: 1px solid #EDEDED;
-                        padding: 15px 0;
+                        padding: 14px 0;
                         .home_right_item_content_container {
-
+                            height:44px;
+                            overflow: hidden;
                             .home_right_item_link {
                                 font-size: 14px;
                                 color: @themeColor;
