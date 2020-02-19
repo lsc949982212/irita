@@ -1133,11 +1133,12 @@
 
                     } else if(data && data.data && data.data.status === 'fail'){
                         this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
+                        this.getAssetAuthList(1);
                         this.centerDialogVisible = false;
                     } else {
                         this.$message.error('解密失败');
                         //失败以后重新请求授权状态,如果状态改变则修改按钮展示
-                        this.getAssetAuthList();
+                        this.getAssetAuthList(1);
                     }
                 }).catch(e =>{
                     console.error(e);
