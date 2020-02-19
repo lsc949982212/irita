@@ -187,13 +187,7 @@
         name : 'Home',
         data(){
             return {
-                dynamicList : [{
-                    address : 'faa*****fds',
-                    displayContent : '发布了新资产',
-                    name : '供应商A',
-                    displayTimePassed : '3天前',
-
-                }],
+                dynamicList : [],
                 totalAssets : 0,
                 authApplyWaitDeal : 0,
                 transOutWait : 0,
@@ -206,6 +200,7 @@
         mounted(){
             this.getDetail();
             this.getDynamicList();
+            console.log('cfg',cfg)
         },
         computed : {
             expired(){
