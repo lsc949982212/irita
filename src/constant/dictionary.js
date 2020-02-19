@@ -50,6 +50,26 @@ export const dictionary = new Map([
     ['invoices','发票信息'],
     ['receivable','资产详情'],
     ['basicInfo','基本信息'],
+
+
+    ['cargoValue','商品价值金额'],
+    ['cargoSpec','商品规格'],
+    ['cargoUnit','商品单位'],
+    ['cargoAmount','商品数量'],
+    ['warehouseName','所在仓库名称'],
+    ['warehouseLocation','仓库地址'],
+    ['entryTime','入库时间'],
+    ['cargoAmount','商品数量'],
+    ['entryFile','入库单'],
+    ['accountAmount','账存数'],
+    ['checkTime','盘点时间'],
+    ['realAmount','实存数'],
+    ['operator','盘点数'],
+    ['checkFile','盘点记录文件'],
+    ['cargoPrice','商品入库时单价'],
+
+
+
 ]);
 
 export const dynamic = new Map([

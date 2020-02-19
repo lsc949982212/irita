@@ -59,7 +59,7 @@
                                 {{ dictionary.get(info.type) }}
                             </span>-->
                             <span class="content_visibility_title">
-                                {{ info.str.split('.')[info.str.split('.').length - 1] }}
+                                {{ info.title ? info.title : info.str.split('.')[info.str.split('.').length - 1] }}
                             </span>
                             <Select :options="info.data" :index="index"
                                     @closeOtherOps="closeOtherOps"

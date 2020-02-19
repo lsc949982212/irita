@@ -6,12 +6,6 @@
   "$id":"http://example.com/root.json",
   "type":"object",
   "title":"",
-  "required":[
-    "basicInfo",
-    "detailedInfo",
-    "authorizationProperties",
-    "secretProperties"
-  ],
   "properties":{
     "basicInfo":{
       "$id":"#/properties/basicInfo",
