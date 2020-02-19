@@ -1193,7 +1193,7 @@
                 console.log(path)
             },
             getDetails(){
-                let url = `/assets/detail/${encodeURIComponent(this.$route.query.nft_id)}`;
+                let url = `/assets/detail/${this.$route.query.nft_id}?address=${this.$accountHelper.getAccount().address}`;
                 if(this.useUnlock){
                     url += `&request_id=${this.transRequestId}`;
                 }
