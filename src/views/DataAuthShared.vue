@@ -298,7 +298,27 @@
                 return accountHelper.isOwner(row.owner) && row.transStatus === constant.ASSET_STATUS.NORMAL
             },
             handleCheckClick(row){
-                this.$router.push(`/asset_detail?type=check&nft_id=${row.id}&owner=${row.owner}&transStatus=${row.transStatus}&query_type=${row.type}&number=${row.number}`);
+                this.getDetails(row)
+            },
+            getDetails(row){
+                let url = `/assets/detail/${row.id}?address=${this.$accountHelper.getAccount().address}`;
+                axios.get({
+                    url,
+                    ctx : this
+                }).then((data) =>{
+                    if(data){
+                        this.handleDetailData(data.data,row);
+                    }
+                }).catch(e =>{
+                    console.error(e);
+                    this.$message.error('获取数据失败');
+                });
+            },
+            handleDetailData(data,row){
+                console.log('detail data', data.chain_info);
+                if(data && data.chain_info){
+                    this.$router.push(`/asset_detail?type=check&nft_id=${row.id}&owner=${data.chain_info.owner}&transStatus=${data.chain_info.transfer_status}&query_type=${data.chain_info.type}&number=${row.number}`);
+                }
             },
             handleTransClick(row){
                 this.$router.push(`/asset_detail?type=trans&nft_id=${row.id}&owner=${row.owner}&transStatus=${row.transStatus}&query_type=${row.type}&number=${row.number}`);

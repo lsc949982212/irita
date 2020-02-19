@@ -227,7 +227,7 @@
                         type : 'success'
                     });
                     this.centerDialogVisible = false;
-                    this.$router.replace('/asset_list')
+                    this.$router.replace('/home')
                 } else {
                     this.$message.error('账号或者密码错误');
                 }
