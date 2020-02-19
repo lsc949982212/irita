@@ -6,6 +6,12 @@
   "$id":"http://example.com/root.json",
   "type":"object",
   "title":"",
+  "required":[
+    "basicInfo",
+    "detailedInfo",
+    "authorizationProperties",
+    "secretProperties"
+  ],
   "properties":{
     "basicInfo":{
       "$id":"#/properties/basicInfo",
@@ -146,8 +152,8 @@
             "warehouseName":{
               "$id":"#/properties/detailedInfo/properties/inventory/properties/warehouseName",
               "type":"string",
-              "title":"",
-              "default":"所在仓库名称",
+              "title":"所在仓库名称",
+              "default":"",
               "examples":[
                 "上海仓库-1"
               ],
@@ -156,8 +162,8 @@
             "warehouseLocation":{
               "$id":"#/properties/detailedInfo/properties/inventory/properties/warehouseLocation",
               "type":"string",
-              "title":"The Warehouselocation Schema",
-              "default":"仓库地址",
+              "title":"仓库地址",
+              "default":"",
               "examples":[
                 ""
               ],
