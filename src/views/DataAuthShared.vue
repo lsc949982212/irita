@@ -108,11 +108,11 @@
                     </el-table-column>
                     <el-table-column
                             label="操作"
-                            min-width="140">
+                            min-width="120">
                         <template slot-scope="scope">
                             <span @click="handleCheckClick(scope.row)"
                                   class="data_auth_link">
-                                资产详情
+                                详情
                             </span>
                             <span @click="handleAuthClick(scope.row)"
                                   v-show="scope.row.status === constant.AUTH_STATUS.APPLYING && scope.row.provider === $accountHelper.getAccount().address"
@@ -341,7 +341,7 @@
             handleDetailData(data, row){
                 console.log('detail data', data.chain_info);
                 if(data && data.chain_info){
-                    this.$router.push(`/asset_detail?type=check&nft_id=${row.id}&owner=${data.chain_info.owner}&transStatus=${data.chain_info.transfer_status}&query_type=${data.chain_info.type}&number=${row.number}`);
+                    this.$router.push(`/asset_detail?type=check&nft_id=${row.id}&owner=${data.chain_info.nft_owner}&transStatus=${data.chain_info.transfer_status}&query_type=${data.chain_info.type}&number=${row.number}`);
                 }
             },
             handleTransClick(row){
