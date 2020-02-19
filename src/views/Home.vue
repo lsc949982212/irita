@@ -91,12 +91,12 @@
                         <span class="home_left_item_content_long">
                             通过资产模型,灵活定制,快速登记资产
                         </span>
-                        <span class="home_left_item_sub_content">
+                        <!--<span class="home_left_item_sub_content">
                             上次操作{{  }}
                         </span>
                         <span class="home_left_item_sub_content">
                             {{  }}分钟前
-                        </span>
+                        </span>-->
                     </div>
                     <div class="home_left_item_container">
                         <div class="home_left_item_icon_container" @click="toSharePage">
@@ -109,12 +109,12 @@
                         <span class="home_left_item_content_long">
                             申请查看其它链上用户隐私保护的资产内容,对方授权共享后,可临时性查看其加密数据
                         </span>
-                        <span class="home_left_item_sub_content">
+                        <!--<span class="home_left_item_sub_content">
                             上次操作{{  }}
                         </span>
                         <span class="home_left_item_sub_content">
                             {{  }}分钟前
-                        </span>
+                        </span>-->
                     </div>
                     <div class="home_left_item_container" @click="toExplorer">
                         <div class="home_left_item_icon_container">
@@ -413,7 +413,7 @@
 
                 }
                 .home_left_content_container_bottom {
-                    height: 222px;
+                    height: 160px;
                     .home_left_item_container {
                         .flexColumn;
                         align-items: flex-start;
