@@ -166,11 +166,23 @@
                         this.$message.error('json数据格式有误,请重新上传');
                         return;
                     }
+                    try {
+                        if(JSON.parse(reader.result).basicInfo.assetType !== this.value){
+                            this.$message.error('资产类型不匹配,请重新上传');
+                            setTimeout(()=>{
+                                window.location.reload();
+                            },2000)
+                        }
+                    }catch (e) {
+                        this.$message.error('导入数据错误,请重新上传');
+                    }
+
                     if(JSON.parse(reader.result).dataInteract){
                         this.dataInteract = JSON.parse(reader.result).dataInteract
                     }
+                    let tempData = JSON.parse(JSON.stringify(JSON.parse(reader.result)))
 
-
+                    tempData.basicInfo.assetOwner = JSON.parse(sessionStorage.getItem('token')).name;
                     const el = document.getElementById('json_schema_node');
                     const childs = el.childNodes;
                     for(let i = childs.length - 1 ; i >= 0 ; i--){
@@ -178,16 +190,21 @@
                     }
                     $("#json_schema_node").alpaca({
                         "schemaSource" : JsonSchemaHelper.getFormatSchemaFile(require(`../schema/${this.value}`)),
-                        "dataSource" : reader.result
+                        "dataSource" : tempData
                     });
                     setTimeout(() =>{
                         document.getElementsByClassName('alpaca-required-indicator').forEach((node) =>{
                             node.innerHTML = '(必填)';
                         });
                         const assetType = document.getElementsByName('basicInfo_assetType');
+                        const assetOwner = document.getElementsByName('basicInfo_assetOwner');
                         if(assetType && assetType.length){
                             assetType[0].setAttribute('disabled', true)
                         }
+                        if(assetOwner && assetOwner.length){
+                            assetOwner[0].setAttribute('disabled', true)
+                        }
+
                     }, 300)
                 }
             },
@@ -246,8 +263,12 @@
                             node.innerHTML = '(必填)';
                         });
                         const assetType = document.getElementsByName('basicInfo_assetType');
+                        const assetOwner = document.getElementsByName('basicInfo_assetOwner');
                         if(assetType && assetType.length){
                             assetType[0].setAttribute('disabled', true)
+                        }
+                        if(assetOwner && assetOwner.length){
+                            assetOwner[0].setAttribute('disabled', true)
                         }
                     }, 100);
                 }

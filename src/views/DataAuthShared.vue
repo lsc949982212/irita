@@ -93,12 +93,12 @@
                                 资产详情
                             </span>
                             <span @click="handleAuthClick(scope.row)"
-                                  v-show="scope.row.status === constant.AUTH_STATUS.APPLYING"
+                                  v-show="scope.row.status === constant.AUTH_STATUS.APPLYING && scope.row.provider === $accountHelper.getAccount().address"
                                   class="data_auth_link">
                                 授权
                             </span>
                             <span @click="handleRefuseClick(scope.row)"
-                                  v-show="scope.row.status === constant.AUTH_STATUS.APPLYING"
+                                  v-show="scope.row.status === constant.AUTH_STATUS.APPLYING && scope.row.provider === $accountHelper.getAccount().address"
                                   class="data_auth_link data_auth_link_refuse">
                                 拒绝
                             </span>
@@ -276,6 +276,7 @@
                             type : 'success'
                         });
                         this.centerDialogVisible = false;
+                        this.onPageChange(1);
                     } else if(data && data.data && data.data.status === 'fail'){
                         this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
                         this.centerDialogVisible = false;
@@ -360,6 +361,7 @@
                         authStatus : this.getDisplayAuthStatus(asset.status),
                         type : asset.type,
                         owner : asset.nft_owner,
+                        provider : asset.provider,
                         transStatus : asset.transfer_status,
                         status:asset.status,
                         request_id:asset.request_id,

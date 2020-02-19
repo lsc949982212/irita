@@ -1187,7 +1187,7 @@
                 console.log(path)
             },
             getDetails(){
-                let url = `/assets/detail/${this.$route.query.nft_id}`;
+                let url = `/assets/detail/${encodeURIComponent(this.$route.query.nft_id)}`;
                 if(this.useUnlock){
                     url += `&request_id=${this.transRequestId}`;
                 }
