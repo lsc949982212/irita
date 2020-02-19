@@ -1,7 +1,8 @@
 {
   "denoms":[
-    "receivable",
+    "Receivable",
     "registration",
+    "Inventory",
     "注册登记"
   ]
 }

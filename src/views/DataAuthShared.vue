@@ -292,7 +292,7 @@
 
             },
             handleSelectChange(){
-                this.onPageChange(1);
+                //this.onPageChange(1);
             },
             getTransShow(row){
                 return accountHelper.isOwner(row.owner) && row.transStatus === constant.ASSET_STATUS.NORMAL
