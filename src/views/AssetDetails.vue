@@ -1196,12 +1196,15 @@
                     url,
                     ctx : this
                 }).then((data) =>{
-                    if(data){
+                    if(data && data.data){
                         this.handleDetailData(data.data);
+                    }else{
+                        this.$message.error('未获取到数据');
                     }
 
                 }).catch(e =>{
                     console.error(e)
+                    this.$message.error('未获取到数据');
                 });
             },
             getCheckStatus(page){
