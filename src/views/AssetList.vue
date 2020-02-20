@@ -153,22 +153,12 @@
     import { accountHelper } from '../helper/accountHelper';
     import { getFormatAddress } from '../util/util';
     import cfg from '../config/config';
-    import denoms from '../schema/config';
+    import schemaConfig from '../schema/config';
 
 
     export default {
         name : 'AssetList',
         data(){
-            let assetType = denoms.denoms.map((d)=>{
-                return {
-                    value: d,
-                    label: d
-                }
-            });
-            assetType.unshift({
-                value: '',
-                label: '全部资产类型'
-            });
 
             let assetStatusValue = this.$route.query.asset_status_value ? Number(this.$route.query.asset_status_value) : constant.ASSET_STATUS_OPTIONS.ALL,
                 userAccountValue = this.$route.query.user_account_value ? Number(this.$route.query.user_account_value) : constant.ASSETS_BELONG.ALL;
@@ -177,7 +167,7 @@
                 totalAssets : 0,
                 totalTxCount : 1,
                 txListCurrentPage : 1,
-                assetType,
+                assetType:[],
                 assetStatus : [{
                     value: constant.ASSET_STATUS_OPTIONS.ALL,
                     label: '全部资产状态'
@@ -222,6 +212,7 @@
         components : {},
         mounted(){
             this.onPageChange(1);
+            this.getAssetType();
         },
         methods : {
             getDisplayAssetTransStatus(status){
@@ -234,6 +225,34 @@
                         return '已接受待转让';
 
                 }
+            },
+            getAssetType(){
+                const url = `/assets/denoms`;
+                axios.get({url, ctx : this}).then((data) =>{
+                    console.log(data);
+                    if(data && data.status === 'success'){
+                        if(data && data.data && data.data.denoms){
+                            data.data.denoms.forEach((item, index) =>{
+                                if(schemaConfig.denoms.includes(item)){
+                                    this.assetType.push({
+                                        value : item,
+                                        label : item
+                                    })
+                                }
+                            });
+                            this.assetType.unshift({
+                                value: '',
+                                label: '全部资产类型'
+                            });
+
+                        }
+                    } else {
+                        this.$message.error('请求数据错误');
+                    }
+                }).catch(e =>{
+                    console.error(e);
+                    this.$message.error('请求数据错误');
+                });
             },
             handleSelectChange(value){
 
