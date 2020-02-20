@@ -142,7 +142,7 @@
                     <div class="home_right_top_title_container">
                         <img src="../assets/dynamic.png" class="home_right_top_icon">
                         <span class="home_right_top_title">
-                            动态
+                            链上动态
                         </span>
                     </div>
                     <div class="home_right_top_all_container">

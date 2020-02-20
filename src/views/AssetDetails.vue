@@ -1280,7 +1280,7 @@
                         let replaced = a.replace(/\./g, '/').replace('$', '');
                         if(pathMap.has(replaced)){
                             pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].style.color = '#2449AD';
-                            if(!showSecret && !this.isOwner){
+                            if(!showSecret && !this.isOwner && !this.useUnlock){
                                 pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
                             }
                         } else {
@@ -1289,7 +1289,7 @@
                                     let num = p.split('[')[1].split(']')[0];
                                     if(p.replace(num, '*') === replaced){
                                         pathMap.get(p).getElementsByClassName('alpaca-control')[0].style.color = '#2449AD';
-                                        if(!showSecret && !this.isOwner){
+                                        if(!showSecret && !this.isOwner && !this.useUnlock){
                                             pathMap.get(p).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
                                         }
                                     }
@@ -1302,7 +1302,7 @@
                         if(pathMap.has(replaced)){
                             pathMap.get(replaced).style.color = 'yellow';
                             pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].style.color = '#FF6200';
-                            if(!this.isOwner){
+                            if(!this.isOwner && !this.useUnlock){
                                 pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
                             }
                         } else {
@@ -1311,7 +1311,7 @@
                                     let num = p.split('[')[1].split(']')[0];
                                     if(p.replace(num, '*') === replaced){
                                         pathMap.get(p).getElementsByClassName('alpaca-control')[0].style.color = '#FF6200';
-                                        if(!this.isOwner){
+                                        if(!this.isOwner && !this.useUnlock){
                                             pathMap.get(p).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
                                         }
                                     }
