@@ -1302,7 +1302,7 @@
                         if(pathMap.has(replaced)){
                             pathMap.get(replaced).style.color = 'yellow';
                             pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].style.color = '#FF6200';
-                            if(!showSecret && !this.isOwner){
+                            if(!this.isOwner){
                                 pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
                             }
                         } else {
@@ -1311,7 +1311,7 @@
                                     let num = p.split('[')[1].split(']')[0];
                                     if(p.replace(num, '*') === replaced){
                                         pathMap.get(p).getElementsByClassName('alpaca-control')[0].style.color = '#FF6200';
-                                        if(!showSecret && !this.isOwner){
+                                        if(!this.isOwner){
                                             pathMap.get(p).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
                                         }
                                     }
