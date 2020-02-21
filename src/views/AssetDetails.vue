@@ -1193,9 +1193,9 @@
                 console.log(path)
             },
             getDetails(){
-                let url = `/assets/detail/${this.$route.query.nft_id}?address=${this.$accountHelper.getAccount().address}`;
+                let url = `/assets/detail/${this.$route.query.nft_id}`;
                 if(this.useUnlock){
-                    url += `&request_id=${this.transRequestId}`;
+                    url += `?request_id=${this.transRequestId}`;
                 }
 
                 axios.get({

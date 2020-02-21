@@ -182,6 +182,7 @@
     import axios from '../helper/httpHelper';
     import { dynamic } from '../constant/dictionary';
     import { getFormatAddress,formatDuring } from '../util/util';
+    import JsonSchemaHelper from '../helper/JsonSchemaHelper';
 
     export default {
         name : 'Home',
@@ -201,6 +202,9 @@
             this.getDetail();
             this.getDynamicList();
             console.log('cfg',cfg)
+            let schema = require(`../schema/receivable`);
+            JsonSchemaHelper.formatJsonSchemaToTreeData(schema);
+            console.error(schema)
         },
         computed : {
             expired(){
