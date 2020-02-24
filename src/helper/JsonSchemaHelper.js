@@ -25,8 +25,12 @@ export default class JsonSchemaHelper {
             schema.children = [];
             for(let key in schema.properties){
                 if(key === 'dataInteract' || key === 'authorizationProperties' || key === 'secretProperties') continue;
-                schema.properties[key].id = schema.properties[key]['$id'];
+                //schema.properties[key].id = schema.properties[key]['$id'];
                 schema.properties[key].label = schema.properties[key].title;
+                //set disabled items
+                /*if(schema.properties[key]['$id'] && schema.properties[key]['$id'].includes('basicInfo')){
+                    schema.properties[key].disabled = true;
+                }*/
                 schema.children.push(schema.properties[key]);
                 if('properties' in schema.properties[key]){
 

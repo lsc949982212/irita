@@ -370,6 +370,9 @@
                     }
 
                 }
+                pre{
+                    border-color:#EDEDED;
+                }
 
                 .fade-enter-active, .fade-leave-active {
                     transition: opacity .28s;
@@ -404,6 +407,9 @@
                 }
                 .el-button--medium{
                     height:34px;
+                }
+                .el-tree{
+                    background: #f8f8f8;
                 }
             }
         }

@@ -55,9 +55,6 @@
                         <div class="content_visibility_item"
                              :class="info.type ? 'first_item' : ''"
                              v-for="(info, index) in authList">
-                            <!--<span class="content_visibility_type" v-if="info.type">
-                                {{ dictionary.get(info.type) }}
-                            </span>-->
                             <span class="content_visibility_title">
                                 {{ info.title ? info.title : info.str.split('.')[info.str.split('.').length - 1] }}
                             </span>
@@ -66,6 +63,78 @@
                                     :ref="`select_${index}`"
                                     @changeAuth="changeAuth"/>
                         </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content_container step_third" v-show="step === 4">
+                <div class="content_item">
+                    <p class="content_item_title">
+                        设置数据交互服务
+                    </p>
+                    <div class="step_fourth_wrap">
+                        <div class="tree_wrap">
+                            <el-tree
+                                    :data="treeData"
+                                    show-checkbox
+                                    ref="tree"
+                                    node-key="$id">
+                            </el-tree>
+                        </div>
+                        <div class="content_wrap">
+                            <div class="content_head_container">
+                                <el-select v-model="service" placeholder="请选择跨链服务" size="small">
+                                    <el-option
+                                            v-for="item in serviceList"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :disabled="item.disabled"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                                <el-button size="medium"
+                                           @click="addServiceItem"
+                                           class="btn" type="primary">新增
+                                </el-button>
+                            </div>
+                            <div class="service_content_container">
+                                <el-table
+                                        :data="checkDataList"
+                                        style="width: 100%">
+                                    <el-table-column type="expand">
+                                        <template slot-scope="props">
+                                            <el-form label-position="left" inline class="demo-table-expand">
+                                                <pre>{{ props.row.interact }}</pre>
+                                            </el-form>
+                                        </template>
+                                    </el-table-column>
+                                    <el-table-column
+                                            label="数据信息"
+                                            min-width="60">
+                                        <template>
+                                            <span>
+                                                数据信息
+                                            </span>
+                                        </template>
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="displayService"
+                                            label="对应的服务"
+                                            min-width="80">
+                                    </el-table-column>
+                                    <el-table-column
+                                            label="操作"
+                                            min-width="60">
+                                        <template slot-scope="scope">
+                                            <el-button @click="handleDeleteClick(scope.row)"
+                                                       type="text" size="small" class="table_delete_btn">
+                                                删除
+                                            </el-button>
+                                        </template>
+                                    </el-table-column>
+                                </el-table>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
@@ -90,11 +159,20 @@
             <div class="btn_container" v-show="step === 3">
                 <el-button class="btn" size="medium" @click="handleThirdStepPre" type="default">上一步</el-button>
                 <el-button size="medium"
+                           @click="changeStep(4)"
+                           class="btn" type="primary">下一步
+                </el-button>
+                <el-button class="btn" size="medium" @click="handleCancelClick">取消</el-button>
+            </div>
+            <div class="btn_container" v-show="step === 4">
+                <el-button class="btn" size="medium" @click="step = 3" type="default">上一步</el-button>
+                <el-button size="medium"
                            @click="save"
                            class="btn" type="primary">保存
                 </el-button>
                 <el-button class="btn" size="medium" @click="handleCancelClick">取消</el-button>
             </div>
+
 
         </div>
     </div>
@@ -111,7 +189,10 @@
     import { isJson } from '../util/util';
     import data from './data';
     import schemaConfig from '../schema/config';
+    import {constant} from '../constant/constant';
     import jp from 'jsonpath';
+
+
     let tempData = JSON.parse(JSON.stringify(data));
 
     export default {
@@ -125,7 +206,14 @@
                 jsonData : null,
                 dictionary,
                 dataInteract : [],
+                checkDataList : [],
+                serviceList : [{
+                    value : constant.SERVICE.CHECK,
+                    label : '查验'
+                }],
+                treeData : [],
                 downloadUrl : null,
+                service : constant.SERVICE.CHECK,
             }
         },
         components : {
@@ -153,6 +241,36 @@
         methods : {
             add(){
                 this.$router.push('/asset_add');
+            },
+            addServiceItem(){
+                console.error(this.$refs.tree.getCheckedKeys())
+                let data = this.$refs.tree.getCheckedKeys().map((item)=>{
+                    return item.replace(/#/g,'$').replace(/\/properties\//g,'.').replace(/\/items/,'[*]')
+                });
+                this.checkDataList.push({
+                    timestamp:new Date().getTime(),
+                    service:this.service,
+                    interact:data.map((item)=>{
+                        return {
+                            xPath:item,
+                            interact_type:this.service,
+                        }
+                    })
+                });
+                this.resetChecked();
+                console.error(data)
+            },
+            handleDeleteClick(row){
+                console.log(row.timestamp)
+                for(let i = 0; i < this.checkDataList.length; i++){
+                    if(this.checkDataList[i].timestamp === row.timestamp){
+                        this.checkDataList.splice(i,1);
+                        break;
+                    }
+                }
+            },
+            resetChecked() {
+                this.$refs.tree.setCheckedKeys([]);
             },
             handleImportClick(){
                 document.getElementById('files').click();
@@ -230,6 +348,10 @@
                                 this.value = data.data.denoms[0]
                                 //this.value = 'car'
                             }
+                            let schema = require(`../schema/${this.value}`);
+                            JsonSchemaHelper.resetArrayToObject(schema);
+                            JsonSchemaHelper.formatJsonSchemaToTreeData(schema);
+                            this.treeData = schema.children;
 
                         }
                     } else {
@@ -271,6 +393,12 @@
                             assetOwner[0].setAttribute('disabled', true)
                         }
                     }, 100);
+                }else if(step === 4){
+                    let schema = require(`../schema/${this.value}`);
+                    JsonSchemaHelper.resetArrayToObject(schema);
+                    JsonSchemaHelper.formatJsonSchemaToTreeData(schema);
+                    this.treeData = schema.children;
+                    console.error(schema)
                 }
             },
             checkData(){
@@ -292,7 +420,11 @@
                 let secret = this.authList.filter((a) => a.value === '3');
                 this.jsonData.authorizationProperties = [];
                 this.jsonData.secretProperties = [];
-                this.jsonData.dataInteract = this.dataInteract;
+                let dataInteract = [];
+                this.checkDataList.forEach((item)=>dataInteract = [...dataInteract, ...item.interact]);
+                console.error(this.checkDataList)
+                console.error(dataInteract)
+                this.jsonData.dataInteract = dataInteract;
                 authorization.forEach((a) => this.jsonData.authorizationProperties.push(a.str));
                 secret.forEach((a) => this.jsonData.secretProperties.push(a.str));
                 this.postData();
@@ -417,6 +549,53 @@
                         .first_item {
                             margin-top: 60px;
                         }
+                    }
+                    .step_fourth_wrap{
+                        .flexRow;
+                        padding-top:15px;
+                        .tree_wrap{
+                            min-width:350px;
+                        }
+                        .content_wrap{
+                            flex:1;
+
+                            .el-select{
+                                width:300px;
+                            }
+                            .content_head_container{
+                                .flexRow;
+                                margin-bottom:10px;
+                                .btn{
+                                    width:136px;
+                                    margin-left:20px;
+                                }
+                            }
+                            .service_content_container{
+                                background: #ffffff;
+                                .table_delete_btn{
+                                    color:#FE2F5D;
+                                }
+                                
+                                
+                                
+                                
+                                .el-table{
+                                    background: #ffffff;
+                                }
+                                .el-table th, .el-table tr {
+                                    background-color: #F8F8F8;
+                                }
+                                .el-table__expanded-cell[class*=cell]{
+                                    padding:10px 15px;
+                                }
+                                pre{
+                                    font-size:12px;
+                                    color:@mainFontColor;
+                                    background: #ffffff;
+                                }
+                            }
+                        }
+
                     }
 
                 }
