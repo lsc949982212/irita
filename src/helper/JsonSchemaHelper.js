@@ -20,18 +20,7 @@ export default class JsonSchemaHelper {
         return tempSchema;
     }
 
-    static getTitleByJSONPath(schema, path){
-        if('properties' in schema){
-            schema = schema.properties[path];
-        }else if('items' in schema){
-            console.error(path)
-            schema = schema.items[path];
-        }
-
-    }
-
-    static formatJsonSchemaToTreeData(schema){
-
+    static formatJsonSchemaToTreeData(schema){//algorithm need to be optimized
         if('properties' in schema){
             schema.children = [];
             for(let key in schema.properties){
@@ -40,22 +29,28 @@ export default class JsonSchemaHelper {
                 schema.properties[key].label = schema.properties[key].title;
                 schema.children.push(schema.properties[key]);
                 if('properties' in schema.properties[key]){
+
                     JsonSchemaHelper.formatJsonSchemaToTreeData(schema.properties[key])
-                }else if('items' in schema){
-
-                    schema.properties = schema.items.properties;
-
-                    //JsonSchemaHelper.formatJsonSchemaToTreeData(schema.items.properties[key])
                 }
 
             }
         }else{
             schema.id = schema['$id'];
             schema.label = schema.title;
-
-            //schema.children.push(schema.properties)
         }
 
+    }
+
+    static resetArrayToObject(schema){
+        for(let key in schema){
+            if(key === 'dataInteract' || key === 'authorizationProperties' || key === 'secretProperties') continue;
+            if(Array.isArray(schema[key]) || typeof schema[key] !== 'object') continue;
+            if('items' in schema[key]){
+                schema[key].properties = schema[key].items.properties;
+            }else{
+                JsonSchemaHelper.resetArrayToObject(schema[key])
+            }
+        }
     }
 
 }

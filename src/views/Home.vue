@@ -203,7 +203,9 @@
             this.getDynamicList();
             console.log('cfg',cfg)
             let schema = require(`../schema/receivable`);
+            JsonSchemaHelper.resetArrayToObject(schema);
             JsonSchemaHelper.formatJsonSchemaToTreeData(schema);
+
             console.error(schema)
         },
         computed : {

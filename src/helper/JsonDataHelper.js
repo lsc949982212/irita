@@ -83,18 +83,6 @@ export default class JsonDataHelper {
                     value : '1',
                     str:`$.${str}`,
                 };
-                /*//JsonSchemaHelper.getTitleByJSONPath(this.schema,str.split('.'));
-                let temp = str.split('.');
-                let format = JSON.parse(JSON.stringify(this.schema));
-
-                for(let i = 0; i < temp.length; i++){
-                    let path = temp[i];
-                    if(path.includes('[*]')){
-                        path = path.substr(0,path.length-3);
-                    }
-                    JsonSchemaHelper.getTitleByJSONPath(format,path);
-                }
-                //console.error(format)*/
 
                 if(key === Object.keys(data)[0]){
                     const nodeLevelStrList = str.split('.');
