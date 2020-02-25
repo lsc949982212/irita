@@ -675,7 +675,8 @@
                             message : '查验已提交成功,请耐心等待',
                             type : 'success'
                         });
-                        this.loadData();
+                        //this.loadData();
+                        this.getCheckStatus(1);
                     } else if(data && data.data && data.data.status === 'fail'){
                         this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
                     } else {

@@ -253,7 +253,7 @@
                     interact:data.map((item)=>{
                         return {
                             xPath:item,
-                            interact_type:this.service,
+                            interactType:this.service,
                         }
                     })
                 });
