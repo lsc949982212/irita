@@ -99,7 +99,7 @@
                                 token_id:
                             </span>
                             <span class="content_chain_info_item_content link" @click="toExplorer('nft_id')">
-                                {{ chainInfo.number }}
+                                {{ chainInfo.token_id }}
                             </span>
                         </div>
                         <div class="content_chain_info_item_wrap">
@@ -656,8 +656,8 @@
                 this.onAssetTxPaginationClick(1);
 
             },
-            getFormatAddress(address){
-                return getFormatAddress(address)
+            getFormatAddress(address, prefix){
+                return getFormatAddress(address,prefix)
             },
             postCheckData(data){
                 console.log(data)
