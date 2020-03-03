@@ -37,6 +37,22 @@
             <div class="asset_details_trans_container"
                  v-show="applyTransShow"
                  v-if="$route.query.type === 'trans'">
+                <el-upload
+                        class="upload-demo"
+                        action="https://jsonplaceholder.typicode.com/posts/"
+                        :on-preview="handlePreview"
+                        :on-remove="handleRemove"
+                        :before-remove="beforeRemove"
+                        multiple
+                        :limit="3"
+                        :on-exceed="handleExceed"
+                        :file-list="fileList">
+                    <el-button size="small" type="primary">点击上传</el-button>
+                </el-upload>
+            </div>
+            <div class="asset_details_trans_container"
+                 v-show="applyTransShow"
+                 v-if="$route.query.type === 'trans'">
                 <span class="asset_details_trans_title">
                     受让方 :
                 </span>
@@ -151,6 +167,21 @@
                                 label="转让状态"
                                 min-width="80">
                         </el-table-column>
+                        <el-table-column
+                                label="转让相关文件"
+                                min-width="60">
+                            <template slot-scope="scope">
+                                <span>文件清单</span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                label="文件一致性校验"
+                                min-width="60">
+                            <template slot-scope="scope">
+                                <span>文件清单</span>
+                            </template>
+                        </el-table-column>
+
                         <el-table-column
                                 label="操作"
                                 min-width="60">
@@ -347,6 +378,12 @@
                           @click="handleTabClick(1)">
                         服务交易记录
                     </span>
+                    <span class="content_tab_item"
+                          :class="tab === 2? 'active_tab' : ''"
+                          @click="handleTabClick(2)">
+                        存证记录
+                    </span>
+
 
                 </div>
                 <div class="auth_refresh_btn" @click="refreshList('list')">
@@ -484,6 +521,65 @@
 
                     </el-table>
                 </div>
+                <div class="content_table_wrap" v-show="tab === 2">
+                    <el-table
+                            :data="evicenceListData"
+                            style="width: 100%">
+                        <el-table-column
+                                fixed
+                                label="交易哈希"
+                                min-width="100">
+                            <template slot-scope="scope">
+                                <span class="link_url" @click="toExplorer('hash',scope.row.hash)">
+                                    {{ scope.row.hash }}
+                                </span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                label="存证ID"
+                                min-width="80">
+                            <template slot-scope="scope">
+                                <span class="link_url" @click="toExplorer('hash',scope.row.serviceHash)">
+                                    {{ getFormatAddress(scope.row.serviceHash) }}
+                                </span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                prop="time"
+                                label="存证时间"
+                                min-width="100">
+                        </el-table-column>
+                        <el-table-column
+                                label="发起地址"
+                                min-width="70">
+                            <template slot-scope="scope">
+                                <span class="link_url" @click="toExplorer('address',scope.row.address)">
+                                    {{ getFormatAddress(scope.row.address) }}
+                                </span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                label="存证文件清单"
+                                min-width="70">
+                            <template slot-scope="scope">
+                                <span class="link_url">
+
+                                </span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                prop="height"
+                                label="区块高度"
+                                min-width="50">
+                            <template slot-scope="scope">
+                                <span class="link_url" @click="toExplorer('height',scope.row.height)">
+                                    {{ scope.row.height }}
+                                </span>
+                            </template>
+                        </el-table-column>
+
+                    </el-table>
+                </div>
             </div>
             <div class="pagination_container" v-show="totalTxListCount > 5 && tab === 0">
                     <span class="total_page">
@@ -588,6 +684,7 @@
                 checkCurrentPage : 1,
                 assetTxCurrentPage : 1,
                 serviceTxCurrentPage : 1,
+                evidenceTxCurrentPage : 1,
                 hasSecret : true,
                 accountApplyAuthorizeStatus : 5,
                 accountApplyTransStatus : 5,
@@ -621,6 +718,8 @@
                 authLatestUpdateTime : '',
                 transLatestUpdateTime : '',
                 checkData : null,
+                evicenceListData: [],
+                fileList: [],
             }
         },
         components : {},
@@ -655,6 +754,18 @@
                 this.getAssetAuthList(1);
                 this.onAssetTxPaginationClick(1);
 
+            },
+            handleRemove(file, fileList) {
+                console.log(file, fileList);
+            },
+            handlePreview(file) {
+                console.log(file);
+            },
+            handleExceed(files, fileList) {
+                this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+            },
+            beforeRemove(file, fileList) {
+                return this.$confirm(`确定移除 ${ file.name }？`);
             },
             getFormatAddress(address){
                 return getFormatAddress(address)
@@ -846,8 +957,10 @@
                 this.tab = tab;
                 if(tab === 0){
                     this.onAssetTxPaginationClick(1);
-                } else {
+                } else if(tab === 1){
                     this.onServiceTxPaginationClick(1);
+                }else if(tab === 2){
+                    this.onEvidenceTxPaginationClick(1);
                 }
             },
             onTxTransPaginationClick(page){
@@ -870,6 +983,10 @@
             onServiceTxPaginationClick(page){
                 this.serviceTxCurrentPage = page;
                 this.getServiceDataList(page);
+            },
+            onEvidenceTxPaginationClick(page){
+                this.evidenceTxCurrentPage = page;
+                this.getEvidenceDataList(page);
             },
             getDataList(page, url, index){
                 axios.get({url, ctx : this}).then((data) =>{
@@ -1414,7 +1531,7 @@
                     return {
                         id : t.nft_id,
                         requestId : t.request_id,
-                        time : formatTimestamp(t.create_at),
+                        time : formatTimestamp(t.time),
                         receiver : t.provider,
                         txStatus : t.status,
                         displayStatus : this.getDisplayAssetTransStatus(t.status),
@@ -1505,6 +1622,19 @@
                     console.error(e)
                 });
             },
+            getEvidenceDataList(page){
+                axios.get({
+                    url : `/assets_tx/service_tx?pageNum=${page}&pageSize=10&used_count=true&nft_id=${this.$route.query.nft_id}`,
+                    ctx : this
+                }).then((data) =>{
+                    if(data && data.data){
+                        this.handleEvicenceDataData(data);
+                    }
+                }).catch(e =>{
+                    console.error(e)
+                });
+            },
+
             handleServiceDataData(data){
                 console.log('service list data', data);
                 this.totalServiceListCount = data.total;
@@ -1520,6 +1650,22 @@
                     }
                 })
             },
+            handleEvicenceDataData(data){
+                console.log('service list data', data);
+                this.totalServiceListCount = data.total;
+                this.serviceListData = data.data.map((item) =>{
+                    return {
+                        serviceName : item.service_name,
+                        serviceType : item.type,
+                        serviceHash : item.tx_hash,
+                        time : formatTimestamp(item.time),
+                        providerAddr : item.provider,
+                        consumeAddr : item.consumer,
+                        height : item.height,
+                    }
+                })
+            },
+
 
         }
     }

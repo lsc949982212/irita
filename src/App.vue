@@ -405,6 +405,9 @@
                 .el-button--medium{
                     height:34px;
                 }
+                .el-upload__input{
+                    display:none;
+                }
             }
         }
     }
