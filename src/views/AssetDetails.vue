@@ -88,6 +88,72 @@
 
             <div class="content_container" style="margin-top:20px;">
                 <p class="content_chain_info">
+                    资产转入时的存证信息
+                </p>
+                <div class="auth_refresh_btn" @click="refreshList('trans')">
+                    <div class="latest_update_time_container" v-show="transLatestUpdateTime">
+                        <span class="latest_update_title">
+                            存证文件数
+                        </span>
+                        <span class="latest_update_content">
+                            {{ evidenceCount }}
+                        </span>
+                        <span class="latest_update_title">
+                            存证时间
+                        </span>
+                        <span class="latest_update_content">
+                            {{ transLatestUpdateTime }}
+                        </span>
+
+                    </div>
+                    <img src="../assets/refresh.png" class="refresh_icon">
+                    <span class="auth_refresh_btn_refresh">
+                        刷新
+                    </span>
+                </div>
+                <div class="content_table_wrap">
+                    <el-table
+                            :data="evidenceDetailListData"
+                            style="width: 100%">
+                        <el-table-column
+                                fixed
+                                label="摘要信息"
+                                min-width="100">
+                            <template slot-scope="scope">
+                                <span class="link_url" @click="toExplorer('hash',scope.row.hash)">
+                                    {{ scope.row.hash }}
+                                </span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                prop="time"
+                                label="摘要算法"
+                                min-width="100">
+                        </el-table-column>
+                        <el-table-column
+                                label="存证数据"
+                                min-width="80">
+                            <template slot-scope="scope">
+                                <span class="link_url" @click="toExplorer('hash',scope.row.serviceHash)">
+                                    {{ getFormatAddress(scope.row.serviceHash) }}
+                                </span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                label="元数据"
+                                min-width="70">
+                            <template slot-scope="scope">
+                                <span class="link_url" @click="toExplorer('address',scope.row.address)">
+                                    {{ getFormatAddress(scope.row.address) }}
+                                </span>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </div>
+            </div>
+
+            <div class="content_container" style="margin-top:20px;">
+                <p class="content_chain_info">
                     链上信息
                 </p>
                 <div class="content_chain_info_wrap">
@@ -171,14 +237,19 @@
                                 label="转让相关文件"
                                 min-width="60">
                             <template slot-scope="scope">
-                                <span>文件清单</span>
+                                <span class="link_url" @click="handleFileClick(scope.row)">
+                                    {{ `共${scope.row.tfs.length}项` }}
+                                </span>
                             </template>
                         </el-table-column>
                         <el-table-column
                                 label="文件一致性校验"
                                 min-width="60">
                             <template slot-scope="scope">
-                                <span>文件清单</span>
+                                <span>{{ scope.row.hashok ? '校验成功' : '校验失败' }}</span>
+                                <img src="../assets/check_failed.png"
+                                     v-show="!scope.row.hashok"
+                                     class="check_failed">
                             </template>
                         </el-table-column>
 
@@ -191,6 +262,12 @@
                                            type="text" size="small">
                                     转让
                                 </el-button>
+                                <el-button @click="transRefused(scope.row)"
+                                           v-show="scope.row.showRefusedBtn"
+                                           type="text" size="small">
+                                    拒绝
+                                </el-button>
+
                                 <el-button @click="acceptTrans(scope.row)"
                                            v-show="scope.row.showAcceptBtn"
                                            type="text" size="small">
@@ -523,7 +600,7 @@
                 </div>
                 <div class="content_table_wrap" v-show="tab === 2">
                     <el-table
-                            :data="evicenceListData"
+                            :data="evidenceListData"
                             style="width: 100%">
                         <el-table-column
                                 fixed
@@ -531,7 +608,7 @@
                                 min-width="100">
                             <template slot-scope="scope">
                                 <span class="link_url" @click="toExplorer('hash',scope.row.hash)">
-                                    {{ scope.row.hash }}
+                                    {{ getFormatAddress(scope.row.tx_hash) }}
                                 </span>
                             </template>
                         </el-table-column>
@@ -540,12 +617,12 @@
                                 min-width="80">
                             <template slot-scope="scope">
                                 <span class="link_url" @click="toExplorer('hash',scope.row.serviceHash)">
-                                    {{ getFormatAddress(scope.row.serviceHash) }}
+                                    {{ getFormatAddress(scope.row.record_id) }}
                                 </span>
                             </template>
                         </el-table-column>
                         <el-table-column
-                                prop="time"
+                                prop="eviTime"
                                 label="存证时间"
                                 min-width="100">
                         </el-table-column>
@@ -562,8 +639,8 @@
                                 label="存证文件清单"
                                 min-width="70">
                             <template slot-scope="scope">
-                                <span class="link_url">
-
+                                <span class="link_url" @click="handleFileClick(scope.row)">
+                                    {{ `共${scope.row.tfs.length}项` }}
                                 </span>
                             </template>
                         </el-table-column>
@@ -605,6 +682,19 @@
                         :total="totalServiceListCount">
                 </el-pagination>
             </div>
+             <div class="pagination_container" v-show="totalEvidenceListCount > 5 && tab === 2">
+                    <span class="total_page">
+                        共{{ totalEvidenceListCount }}条
+                    </span>
+                <el-pagination
+                        background
+                        @current-change="onEvidenceTxPaginationClick"
+                        :current-page="evidenceTxCurrentPage"
+                        layout="prev, pager, next"
+                        :total="totalEvidenceListCount">
+                </el-pagination>
+            </div>
+
         </div>
         <el-dialog
                 :visible.sync="centerDialogVisible"
@@ -627,8 +717,33 @@
 
                 </div>
             </div>
-
         </el-dialog>
+        <el-dialog
+                :visible.sync="evidenceMaskVisible"
+                width="400px"
+                top="35vh"
+                center>
+            <div class="asset_details_dialog_container">
+                <span class="asset_details_dialog_title">
+                    转让相关文件
+                </span>
+                <div class="asset_details_dialog_content_container"
+                    @click="download(item)"
+                     v-for="item in currentTfs">
+                    <span class="asset_details_dialog_content_name">
+                        {{ item.meta }}
+                    </span>
+                    <img src="../assets/download.png" class="download_icon">
+                </div>
+                <div slot="footer" class="dialog-footer">
+                    <el-button @click="evidenceMaskVisible = false"
+                               size="medium" type="primary"
+                               class="asset_details_close_btn">关闭
+                    </el-button>
+                </div>
+            </div>
+        </el-dialog>
+
     </div>
 </template>
 
@@ -671,12 +786,15 @@
                 totalcheckCount : 1,
                 totalTxListCount : 1,
                 totalServiceListCount : 1,
+                totalEvidenceListCount : 0,
+                totalEvidenceDetailCount : 0,
                 options : [{
                     value : recevieAddr,
                     label : receiverName
                 }],
                 value : recevieAddr,
                 centerDialogVisible : false,
+                evidenceMaskVisible : false,
                 dialogTitle : '确认转让?',
                 dialogType : 1,
                 transCurrentPage : 1,
@@ -718,8 +836,12 @@
                 authLatestUpdateTime : '',
                 transLatestUpdateTime : '',
                 checkData : null,
-                evicenceListData: [],
+                evidenceListData: [],
+                evidenceDetailListData: [],
                 fileList: [],
+                evidenceCount:0,
+                recordIds:[],
+                currentTfs:[{}],
             }
         },
         components : {},
@@ -753,7 +875,16 @@
                 this.getAssetTransList(1);
                 this.getAssetAuthList(1);
                 this.onAssetTxPaginationClick(1);
+                this.getEvidenceDetail(1);
 
+            },
+            download(item){
+                console.log(item)
+                window.open(item.uri);
+            },
+            handleFileClick(file){
+                this.evidenceMaskVisible = true;
+                this.currentTfs = file.tfs;
             },
             handleRemove(file, fileList) {
                 console.log(file, fileList);
@@ -799,6 +930,36 @@
                     this.$message.error('查验提交失败');
                 });
             },
+            handleRefuseTrans(){
+                const body = {
+                    request_id : this.requestId,
+                };
+                this.loading = true;
+                axios.post({
+                    url : ` /assets_transfer/${this.$route.query.nft_id}/transfer_refuse`,
+                    body,
+                    ctx : this
+                }).then((data) =>{
+                    console.log(data);
+                    this.centerDialogVisible = false;
+                    this.loading = false;
+                    if(data && data.data && data.data.status === 'success'){
+                        Message({
+                            message : '拒绝成功',
+                            type : 'success'
+                        });
+                        this.getAssetTransList(1);
+                    } else if(data && data.data && data.data.status === 'fail'){
+                        this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
+                    } else {
+                        this.$message.error('拒绝失败');
+                    }
+                }).catch(e =>{
+                    this.loading = false;
+                    console.error(e);
+                    this.$message.error('拒绝失败');
+                });
+            },
             refreshList(type){
                 switch (type){
                     case 'trans':
@@ -815,8 +976,10 @@
                         this.authCurrentPage = 1;
                         if(this.tab === 0){
                             this.onAssetTxPaginationClick(1);
-                        } else {
+                        } else if(this.tab === 1){
                             this.onServiceTxPaginationClick(1);
+                        } else if(this.tab === 2){
+                            this.onEvidenceTxPaginationClick(1);
                         }
 
                 }
@@ -933,6 +1096,13 @@
                     checker_addr:cfg.checkerAddress,
                 }
             },
+            transRefused(row){
+                this.centerDialogVisible = true;
+                this.dialogTitle = '确认拒绝转让';
+                this.dialogType = 7;
+                this.requestId = row.requestId;
+            },
+
 
             handleConfirmBtnClick(){
                 if(this.dialogType === 0){
@@ -949,6 +1119,8 @@
                     this.refuseAuth();
                 } else if(this.dialogType === 6){
                     this.postCheckData();
+                } else if(this.dialogType === 7){
+                    this.handleRefuseTrans();
                 }
             },
 
@@ -988,6 +1160,11 @@
                 this.evidenceTxCurrentPage = page;
                 this.getEvidenceDataList(page);
             },
+            onEvidenceDetailPaginationClick(page){
+                this.evidenceDetailCurrentPage = page;
+                this.getEvidenceDetailDataList(page);
+            },
+
             getDataList(page, url, index){
                 axios.get({url, ctx : this}).then((data) =>{
                     this.handleData(data, index)
@@ -1377,9 +1554,16 @@
                     this.authorizationList = JSON.parse(data.asset_info).authorizationProperties;
                     this.secretList = JSON.parse(data.asset_info).secretProperties;
                     this.hasSecret = this.jsonData.authorizationProperties.length > 0 && !this.$accountHelper.isOwner(data.chain_info.owner)
+                    this.recordIds = JSON.parse(data.asset_info).transferHistories;
                     this.renderUI();
                     //获取完json数据才能获取查验信息
                     this.getCheckStatus(1);
+                    //获取record ids;
+                    this.onEvidenceTxPaginationClick(1);
+                    if(data.chain_info.record_id){
+                        this.getEvidenceDetail(data.chain_info.record_id)
+                    }
+
                 }
                 if(data && data.chain_info){
                     this.chainInfo = data.chain_info;
@@ -1539,7 +1723,10 @@
                         consumer : t.consumer,
                         provider : t.provider,
                         showAcceptBtn : t.status === constant.ASSET_LIST_STATUS.APPLYING && t.provider === this.$accountHelper.getAccount().address,
-                        showTransBtn : t.status === constant.ASSET_LIST_STATUS.ACCEPT && t.consumer === this.$accountHelper.getAccount().address,
+                        showTransBtn : t.status === constant.ASSET_LIST_STATUS.ACCEPT && t.consumer === this.$accountHelper.getAccount().address && t.hashok,
+                        showRefusedBtn : t.status === constant.ASSET_LIST_STATUS.ACCEPT && t.consumer === this.$accountHelper.getAccount().address && t.hashok,
+                        tfs:t.tfs,
+                        hashok:t.hashok
                     }
                 })
             },
@@ -1623,12 +1810,38 @@
                 });
             },
             getEvidenceDataList(page){
+                console.error('-------',this.recordIds)
+                axios.get({
+                    url : `/assets_record?pageNum=${page}&pageSize=10&used_count=true`,
+                    ctx : this
+                }).then((data) =>{
+                    if(data && data.data){
+                        this.handleEvidenceDataData(data);
+                    }
+                }).catch(e =>{
+                    console.error(e)
+                });
+            },
+
+            getEvidenceDetailDataList(page){
                 axios.get({
                     url : `/assets_tx/service_tx?pageNum=${page}&pageSize=10&used_count=true&nft_id=${this.$route.query.nft_id}`,
                     ctx : this
                 }).then((data) =>{
                     if(data && data.data){
-                        this.handleEvicenceDataData(data);
+                        this.handleEvidenceDataData(data);
+                    }
+                }).catch(e =>{
+                    console.error(e)
+                });
+            },
+            getEvidenceDetail(record_id){
+                axios.get({
+                    url : `/assets_record/detail/${record_id}`,
+                    ctx : this
+                }).then((data) =>{
+                    if(data && data.data){
+                        console.error('---------',data)
                     }
                 }).catch(e =>{
                     console.error(e)
@@ -1650,21 +1863,16 @@
                     }
                 })
             },
-            handleEvicenceDataData(data){
-                console.log('service list data', data);
+            handleEvidenceDataData(data){
+                console.error('evidence list data', data);
                 this.totalServiceListCount = data.total;
-                this.serviceListData = data.data.map((item) =>{
-                    return {
-                        serviceName : item.service_name,
-                        serviceType : item.type,
-                        serviceHash : item.tx_hash,
-                        time : formatTimestamp(item.time),
-                        providerAddr : item.provider,
-                        consumeAddr : item.consumer,
-                        height : item.height,
-                    }
+                this.evidenceListData = data.data;
+                this.evidenceListData.forEach((item)=>{
+                    item.eviTime = formatTimestamp(item.time);
                 })
+                
             },
+
 
 
         }
@@ -1907,6 +2115,13 @@
                         color: @themeColor;
                         cursor: pointer;
                     }
+                    .check_failed{
+                        width:14px;
+                        height:14px;
+                        position:relative;
+                        top:-1px;
+                        left:2px;
+                    }
                 }
             }
             .pagination_container {
@@ -1942,6 +2157,26 @@
                 }
                 .asset_details_confirm_btn {
                     width: 136px;
+                }
+                .asset_details_close_btn {
+                    width: 100%;
+                    margin-top:20px;
+                }
+
+            }
+            .asset_details_dialog_content_container{
+                border-bottom:1px solid #EDEDED;
+                .flexRow;
+                justify-content: space-between;
+                height:40px;
+                align-items:center;
+                cursor:pointer;
+                .asset_details_dialog_content_name{
+
+                }
+                .download_icon{
+                    width: 14px;
+                    height: 13px;
                 }
             }
 
