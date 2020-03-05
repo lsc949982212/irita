@@ -408,8 +408,11 @@
                 .el-button--medium{
                     height:34px;
                 }
-                .el-tree{
+                .el-tree {
                     background: #f8f8f8;
+                }
+                .el-upload__input{
+                    display:none;
                 }
             }
         }
