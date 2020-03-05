@@ -29,26 +29,39 @@
                                v-show="unlockShow"
                                class="btn" type="primary">点击解密
                     </el-button>
+                    <el-button size="small"
+                               @click="handleSuperviseClick"
+                               v-show="superviseShow"
+                               class="btn" type="primary">监管查看
+                    </el-button>
+
                 </div>
 
 
             </div>
 
-            <div class="asset_details_trans_container"
+            <div class="asset_details_upload_container"
                  v-show="applyTransShow"
                  v-if="$route.query.type === 'trans'">
-                <el-upload
-                        class="upload-demo"
-                        action="https://jsonplaceholder.typicode.com/posts/"
-                        :on-preview="handlePreview"
-                        :on-remove="handleRemove"
-                        :before-remove="beforeRemove"
-                        multiple
-                        :limit="3"
-                        :on-exceed="handleExceed"
-                        :file-list="fileList">
-                    <el-button size="small" type="primary">点击上传</el-button>
-                </el-upload>
+                <span class="upload_title">
+                    转让相关文件:
+                </span>
+
+                <form method="POST" action="" name="form" enctype="multipart/form-data">
+                    <input type="file" name="file"
+                           id="upload_file"
+                           style="display:none;"
+                           multiple="multiple" @change="fileImport"/>
+                </form>
+                <div class="file_list_container">
+                    <span class="file_list" v-for="item in fileList">
+                        {{ item.name }}
+                    </span>
+                </div>
+                <span class="upload_btn" @click="uploadFile">
+                    上传文件
+                </span>
+
             </div>
             <div class="asset_details_trans_container"
                  v-show="applyTransShow"
@@ -73,13 +86,6 @@
             <div class="schema_container" id="schema_container" v-show="!showJsonData">
                 <div class="content_item" id="detail_json_schema_node"></div>
                 <div class="content_item" id="locked_detail_json_schema_node" style="display:none;"></div>
-                <!-- <div class="note_container" v-show="jsonData">
-                     <span class="auth_title">授权可见:</span>
-                     <span class="auth_color"></span>
-                     <span class="secret_title">仅自己可见:</span>
-                     <span class="secret_color"></span>
-
-                 </div>-->
             </div>
             <div class="schema_container" v-show="showJsonData">
                 <pre>{{ jsonData }}</pre>
@@ -90,19 +96,19 @@
                 <p class="content_chain_info">
                     资产转入时的存证信息
                 </p>
-                <div class="auth_refresh_btn" @click="refreshList('trans')">
-                    <div class="latest_update_time_container" v-show="transLatestUpdateTime">
+                <div class="auth_refresh_btn" @click="refreshList('evi')">
+                    <div class="latest_update_time_container">
                         <span class="latest_update_title">
                             存证文件数
                         </span>
                         <span class="latest_update_content">
                             {{ evidenceCount }}
                         </span>
-                        <span class="latest_update_title">
+                        <span class="latest_update_title" style="margin-left:10px;">
                             存证时间
                         </span>
                         <span class="latest_update_content">
-                            {{ transLatestUpdateTime }}
+                            {{ evidenceLatestUpdateTime }}
                         </span>
 
                     </div>
@@ -120,13 +126,13 @@
                                 label="摘要信息"
                                 min-width="100">
                             <template slot-scope="scope">
-                                <span class="link_url" @click="toExplorer('hash',scope.row.hash)">
-                                    {{ scope.row.hash }}
+                                <span class="link_url" @click="toExplorer('hash',scope.row.tx_hash)">
+                                    {{ getFormatAddress(scope.row.digest) }}
                                 </span>
                             </template>
                         </el-table-column>
                         <el-table-column
-                                prop="time"
+                                prop="digest_algo"
                                 label="摘要算法"
                                 min-width="100">
                         </el-table-column>
@@ -134,19 +140,15 @@
                                 label="存证数据"
                                 min-width="80">
                             <template slot-scope="scope">
-                                <span class="link_url" @click="toExplorer('hash',scope.row.serviceHash)">
-                                    {{ getFormatAddress(scope.row.serviceHash) }}
-                                </span>
+                                <a class="link_url" :href="scope.row.uri">
+                                    {{ getFormatAddress(scope.row.uri) }}
+                                </a>
                             </template>
                         </el-table-column>
                         <el-table-column
                                 label="元数据"
+                                prop="meta"
                                 min-width="70">
-                            <template slot-scope="scope">
-                                <span class="link_url" @click="toExplorer('address',scope.row.address)">
-                                    {{ getFormatAddress(scope.row.address) }}
-                                </span>
-                            </template>
                         </el-table-column>
                     </el-table>
                 </div>
@@ -390,7 +392,7 @@
                         <el-table-column type="expand">
                             <template slot-scope="props">
                                 <el-form label-position="left" inline class="demo-table-expand">
-                                   <pre>{{ props.row.expandData }}</pre>
+                                    <pre>{{ props.row.expandData }}</pre>
                                 </el-form>
                             </template>
                         </el-table-column>
@@ -682,7 +684,7 @@
                         :total="totalServiceListCount">
                 </el-pagination>
             </div>
-             <div class="pagination_container" v-show="totalEvidenceListCount > 5 && tab === 2">
+            <div class="pagination_container" v-show="totalEvidenceListCount > 5 && tab === 2">
                     <span class="total_page">
                         共{{ totalEvidenceListCount }}条
                     </span>
@@ -694,7 +696,6 @@
                         :total="totalEvidenceListCount">
                 </el-pagination>
             </div>
-
         </div>
         <el-dialog
                 :visible.sync="centerDialogVisible"
@@ -728,7 +729,7 @@
                     转让相关文件
                 </span>
                 <div class="asset_details_dialog_content_container"
-                    @click="download(item)"
+                     @click="download(item)"
                      v-for="item in currentTfs">
                     <span class="asset_details_dialog_content_name">
                         {{ item.meta }}
@@ -836,17 +837,86 @@
                 authLatestUpdateTime : '',
                 transLatestUpdateTime : '',
                 checkData : null,
-                evidenceListData: [],
-                evidenceDetailListData: [],
-                fileList: [],
-                evidenceCount:0,
-                recordIds:[],
-                currentTfs:[{}],
+                evidenceListData : [],
+                evidenceDetailListData : [],
+                fileList : [],
+                evidenceCount : 0,
+                recordIds : [],
+                currentTfs : [{}],
+                superviseShow : false,
+                evidenceLatestUpdateTime : '',
+                currentRecordId : '',
             }
         },
         components : {},
         mounted(){
             this.loadData();
+
+
+            /*$(".upload").click(function (){
+                //通过FormData对象 异步提交文件 返回提交结果
+                var img = document.form.file.files;
+                console.error(img)
+                //var companyid = $("[name='companyid']").val();
+                //var userid = $("[name='userid']").val();
+                var fm = new FormData();
+                //fm.append('files', img);
+                fm.append('nft_id', "aada111应收账款");
+                fm.append('provider', 'faa1tzlqyrykyvqnqv2hj7g9y2777recf0nawfyv45');
+                fm.append('provider_pubkey', '02ee7a9fce53b2e64d3c68fe8c6cf13f6a2e564e34f9beb16f0daa4178edcf659b');
+                //fm.append('companyid', companyid);
+                //var url = saasurl+"/management/uploadFile";
+                console.error(fm)
+                fetch(`http://edge1.dev.bianjie.ai/assets_transfer/${this.$route.query.nft_id}/transfer_owner`, {
+                    method : "POST",
+                    headers : {
+                        "Content-Type" : 'application/x-www-form-urlencoded'
+                    },
+                    body : fm
+                }).then(function (response){
+                    console.error(response);
+                }).catch(e=>{
+                    console.error(e)
+                })
+                return false;
+
+                /!*$.ajax({
+                    url : `/assets_transfer/${this.$route.query.nft_id}/transfer_owner`,
+                    cache : false,
+                    type : "POST",
+                    data : fm,
+                    headers : {"X-usertoken" : sessionStorage.getItem("token")},
+                    processData : false,
+                    contentType : false,
+                    complete : function (xhr){
+                        /!*if(xhr.readyState==4&&xhr.status==200){
+                            var result = xhr.responseText;
+                            var json = JSON.parse(result);
+                            var code =json.ret_code;
+                            if(code=="000"){
+                                var url = json.fileUrl;
+                                var name = json.fileName;
+                                var innerHtml = "<a style='cursor: pointer;color: yellow;' target='_blank' href="+url+">&nbsp;点击查看&nbsp;</a>";
+                                $(".msg").html("上传成功（"+innerHtml+"）！");
+                                $(".alerttop").fadeToggle();
+                            }else{
+                                $(".myadmin-alert").removeClass("alert-success").addClass("alert-warning");
+                                $(".msg").text(json.ret_msg);
+                                $(".alerttop").fadeToggle();
+                            }
+
+                        }else{
+                            $(".myadmin-alert").removeClass("alert-success").addClass("alert-warning");
+                            $(".msg").text("上传失败！");
+                            $(".alerttop").fadeToggle();
+                        }*!/
+                        console.error(xhr)
+
+                    }
+                })*!/
+                //return false; //防止刷新页面
+            });*/
+
         },
         computed : {
             editBtnShow(){
@@ -878,6 +948,14 @@
                 this.getEvidenceDetail(1);
 
             },
+            uploadFile(){
+                document.getElementById('upload_file').click();
+            },
+            fileImport(){
+                const fileList = document.form.file.files;
+                this.fileList = Array.from(fileList);
+                console.error(this.fileList);
+            },
             download(item){
                 console.log(item)
                 window.open(item.uri);
@@ -885,18 +963,6 @@
             handleFileClick(file){
                 this.evidenceMaskVisible = true;
                 this.currentTfs = file.tfs;
-            },
-            handleRemove(file, fileList) {
-                console.log(file, fileList);
-            },
-            handlePreview(file) {
-                console.log(file);
-            },
-            handleExceed(files, fileList) {
-                this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
-            },
-            beforeRemove(file, fileList) {
-                return this.$confirm(`确定移除 ${ file.name }？`);
             },
             getFormatAddress(address){
                 return getFormatAddress(address)
@@ -906,7 +972,7 @@
                 this.loading = true;
                 axios.post({
                     url : `/assets_check/${this.$route.query.nft_id}`,
-                    body:this.checkData,
+                    body : this.checkData,
                     ctx : this
                 }).then((data) =>{
                     console.log(data);
@@ -981,6 +1047,9 @@
                         } else if(this.tab === 2){
                             this.onEvidenceTxPaginationClick(1);
                         }
+                    case 'evi':
+                        this.getEvidenceDetail();
+
 
                 }
             },
@@ -1091,9 +1160,9 @@
                 this.dialogTitle = '确认查验';
                 this.dialogType = 6;
                 this.checkData = {
-                    req_data_path:row.path,
-                    interact_type:row.interactType,
-                    checker_addr:cfg.checkerAddress,
+                    req_data_path : row.path,
+                    interact_type : row.interactType,
+                    checker_addr : cfg.checkerAddress,
                 }
             },
             transRefused(row){
@@ -1131,7 +1200,7 @@
                     this.onAssetTxPaginationClick(1);
                 } else if(tab === 1){
                     this.onServiceTxPaginationClick(1);
-                }else if(tab === 2){
+                } else if(tab === 2){
                     this.onEvidenceTxPaginationClick(1);
                 }
             },
@@ -1160,11 +1229,6 @@
                 this.evidenceTxCurrentPage = page;
                 this.getEvidenceDataList(page);
             },
-            onEvidenceDetailPaginationClick(page){
-                this.evidenceDetailCurrentPage = page;
-                this.getEvidenceDetailDataList(page);
-            },
-
             getDataList(page, url, index){
                 axios.get({url, ctx : this}).then((data) =>{
                     this.handleData(data, index)
@@ -1177,12 +1241,19 @@
             postAcceptTrans(){
                 let token = sessionStorage.getItem('token');
                 let displayUserName = '';
+                let pubkey = '';
                 if(token){
                     displayUserName = JSON.parse(token).name;
+                    for(let key in cfg.account){
+                        if(cfg.account[key].address !== JSON.parse(token).address){
+                            pubkey = cfg.account[key].publicKey;
+                        }
+                    }
                 }
                 const body = {
                     request_id : this.requestId,
-                    owner_name:displayUserName,
+                    owner_name : displayUserName,
+                    assetowner_pubkey:pubkey,
                 };
                 this.loading = true;
                 axios.post({
@@ -1363,18 +1434,27 @@
                         }
                     }
                 }
-                const body = {
-                    provider : address,
-                    provider_pubkey : publicKey
-                };
+
                 this.loading = true;
-                axios.post({
-                    url : `/assets_transfer/${this.$route.query.nft_id}/transfer_owner`,
-                    body,
-                    ctx : this
-                }).then((data) =>{
+                const fm = new FormData(), fileList = document.form.file.files,
+                    url = `http://edge1.dev.bianjie.ai/assets_transfer/${this.$route.query.nft_id}/transfer_owner`;
+                for(let item of fileList){
+                    fm.append('files', item);
+                }
+
+                fm.append('provider', address);
+                fm.append('provider_pubkey', publicKey);
+                fetch(url, {
+                    method : "POST",
+                    headers : {
+                        "Content-Type" : 'multipart/form-data'
+                    },
+                    body : fm
+                }).then((response)=>{
+                    return response.json();
+                }).then((data)=>{
                     this.loading = false;
-                    console.log(data);
+                    console.error(data)
                     if(data && data.data && data.data.status === 'success'){
                         Message({
                             message : '申请转让成功',
@@ -1389,12 +1469,12 @@
                     } else {
                         this.$message.error('申请转让失败');
                     }
-                }).catch(e =>{
+                }).catch(e=>{
                     this.loading = false;
-                    console.error(e);
+                    console.error(e)
                     this.$message.error('申请转让失败');
                     this.centerDialogVisible = false;
-                });
+                })
             },
             unlock(){//点击解密
                 const body = {
@@ -1438,6 +1518,9 @@
                     console.error(e);
                     this.$message.error('解密失败');
                 });
+            },
+            handleSuperviseClick(){
+
             },
             handleCancelBtnClick(){
                 this.centerDialogVisible = false;
@@ -1498,7 +1581,7 @@
                 }).then((data) =>{
                     if(data && data.data){
                         this.handleDetailData(data.data);
-                    }else{
+                    } else {
                         this.$message.error('未获取到数据');
                     }
 
@@ -1515,26 +1598,26 @@
                 }).then((data) =>{
                     console.error(data)
                     if(data && data.data && data.data.length){
-                        this.checkDataList = data.data.map((item)=>{
+                        this.checkDataList = data.data.map((item) =>{
                             let displayStatus = '', displayResult = '';
                             if(item.status === constant.CHECK_STATUS.NOT_CALL){
                                 displayStatus = '未查验';
-                            }else if(item.status === constant.CHECK_STATUS.CALLING){
+                            } else if(item.status === constant.CHECK_STATUS.CALLING){
                                 displayStatus = '查验中';
-                            }else if(item.status === constant.CHECK_STATUS.RESPONSED){
+                            } else if(item.status === constant.CHECK_STATUS.RESPONSED){
                                 displayStatus = '已查验';
                                 displayResult = item.check_result ? '通过' : '不通过'
-                            }else if(item.status === constant.CHECK_STATUS.EXPIRED){
+                            } else if(item.status === constant.CHECK_STATUS.EXPIRED){
                                 displayStatus = '已失效';
                             }
                             return {
                                 displayStatus,
                                 displayResult,
-                                path:item.req_data_path,
-                                interactType:item.interact_type,
-                                expandData:jp.query(this.jsonData, item.req_data_path),
-                                status:item.status,
-                                result:item.check_result,
+                                path : item.req_data_path,
+                                interactType : item.interact_type,
+                                expandData : jp.query(this.jsonData, item.req_data_path),
+                                status : item.status,
+                                result : item.check_result,
                             }
                         })
                     }
@@ -1561,7 +1644,8 @@
                     //获取record ids;
                     this.onEvidenceTxPaginationClick(1);
                     if(data.chain_info.record_id){
-                        this.getEvidenceDetail(data.chain_info.record_id)
+                        this.currentRecordId = data.chain_info.record_id;
+                        this.getEvidenceDetail()
                     }
 
                 }
@@ -1725,8 +1809,8 @@
                         showAcceptBtn : t.status === constant.ASSET_LIST_STATUS.APPLYING && t.provider === this.$accountHelper.getAccount().address,
                         showTransBtn : t.status === constant.ASSET_LIST_STATUS.ACCEPT && t.consumer === this.$accountHelper.getAccount().address && t.hashok,
                         showRefusedBtn : t.status === constant.ASSET_LIST_STATUS.ACCEPT && t.consumer === this.$accountHelper.getAccount().address && t.hashok,
-                        tfs:t.tfs,
-                        hashok:t.hashok
+                        tfs : t.tfs,
+                        hashok : t.hashok
                     }
                 })
             },
@@ -1810,9 +1894,10 @@
                 });
             },
             getEvidenceDataList(page){
-                console.error('-------',this.recordIds)
+                console.error('-------', this.recordIds)
+                let recordIdStr = this.recordIds.join();
                 axios.get({
-                    url : `/assets_record?pageNum=${page}&pageSize=10&used_count=true`,
+                    url : `/assets_record?pageNum=${page}&pageSize=10&used_count=true&record_ids=${recordIdStr}`,
                     ctx : this
                 }).then((data) =>{
                     if(data && data.data){
@@ -1822,26 +1907,17 @@
                     console.error(e)
                 });
             },
-
-            getEvidenceDetailDataList(page){
+            getEvidenceDetail(){
                 axios.get({
-                    url : `/assets_tx/service_tx?pageNum=${page}&pageSize=10&used_count=true&nft_id=${this.$route.query.nft_id}`,
+                    url : `/assets_record/detail/eb8e0a3d8462710404f7fe3d75dbbf71d960703ac07899f4a227cc020a6b6886`,
+                    //url : `/assets_record/detail/${this.currentRecordId}`,
                     ctx : this
                 }).then((data) =>{
                     if(data && data.data){
-                        this.handleEvidenceDataData(data);
-                    }
-                }).catch(e =>{
-                    console.error(e)
-                });
-            },
-            getEvidenceDetail(record_id){
-                axios.get({
-                    url : `/assets_record/detail/${record_id}`,
-                    ctx : this
-                }).then((data) =>{
-                    if(data && data.data){
-                        console.error('---------',data)
+                        console.error('---------', data)
+                        this.evidenceCount = data.data.file_nums;
+                        this.evidenceLatestUpdateTime = formatTimestamp(data.data.time);
+                        this.evidenceDetailListData = data.data.contents;
                     }
                 }).catch(e =>{
                     console.error(e)
@@ -1867,12 +1943,11 @@
                 console.error('evidence list data', data);
                 this.totalServiceListCount = data.total;
                 this.evidenceListData = data.data;
-                this.evidenceListData.forEach((item)=>{
+                this.evidenceListData.forEach((item) =>{
                     item.eviTime = formatTimestamp(item.time);
                 })
-                
-            },
 
+            },
 
 
         }
@@ -1926,6 +2001,50 @@
                     margin-left: 20px;
                     margin-right: 20px;
                     width: 136px;
+                }
+            }
+            .asset_details_upload_container {
+                .flexRow;
+                align-items: flex-start;
+                margin-bottom: 20px;
+                .upload_title {
+                    margin-right: 20px;
+                    height: 34px;
+                    line-height: 34px;
+                    color: #464646;
+                    font-size: 14px;
+                }
+                .file_list_container {
+                    .flexColumn;
+                    width: 200px;
+                    margin-right: 20px;
+                    .file_list {
+                        width: 200px;
+                        margin-bottom: 10px;
+                        height: 34px;
+                        line-height: 34px;
+                        border: 1px solid #EDEDED;
+                        border-radius: 4px;
+                        padding-left: 10px;
+                        color: #464646;
+                        font-size: 14px;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                    }
+                }
+                .upload_btn {
+                    width: 136px;
+                    margin-bottom: 10px;
+                    height: 34px;
+                    line-height: 34px;
+                    border: 1px solid #EDEDED;
+                    border-radius: 4px;
+                    color: #2449AD;
+                    background: #EDEDED;
+                    cursor: pointer;
+                    text-align: center;
+                    font-size: 14px;
                 }
             }
             .schema_container {
@@ -2016,8 +2135,8 @@
                         padding: 0;
                     }
                 }
-                .alpaca-message{
-                    display:none;
+                .alpaca-message {
+                    display: none;
                 }
             }
             .content_container {
@@ -2060,6 +2179,7 @@
                         .latest_update_content {
                             font-size: 14px;
                             color: @mainFontColor;
+                            margin-right: 10px;
                         }
                     }
 
@@ -2115,12 +2235,12 @@
                         color: @themeColor;
                         cursor: pointer;
                     }
-                    .check_failed{
-                        width:14px;
-                        height:14px;
-                        position:relative;
-                        top:-1px;
-                        left:2px;
+                    .check_failed {
+                        width: 14px;
+                        height: 14px;
+                        position: relative;
+                        top: -1px;
+                        left: 2px;
                     }
                 }
             }
@@ -2160,21 +2280,21 @@
                 }
                 .asset_details_close_btn {
                     width: 100%;
-                    margin-top:20px;
+                    margin-top: 20px;
                 }
 
             }
-            .asset_details_dialog_content_container{
-                border-bottom:1px solid #EDEDED;
+            .asset_details_dialog_content_container {
+                border-bottom: 1px solid #EDEDED;
                 .flexRow;
                 justify-content: space-between;
-                height:40px;
-                align-items:center;
-                cursor:pointer;
-                .asset_details_dialog_content_name{
+                height: 40px;
+                align-items: center;
+                cursor: pointer;
+                .asset_details_dialog_content_name {
 
                 }
-                .download_icon{
+                .download_icon {
                     width: 14px;
                     height: 13px;
                 }
