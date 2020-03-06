@@ -30,6 +30,7 @@ export const constant = {
         TRANSFERED:2,
         REFUSED:3,
         INVALID:4,
+        REFUSED_TRANS:5
     },
     AUTHORIZATION_STATUS:{
         APPLYING:0,

@@ -759,6 +759,7 @@
     import { getErrorMsgByErrorCode } from '../helper/errorCodeHelper';
     import { conversionHelper } from '../helper/conversionHelper';
     import jp from 'jsonpath';
+    import qs from 'qs';
 
     export default {
         name : 'AssetAdd',
@@ -1002,7 +1003,7 @@
                 };
                 this.loading = true;
                 axios.post({
-                    url : ` /assets_transfer/${this.$route.query.nft_id}/transfer_refuse`,
+                    url : `/assets_transfer/${this.$route.query.nft_id}/transfer_refuse`,
                     body,
                     ctx : this
                 }).then((data) =>{
@@ -1065,6 +1066,9 @@
                         return '已拒绝';
                     case constant.ASSET_LIST_STATUS.INVALID:
                         return '已失效';
+                    case constant.ASSET_LIST_STATUS.REFUSED_TRANS:
+                        return '转让方拒绝';
+
 
                 }
             },
@@ -1442,6 +1446,7 @@
                     fm.append('files', item);
                 }
 
+
                 fm.append('provider', address);
                 fm.append('provider_pubkey', publicKey);
                 fetch(url, {
@@ -1449,7 +1454,7 @@
                     headers : {
                         "Content-Type" : 'multipart/form-data'
                     },
-                    body : fm
+                    body : qs.stringify(fm)
                 }).then((response)=>{
                     return response.json();
                 }).then((data)=>{
