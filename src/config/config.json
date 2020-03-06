@@ -5,21 +5,24 @@
       "publicKey":"${firstPublicKey}",
       "address":"${firstAddress}",
       "name":"供应商A",
-      "domain":"${firstDomain}"
+      "domain":"${firstDomain}",
+      "isSupervise":"${firstIsSupervise}"
     },
     "userb":{
       "psd": "${secondPsd}",
       "publicKey":"${secondPublicKey}",
       "address":"${secondAddress}",
       "name":"保理服务商B",
-      "domain":"${secondDomain}"
+      "domain":"${secondDomain}",
+      "isSupervise":"${secondIsSupervise}"
     },
     "userc":{
       "psd": "${thirdPsd}",
       "publicKey":"${thirdPublicKey}",
       "address":"${thirdAddress}",
       "name":"监管查看账号",
-      "domain":"${thirdDomain}"
+      "domain":"${thirdDomain}",
+      "isSupervise":"${thirdIsSupervise}"
     }
 
 
