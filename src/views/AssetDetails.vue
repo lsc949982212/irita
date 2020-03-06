@@ -1454,7 +1454,7 @@
                     headers : {
                         "Content-Type" : 'multipart/form-data'
                     },
-                    body : qs.stringify(fm)
+                    body : fm
                 }).then((response)=>{
                     return response.json();
                 }).then((data)=>{
