@@ -22,7 +22,7 @@
                                @click="applyCheck"
                                v-show="applyAuthShow"
                                :loading="applyBtnLoading"
-                               class="btn" type="primary">申请查看
+                               class="btn" type="primary">{{ applyToCheck }}
                     </el-button>
                     <el-button size="small"
                                @click="unlock"
@@ -765,14 +765,18 @@
         name : 'AssetAdd',
         data(){
             let token = sessionStorage.getItem('token');
-            let recevieAddr, receiverName;
+            //let recevieAddr, receiverName;
+
+
+            let options = [];
 
             if(token){
                 for(let key in cfg.account){
-                    if(cfg.account[key].address !== JSON.parse(token).address){
-                        recevieAddr = cfg.account[key].address;
-                        receiverName = cfg.account[key].name;
-                    }
+                    options.push({
+                        value:cfg.account[key].address,
+                        label:cfg.account[key].name,
+                        disabled:cfg.account[key].address === JSON.parse(token).address
+                    })
                 }
             }
             return {
@@ -790,11 +794,8 @@
                 totalServiceListCount : 1,
                 totalEvidenceListCount : 0,
                 totalEvidenceDetailCount : 0,
-                options : [{
-                    value : recevieAddr,
-                    label : receiverName
-                }],
-                value : recevieAddr,
+                options,
+                value : '',
                 centerDialogVisible : false,
                 evidenceMaskVisible : false,
                 dialogTitle : '确认转让?',
@@ -847,6 +848,7 @@
                 superviseShow : false,
                 evidenceLatestUpdateTime : '',
                 currentRecordId : '',
+                transAssetOwnerAddr:''
             }
         },
         components : {},
@@ -939,6 +941,18 @@
             },
             isOwner(){
                 return this.$route.query.owner === this.$accountHelper.getAccount().address
+            },
+            applyToCheck(){
+                let isSupervise = false;
+                let token = sessionStorage.getItem('token');
+                if(token){
+                    isSupervise = JSON.parse(token).isSupervise;
+                }
+                if(isSupervise){
+                    return '监管查看'
+                }else{
+                    return '申请查看'
+                }
             }
         },
         methods : {
@@ -1136,6 +1150,7 @@
                 this.dialogType = 2;
                 this.operateNftId = row.id;
                 this.requestId = row.requestId;
+                this.transAssetOwnerAddr = row.consumer;
             },
             refused(row){
                 this.centerDialogVisible = true;
@@ -1243,7 +1258,7 @@
 
             },
             postAcceptTrans(){
-                let token = sessionStorage.getItem('token');
+                /*let token = sessionStorage.getItem('token');
                 let displayUserName = '';
                 let pubkey = '';
                 if(token){
@@ -1253,11 +1268,13 @@
                             pubkey = cfg.account[key].publicKey;
                         }
                     }
-                }
+                }*/
+                console.log('this asset owner address:', this.transAssetOwnerAddr);
+
                 const body = {
                     request_id : this.requestId,
-                    owner_name : displayUserName,
-                    assetowner_pubkey:pubkey,
+                    owner_name : this.$accountHelper.getUserNameByAddress(this.transAssetOwnerAddr),
+                    assetowner_pubkey:this.$accountHelper.getPublicKeyByAddress(this.transAssetOwnerAddr),
                 };
                 this.loading = true;
                 axios.post({
@@ -1428,15 +1445,9 @@
                 });
             },
             transfer(){
-                let publicKey, address;
-                let token = sessionStorage.getItem('token');
-                if(token){
-                    for(let key in cfg.account){
-                        if(cfg.account[key].address !== JSON.parse(token).address){
-                            publicKey = cfg.account[key].publicKey;
-                            address = cfg.account[key].address;
-                        }
-                    }
+                if(!this.value){
+                    this.$message.error('请选择要转让的账户');
+                    return;
                 }
 
                 this.loading = true;
@@ -1447,8 +1458,8 @@
                 }
 
 
-                fm.append('provider', address);
-                fm.append('provider_pubkey', publicKey);
+                fm.append('provider', this.value);
+                fm.append('provider_pubkey', this.$accountHelper.getPublicKeyByAddress(this.value));
                 fetch(url, {
                     method : "POST",
                     headers : {
