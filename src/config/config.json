@@ -13,7 +13,15 @@
       "address":"${secondAddress}",
       "name":"保理服务商B",
       "domain":"${secondDomain}"
+    },
+    "userc":{
+      "psd": "${thirdPsd}",
+      "publicKey":"${thirdPublicKey}",
+      "address":"${thirdAddress}",
+      "name":"监管查看账号",
+      "domain":"${thirdDomain}"
     }
+
 
   },
   "app":{
