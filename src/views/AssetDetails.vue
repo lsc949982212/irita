@@ -618,7 +618,7 @@
                                 label="存证ID"
                                 min-width="80">
                             <template slot-scope="scope">
-                                <span class="link_url" @click="toExplorer('hash',scope.row.serviceHash)">
+                                <span class="link_url" @click="toExplorer('hash',scope.row.hash)">
                                     {{ getFormatAddress(scope.row.record_id) }}
                                 </span>
                             </template>
@@ -1894,18 +1894,21 @@
                 });
             },
             getEvidenceDataList(page){
-                console.error('-------', this.recordIds)
-                let recordIdStr = this.recordIds.join();
-                axios.get({
-                    url : `/assets_record?pageNum=${page}&pageSize=10&used_count=true&record_ids=${recordIdStr}`,
-                    ctx : this
-                }).then((data) =>{
-                    if(data && data.data){
-                        this.handleEvidenceDataData(data);
-                    }
-                }).catch(e =>{
-                    console.error(e)
-                });
+                console.log(this.recordIds)
+                if(this.recordIds){
+                    let recordIdStr = this.recordIds.join();
+                    axios.get({
+                        url : `/assets_record?pageNum=${page}&pageSize=10&used_count=true&record_ids=${recordIdStr}`,
+                        ctx : this
+                    }).then((data) =>{
+                        if(data && data.data){
+                            this.handleEvidenceDataData(data);
+                        }
+                    }).catch(e =>{
+                        console.error(e)
+                    });
+                }
+
             },
             getEvidenceDetail(){
                 axios.get({
