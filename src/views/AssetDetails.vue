@@ -854,72 +854,6 @@
         components : {},
         mounted(){
             this.loadData();
-
-
-            /*$(".upload").click(function (){
-                //通过FormData对象 异步提交文件 返回提交结果
-                var img = document.form.file.files;
-                console.error(img)
-                //var companyid = $("[name='companyid']").val();
-                //var userid = $("[name='userid']").val();
-                var fm = new FormData();
-                //fm.append('files', img);
-                fm.append('nft_id', "aada111应收账款");
-                fm.append('provider', 'faa1tzlqyrykyvqnqv2hj7g9y2777recf0nawfyv45');
-                fm.append('provider_pubkey', '02ee7a9fce53b2e64d3c68fe8c6cf13f6a2e564e34f9beb16f0daa4178edcf659b');
-                //fm.append('companyid', companyid);
-                //var url = saasurl+"/management/uploadFile";
-                console.error(fm)
-                fetch(`http://edge1.dev.bianjie.ai/assets_transfer/${this.$route.query.nft_id}/transfer_owner`, {
-                    method : "POST",
-                    headers : {
-                        "Content-Type" : 'application/x-www-form-urlencoded'
-                    },
-                    body : fm
-                }).then(function (response){
-                    console.error(response);
-                }).catch(e=>{
-                    console.error(e)
-                })
-                return false;
-
-                /!*$.ajax({
-                    url : `/assets_transfer/${this.$route.query.nft_id}/transfer_owner`,
-                    cache : false,
-                    type : "POST",
-                    data : fm,
-                    headers : {"X-usertoken" : sessionStorage.getItem("token")},
-                    processData : false,
-                    contentType : false,
-                    complete : function (xhr){
-                        /!*if(xhr.readyState==4&&xhr.status==200){
-                            var result = xhr.responseText;
-                            var json = JSON.parse(result);
-                            var code =json.ret_code;
-                            if(code=="000"){
-                                var url = json.fileUrl;
-                                var name = json.fileName;
-                                var innerHtml = "<a style='cursor: pointer;color: yellow;' target='_blank' href="+url+">&nbsp;点击查看&nbsp;</a>";
-                                $(".msg").html("上传成功（"+innerHtml+"）！");
-                                $(".alerttop").fadeToggle();
-                            }else{
-                                $(".myadmin-alert").removeClass("alert-success").addClass("alert-warning");
-                                $(".msg").text(json.ret_msg);
-                                $(".alerttop").fadeToggle();
-                            }
-
-                        }else{
-                            $(".myadmin-alert").removeClass("alert-success").addClass("alert-warning");
-                            $(".msg").text("上传失败！");
-                            $(".alerttop").fadeToggle();
-                        }*!/
-                        console.error(xhr)
-
-                    }
-                })*!/
-                //return false; //防止刷新页面
-            });*/
-
         },
         computed : {
             editBtnShow(){
@@ -1456,22 +1390,17 @@
                 for(let item of fileList){
                     fm.append('files', item);
                 }
-
-
                 fm.append('provider', this.value);
                 fm.append('provider_pubkey', this.$accountHelper.getPublicKeyByAddress(this.value));
                 fetch(url, {
                     method : "POST",
-                    headers : {
-                        "Content-Type" : 'application/x-www-form-urlencoded'
-                    },
                     body : fm
                 }).then((response)=>{
                     return response.json();
                 }).then((data)=>{
                     this.loading = false;
                     console.error(data)
-                    if(data && data.data && data.data.status === 'success'){
+                    if(data && data.status === 'success'){
                         Message({
                             message : '申请转让成功',
                             type : 'success'
@@ -1479,8 +1408,8 @@
                         this.centerDialogVisible = false;
                         //this.$router.go(-1);
                         this.loadData();
-                    } else if(data && data.data && data.data.status === 'fail'){
-                        this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
+                    } else if(data && data.status === 'fail'){
+                        this.$message.error(getErrorMsgByErrorCode(data.errCode));
                         this.centerDialogVisible = false;
                     } else {
                         this.$message.error('申请转让失败');
