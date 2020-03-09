@@ -140,9 +140,10 @@
                                 label="存证数据"
                                 min-width="80">
                             <template slot-scope="scope">
-                                <a class="link_url" :href="scope.row.uri">
+                                <span class="link_url"
+                                      @click="decryptoFile(scope.row)">
                                     {{ getFormatAddress(scope.row.uri) }}
-                                </a>
+                                </span>
                             </template>
                         </el-table-column>
                         <el-table-column
@@ -759,7 +760,7 @@
     import { getErrorMsgByErrorCode } from '../helper/errorCodeHelper';
     import { conversionHelper } from '../helper/conversionHelper';
     import jp from 'jsonpath';
-    import qs from 'qs';
+    import {accountHelper} from '../helper/accountHelper';
 
     export default {
         name : 'AssetAdd',
@@ -915,6 +916,15 @@
             },
             getFormatAddress(address){
                 return getFormatAddress(address)
+            },
+            decryptoFile(row){
+                console.error(row)
+                if(!row.decryptoUri){
+                    window.open(row.uri)
+                }else{
+                    let url = `${accountHelper.getAccount().domain}/common/decrypt_download_file?file_url=${row.decryptoUri}`;
+                    window.open(url)
+                }
             },
             postCheckData(data){
                 console.log(data)
@@ -1425,14 +1435,17 @@
                             message : '解密成功',
                             type : 'success'
                         });
-                        this.jsonData = JSON.parse(data.data.data);
-                        this.secretList = JSON.parse(data.data.data).secretProperties;
+                        this.jsonData = JSON.parse(data.data.data.asset_content);
+                        this.secretList = JSON.parse(data.data.data.asset_content).secretProperties;
+                        this.evidenceDetailListData.forEach((item)=>{
+                            item.decryptoUri = data.data.data.record_files.find((f)=>f.origin_file === item.uri).re_encrypted_file
+                        });
                         document.getElementById('detail_json_schema_node').style.display = 'none';
                         document.getElementById('locked_detail_json_schema_node').style.display = 'block';
                         setTimeout(() =>{
                             $("#locked_detail_json_schema_node").alpaca({
                                 "schemaSource" : JsonSchemaHelper.getFormatSchemaFile(require(`../schema/${this.$route.query.query_type}`)),
-                                "dataSource" : JSON.parse(data.data.data),
+                                "dataSource" : JSON.parse(data.data.data.asset_content),
                                 "view" : "bootstrap-display"
                             });
                             this.drawNoteNode();
