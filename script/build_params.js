@@ -58,14 +58,8 @@ replaceEnv([
         "secondDomain":secondDomain,
         "chainId":chainId,
         "checkerAddress":checkerAddress,
-        "thirdPsd":thirdPsd,
-        "thirdPublicKey":thirdPublicKey,
-        "thirdAddress":thirdAddress,
-        "thirdName":thirdName,
-        "thirdDomain":thirdDomain,
         "firstIsSupervise":firstIsSupervise,
-        "secondIsSupervise":secondIsSupervise,
-        "thirdIsSupervise":thirdIsSupervise,
+        "secondIsSupervise":secondIsSupervise
     }
 );
 
