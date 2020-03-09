@@ -886,13 +886,15 @@
             },
             replaceAuthorizationDataToStar(){
                 //判断授权查看数据是否展示***
-                //showSecret && !this.isOwner && !this.useUnlock
                 // 非资产拥有者 && 没有'点击解密'操作 && 没有直接调用解密接口
+                return !this.isDecrypto && !this.isOwner && !this.useUnlock
 
             },
             replaceSecretDataToStar(){
                 //判断仅自己可见数据是否展示***
                 //!this.$accountHelper.isSupervise()
+                //资产拥有者 || 监管查看 || 直接调用解密接口正常展示
+                return !(this.isOwner || (this.$accountHelper.isSupervise() && this.isDecrypto) || this.useUnlock)
 
             },
 
@@ -915,7 +917,8 @@
             },
             download(item){
                 console.log(item)
-                window.open(item.uri);
+                let url = `${accountHelper.getAccount().domain}/common/decrypt_download_file?file_url=${item.uri}`;
+                window.open(url)
             },
             handleFileClick(file){
                 this.evidenceMaskVisible = true;
@@ -927,7 +930,8 @@
             decryptoFile(row){
                 console.error(row)
                 if(!row.decryptoUri){
-                    window.open(row.uri)
+                    let url = `${accountHelper.getAccount().domain}/common/decrypt_download_file?file_url=${row.uri}`;
+                    window.open(url)
                 }else{
                     let url = `${accountHelper.getAccount().domain}/common/decrypt_download_file?file_url=${row.decryptoUri}`;
                     window.open(url)
@@ -1456,6 +1460,7 @@
                                 "view" : "bootstrap-display"
                             });
                             this.drawNoteNode();
+                            this.isDecrypto = true;
                             this.setSecretFieldStyle(true);
                         }, 100);
 
@@ -1707,6 +1712,7 @@
                     "dataSource" : this.jsonData,
                     "view" : "bootstrap-display"
                 });
+                this.isDecrypto = false;
                 this.setSecretFieldStyle(false);
                 this.drawNoteNode();
             },
