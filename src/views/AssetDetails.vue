@@ -843,7 +843,8 @@
                 superviseShow : false,
                 evidenceLatestUpdateTime : '',
                 currentRecordId : '',
-                transAssetOwnerAddr:''
+                transAssetOwnerAddr:'',
+                isDecrypto:false,
             }
         },
         components : {},
@@ -886,9 +887,10 @@
             replaceAuthorizationDataToStar(){
                 //判断授权查看数据是否展示***
                 //showSecret && !this.isOwner && !this.useUnlock
+                // 非资产拥有者 && 没有'点击解密'操作 && 没有直接调用解密接口
 
             },
-            replaceSecreatDataToStar(){
+            replaceSecretDataToStar(){
                 //判断仅自己可见数据是否展示***
                 //!this.$accountHelper.isSupervise()
 
@@ -1515,9 +1517,6 @@
                 }
                 return aEle;
             },
-            handleCheck(path){
-                console.log(path)
-            },
             getDetails(){
                 let url = `/assets/detail/${this.$route.query.nft_id}?address=${this.$accountHelper.getAccount().address}`;
                 if(this.useUnlock){
@@ -1860,7 +1859,7 @@
             },
             getEvidenceDataList(page){
                 console.log(this.recordIds)
-                if(this.recordIds.length){
+                if(this.recordIds && this.recordIds.length){
                     let recordIdStr = this.recordIds.join();
                     axios.get({
                         url : `/assets_record?pageNum=${page}&pageSize=10&used_count=true&record_ids=${recordIdStr}`,
