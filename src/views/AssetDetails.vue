@@ -29,12 +29,6 @@
                                v-show="unlockShow"
                                class="btn" type="primary">点击解密
                     </el-button>
-                    <el-button size="small"
-                               @click="handleSuperviseClick"
-                               v-show="superviseShow"
-                               class="btn" type="primary">监管查看
-                    </el-button>
-
                 </div>
 
 
@@ -610,7 +604,7 @@
                                 label="交易哈希"
                                 min-width="100">
                             <template slot-scope="scope">
-                                <span class="link_url" @click="toExplorer('hash',scope.row.hash)">
+                                <span class="link_url" @click="toExplorer('hash',scope.row.tx_hash)">
                                     {{ getFormatAddress(scope.row.tx_hash) }}
                                 </span>
                             </template>
@@ -619,7 +613,7 @@
                                 label="存证ID"
                                 min-width="80">
                             <template slot-scope="scope">
-                                <span class="link_url" @click="toExplorer('hash',scope.row.hash)">
+                                <span class="link_url" @click="toExplorer('hash',scope.row.tx_hash)">
                                     {{ getFormatAddress(scope.row.record_id) }}
                                 </span>
                             </template>
@@ -1385,7 +1379,7 @@
 
                 this.loading = true;
                 const fm = new FormData(), fileList = document.form.file.files,
-                    url = `http://edge1.dev.bianjie.ai/assets_transfer/${this.$route.query.nft_id}/transfer_owner`;
+                    url = `${accountHelper.getAccount().domain}/assets_transfer/${this.$route.query.nft_id}/transfer_owner`;
                 for(let item of fileList){
                     fm.append('files', item);
                 }
@@ -1465,9 +1459,6 @@
                     console.error(e);
                     this.$message.error('解密失败');
                 });
-            },
-            handleSuperviseClick(){
-
             },
             handleCancelBtnClick(){
                 this.centerDialogVisible = false;
@@ -1842,7 +1833,7 @@
             },
             getEvidenceDataList(page){
                 console.log(this.recordIds)
-                if(this.recordIds){
+                if(this.recordIds.length){
                     let recordIdStr = this.recordIds.join();
                     axios.get({
                         url : `/assets_record?pageNum=${page}&pageSize=10&used_count=true&record_ids=${recordIdStr}`,
@@ -1867,6 +1858,9 @@
                             this.evidenceCount = data.data.file_nums;
                             this.evidenceLatestUpdateTime = formatTimestamp(data.data.time);
                             this.evidenceDetailListData = data.data.contents;
+                            this.evidenceDetailListData.forEach((item)=>{
+                                item.tx_hash = data.data.tx_hash
+                            })
                         }
                     }).catch(e =>{
                         console.error(e)

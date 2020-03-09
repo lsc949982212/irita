@@ -146,9 +146,6 @@
             },
             expired(expired){
                 if(expired){
-                    /*if(this.showToast){
-                        this.$message.error('登录过期,请重新登录');
-                    }*/
                     this.$router.push('/login');
                 }
             }
@@ -207,7 +204,6 @@
                 this.centerDialogVisible = true;
             },
             login(){
-                //this.$refs.login.setDialogVisible(true);
                 if(!this.username){
                     this.$message.error('请输入账号');
                     return;
@@ -224,7 +220,8 @@
                 if(isSuccess){
                     Message({
                         message : '登录成功',
-                        type : 'success'
+                        type : 'success',
+                        duration:2000
                     });
                     this.centerDialogVisible = false;
                     this.$router.replace('/home')
