@@ -877,7 +877,7 @@
                 if(token){
                     isSupervise = JSON.parse(token).isSupervise;
                 }
-                if(isSupervise){
+                if(isSupervise === 'true'){
                     return '监管查看'
                 }else{
                     return '申请查看'
