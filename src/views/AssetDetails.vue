@@ -1845,18 +1845,21 @@
 
             },
             getEvidenceDetail(){
-                axios.get({
-                    url : `/assets_record/detail/${this.currentRecordId}`,
-                    ctx : this
-                }).then((data) =>{
-                    if(data && data.data){
-                        this.evidenceCount = data.data.file_nums;
-                        this.evidenceLatestUpdateTime = formatTimestamp(data.data.time);
-                        this.evidenceDetailListData = data.data.contents;
-                    }
-                }).catch(e =>{
-                    console.error(e)
-                });
+                if(this.currentRecordId){
+                    axios.get({
+                        url : `/assets_record/detail/${this.currentRecordId}`,
+                        ctx : this
+                    }).then((data) =>{
+                        if(data && data.data){
+                            this.evidenceCount = data.data.file_nums;
+                            this.evidenceLatestUpdateTime = formatTimestamp(data.data.time);
+                            this.evidenceDetailListData = data.data.contents;
+                        }
+                    }).catch(e =>{
+                        console.error(e)
+                    });
+                }
+
             },
 
             handleServiceDataData(data){
