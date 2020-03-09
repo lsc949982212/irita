@@ -33,8 +33,8 @@ if (program.params) {
     secondDomain = program.params[11];
     chainId = program.params[12];
     checkerAddress = program.params[13];
-    firstIsSupervise = program.params[19];
-    secondIsSupervise = program.params[20];
+    firstIsSupervise = program.params[14];
+    secondIsSupervise = program.params[15];
 
 }
 
