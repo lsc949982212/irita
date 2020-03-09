@@ -882,7 +882,18 @@
                 }else{
                     return '申请查看'
                 }
-            }
+            },
+            replaceAuthorizationDataToStar(){
+                //判断授权查看数据是否展示***
+                //showSecret && !this.isOwner && !this.useUnlock
+
+            },
+            replaceSecreatDataToStar(){
+                //判断仅自己可见数据是否展示***
+                //!this.$accountHelper.isSupervise()
+
+            },
+
         },
         methods : {
             loadData(){
@@ -1625,18 +1636,34 @@
                         if(pathMap.has(replaced)){
                             pathMap.get(replaced).style.color = 'yellow';
                             pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].style.color = '#FF6200';
-                            if(!this.isOwner && !this.useUnlock){
-                                pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
+                            //监管人员解密以后是可以查看所有数据
+                            if(showSecret){
+                                if(!this.$accountHelper.isSupervise()){
+                                    pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
+                                }
+
+                            }else{
+                                if(!this.isOwner && !this.useUnlock){
+                                    pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
+                                }
                             }
+
                         } else {
                             Array.from(pathMap.keys()).forEach((p) =>{
                                 if(p.includes('[') && p.includes(']')){
                                     let num = p.split('[')[1].split(']')[0];
                                     if(p.replace(num, '*') === replaced){
                                         pathMap.get(p).getElementsByClassName('alpaca-control')[0].style.color = '#FF6200';
-                                        if(!this.isOwner && !this.useUnlock){
-                                            pathMap.get(p).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
+                                        if(showSecret){
+                                            if(!this.$accountHelper.isSupervise()){
+                                                pathMap.get(p).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
+                                            }
+                                        }else{
+                                            if(!this.isOwner && !this.useUnlock){
+                                                pathMap.get(p).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
+                                            }
                                         }
+
                                     }
                                 }
                             })
