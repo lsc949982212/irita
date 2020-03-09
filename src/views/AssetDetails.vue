@@ -1192,17 +1192,6 @@
 
             },
             postAcceptTrans(){
-                /*let token = sessionStorage.getItem('token');
-                let displayUserName = '';
-                let pubkey = '';
-                if(token){
-                    displayUserName = JSON.parse(token).name;
-                    for(let key in cfg.account){
-                        if(cfg.account[key].address !== JSON.parse(token).address){
-                            pubkey = cfg.account[key].publicKey;
-                        }
-                    }
-                }*/
                 console.log('this asset owner address:', this.transAssetOwnerAddr);
 
                 const body = {
@@ -1857,12 +1846,10 @@
             },
             getEvidenceDetail(){
                 axios.get({
-                    url : `/assets_record/detail/eb8e0a3d8462710404f7fe3d75dbbf71d960703ac07899f4a227cc020a6b6886`,
-                    //url : `/assets_record/detail/${this.currentRecordId}`,
+                    url : `/assets_record/detail/${this.currentRecordId}`,
                     ctx : this
                 }).then((data) =>{
                     if(data && data.data){
-                        console.error('---------', data)
                         this.evidenceCount = data.data.file_nums;
                         this.evidenceLatestUpdateTime = formatTimestamp(data.data.time);
                         this.evidenceDetailListData = data.data.contents;
