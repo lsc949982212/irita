@@ -82,6 +82,7 @@
                 secretProperties:[],
                 assetType:this.$route.query.asset_type,
                 dataInteract:[],
+                transferHistories:[],
 
             }
         },
@@ -109,6 +110,7 @@
                 jsonData.authorizationProperties = [];
                 jsonData.secretProperties = [];
                 jsonData.dataInteract = this.dataInteract;
+                jsonData.transferHistories = this.transferHistories;
                 authorization.forEach((a) => jsonData.authorizationProperties.push(a.str));
                 secret.forEach((a) => jsonData.secretProperties.push(a.str));
                 this.jsonData = jsonData;
@@ -167,6 +169,10 @@
                     if(this.jsonData.dataInteract){
                         this.dataInteract = this.jsonData.dataInteract
                     }
+                    if(this.jsonData.transferHistories){
+                        this.transferHistories = this.jsonData.transferHistories
+                    }
+
                     this.authorizationProperties = this.jsonData.authorizationProperties;
                     this.secretProperties = this.jsonData.secretProperties;
                     this.renderUI();
