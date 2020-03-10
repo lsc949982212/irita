@@ -1001,12 +1001,15 @@
                     case 'trans':
                         this.transCurrentPage = 1;
                         this.getAssetTransList(1);
+                        break;
                     case 'auth':
                         this.authCurrentPage = 1;
                         this.getAssetAuthList(1);
+                        break;
                     case 'check':
                         this.checkCurrentPage = 1;
                         this.getCheckStatus(1);
+                        break;
                     case 'list':
                         this.assetTxCurrentPage = 1;
                         this.authCurrentPage = 1;
@@ -1017,8 +1020,10 @@
                         } else if(this.tab === 2){
                             this.onEvidenceTxPaginationClick(1);
                         }
+                        break;
                     case 'evi':
                         this.getEvidenceDetail();
+                        break;
 
 
                 }
@@ -1450,7 +1455,6 @@
                         this.secretList = JSON.parse(data.data.data.asset_content).secretProperties;
                         this.evidenceDetailListData.forEach((item)=>{
                             let uri = data.data.data.record_files.find((f)=>f.origin_file === item.uri);
-                            console.error('------',uri)
                             if(uri){
                                 item.decryptoUri = uri.re_encrypted_file
                             }
