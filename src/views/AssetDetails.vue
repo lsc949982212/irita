@@ -1449,7 +1449,12 @@
                         this.jsonData = JSON.parse(data.data.data.asset_content);
                         this.secretList = JSON.parse(data.data.data.asset_content).secretProperties;
                         this.evidenceDetailListData.forEach((item)=>{
-                            item.decryptoUri = data.data.data.record_files.find((f)=>f.origin_file === item.uri).re_encrypted_file
+                            let uri = data.data.data.record_files.find((f)=>f.origin_file === item.uri);
+                            console.error('------',uri)
+                            if(uri){
+                                item.decryptoUri = uri.re_encrypted_file
+                            }
+
                         });
                         document.getElementById('detail_json_schema_node').style.display = 'none';
                         document.getElementById('locked_detail_json_schema_node').style.display = 'block';
