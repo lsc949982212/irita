@@ -845,6 +845,7 @@
                 currentRecordId : '',
                 transAssetOwnerAddr:'',
                 isDecrypto:false,
+                assetOwner:this.$route.query.owner,
             }
         },
         components : {},
@@ -870,7 +871,7 @@
                 return this.$route.query.type === 'check' && !this.isOwner && this.hasSecret && this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.AUTH;
             },
             isOwner(){
-                return this.$route.query.owner === this.$accountHelper.getAccount().address
+                return this.assetOwner === this.$accountHelper.getAccount().address
             },
             applyToCheck(){
                 let isSupervise = false;
@@ -1276,6 +1277,8 @@
                             type : 'success'
                         });
                         this.loadData();
+                        this.getDetails();
+                        this.assetOwner = this.provider;
                         this.centerDialogVisible = false;
                     } else if(data && data.data && data.data.status === 'fail'){
                         this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
@@ -1460,10 +1463,13 @@
                             }
 
                         });
-                        document.getElementById('detail_json_schema_node').style.display = 'none';
-                        document.getElementById('locked_detail_json_schema_node').style.display = 'block';
+                        const el = document.getElementById('detail_json_schema_node');
+                        const childs = el.childNodes;
+                        for(let i = childs.length - 1 ; i >= 0 ; i--){
+                            el.removeChild(childs[i]);
+                        }
                         setTimeout(() =>{
-                            $("#locked_detail_json_schema_node").alpaca({
+                            $("#detail_json_schema_node").alpaca({
                                 "schemaSource" : JsonSchemaHelper.getFormatSchemaFile(require(`../schema/${this.$route.query.query_type}`)),
                                 "dataSource" : JSON.parse(data.data.data.asset_content),
                                 "view" : "bootstrap-display"
@@ -1716,6 +1722,11 @@
                 }, 500)
             },
             renderUI(){
+                const el = document.getElementById('detail_json_schema_node');
+                const childs = el.childNodes;
+                for(let i = childs.length - 1 ; i >= 0 ; i--){
+                    el.removeChild(childs[i]);
+                }
                 $("#detail_json_schema_node").alpaca({
                     "schemaSource" : JsonSchemaHelper.getFormatSchemaFile(require(`../schema/${this.$route.query.query_type}`)),
                     "dataSource" : this.jsonData,
@@ -1926,7 +1937,7 @@
                 })
             },
             handleEvidenceDataData(data){
-                console.error('evidence list data', data);
+                console.log('evidence list data', data);
                 this.totalServiceListCount = data.total;
                 this.evidenceListData = data.data;
                 this.evidenceListData.forEach((item) =>{
