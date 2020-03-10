@@ -1217,7 +1217,7 @@
 
                 const body = {
                     request_id : this.requestId,
-                    owner_name : this.$accountHelper.getUserNameByAddress(this.transAssetOwnerAddr),
+                    accetper_name : this.$accountHelper.getAccount().address,
                     assetowner_pubkey:this.$accountHelper.getPublicKeyByAddress(this.transAssetOwnerAddr),
                 };
                 this.loading = true;
