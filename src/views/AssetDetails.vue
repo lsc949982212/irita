@@ -1683,7 +1683,7 @@
                         }
                     });
 
-                }, 250)
+                }, 500)
             },
             //添加密文注释
             drawNoteNode(){
@@ -1982,6 +1982,7 @@
                     font-size: 14px;
                     color: @mainFontColor;
                     margin-right: 10px;
+                    width:100px;
                 }
                 .asset_details_trans_btn {
                     margin-left: 20px;
@@ -1994,18 +1995,19 @@
                 align-items: flex-start;
                 margin-bottom: 20px;
                 .upload_title {
-                    margin-right: 20px;
+                    margin-right: 10px;
                     height: 34px;
                     line-height: 34px;
                     color: #464646;
                     font-size: 14px;
+                    width:100px;
                 }
                 .file_list_container {
                     .flexColumn;
-                    width: 200px;
+                    width: 192px;
                     margin-right: 20px;
                     .file_list {
-                        width: 200px;
+                        width: 192px;
                         margin-bottom: 10px;
                         height: 34px;
                         line-height: 34px;
