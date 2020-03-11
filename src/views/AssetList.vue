@@ -219,10 +219,13 @@
                 switch (status){
                     case constant.ASSET_STATUS.NORMAL:
                         return '正常';
+                        break;
                     case constant.ASSET_STATUS.APPLyING:
                         return '转让申请中';
+                        break;
                     case constant.ASSET_STATUS.ACCEPT:
                         return '已接受待转让';
+                        break;
 
                 }
             },
@@ -265,10 +268,13 @@
                 switch (status){
                     case constant.CHECK_RESULT.NOT_CHECK:
                         return '未查验';
+                        break;
                     case constant.CHECK_RESULT.CHECKED:
                         return '已查验';
+                        break;
                     case constant.CHECK_RESULT.CHECK_FAILED:
                         return '查验失败';
+                        break;
 
                 }
             },
@@ -276,6 +282,7 @@
                 switch (type){
                     case 'address':
                         window.open(`${cfg.app.explorer}/#/address/${param ? param : this.chainInfo.nft_owner}`);
+                        break;
                 }
             },
             handleCheckClick(row){

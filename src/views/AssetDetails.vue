@@ -1033,16 +1033,22 @@
                 switch (status){
                     case constant.ASSET_LIST_STATUS.APPLYING:
                         return '转让申请中';
+                        break;
                     case constant.ASSET_LIST_STATUS.ACCEPT:
                         return '已接受待转让';
+                        break;
                     case constant.ASSET_LIST_STATUS.TRANSFERED:
                         return '已转让';
+                        break;
                     case constant.ASSET_LIST_STATUS.REFUSED:
                         return '已拒绝';
+                        break;
                     case constant.ASSET_LIST_STATUS.INVALID:
                         return '已失效';
+                        break;
                     case constant.ASSET_LIST_STATUS.REFUSED_TRANS:
                         return '转让方拒绝';
+                        break;
 
 
                 }
@@ -1051,14 +1057,19 @@
                 switch (status){
                     case constant.AUTHORIZATION_STATUS.APPLYING:
                         return '申请中';
+                        break;
                     case constant.AUTHORIZATION_STATUS.AUTH:
                         return '已授权';
+                        break;
                     case constant.AUTHORIZATION_STATUS.REFUSED:
                         return '已拒绝';
+                        break;
                     case constant.AUTHORIZATION_STATUS.INVALID:
                         return '已失效';
+                        break;
                     case constant.AUTHORIZATION_STATUS.EXPIRED:
                         return '已过期';
+                        break;
 
 
                 }
@@ -1500,14 +1511,19 @@
                 switch (type){
                     case 'address':
                         window.open(`${cfg.app.explorer}/#/address/${param ? param : this.chainInfo.nft_owner}`);
+                        break;
                     case 'nft_id':
                         window.open(`${cfg.app.explorer}/#/nft/token?denom=${this.chainInfo.type}&tokenId=${this.chainInfo.number}`);
+                        break;
                     case 'hash':
                         window.open(`${cfg.app.explorer}/#/tx?txHash=${param}`);
+                        break;
                     case 'height':
                         window.open(`${cfg.app.explorer}/#/block/${param}`);
+                        break;
                     case 'serviceName':
                         window.open(`${cfg.app.explorer}/#/service?serviceName=${param}&chainId=${cfg.chainId}`);
+                        break;
                 }
             },
             getCheckElement(tag, dataAttr, reg){
