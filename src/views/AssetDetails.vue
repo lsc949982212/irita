@@ -924,6 +924,9 @@
             download(item){
                 console.log(item)
                 let url = `${accountHelper.getAccount().domain}/common/decrypt_download_file?file_url=${item.uri}`;
+                if(item.meta){
+                    url += `&filename=${item.meta}`
+                }
                 window.open(url)
             },
             handleFileClick(file){
@@ -937,9 +940,15 @@
                 console.error(row)
                 if(!row.decryptoUri){
                     let url = `${accountHelper.getAccount().domain}/common/decrypt_download_file?file_url=${row.uri}`;
+                    if(row.meta){
+                        url += `&filename=${row.meta}`
+                    }
                     window.open(url)
                 }else{
                     let url = `${accountHelper.getAccount().domain}/common/decrypt_download_file?file_url=${row.decryptoUri}`;
+                    if(row.meta){
+                        url += `&filename=${row.meta}`
+                    }
                     window.open(url)
                 }
             },
