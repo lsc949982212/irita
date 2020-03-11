@@ -226,6 +226,12 @@
                                 min-width="80">
                         </el-table-column>
                         <el-table-column
+                                prop="displayPoster"
+                                label="转让者"
+                                min-width="80">
+                        </el-table-column>
+
+                        <el-table-column
                                 prop="displayStatus"
                                 label="转让状态"
                                 min-width="80">
@@ -1810,6 +1816,7 @@
                         txStatus : t.status,
                         displayStatus : this.getDisplayAssetTransStatus(t.status),
                         displayReceiver : this.$accountHelper.getUserNameByAddress(t.provider),
+                        displayPoster : this.$accountHelper.getUserNameByAddress(t.consumer),
                         consumer : t.consumer,
                         provider : t.provider,
                         showAcceptBtn : t.status === constant.ASSET_LIST_STATUS.APPLYING && t.provider === this.$accountHelper.getAccount().address,
