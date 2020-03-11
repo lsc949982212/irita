@@ -221,16 +221,15 @@
                                 min-width="100">
                         </el-table-column>
                         <el-table-column
-                                prop="displayReceiver"
-                                label="受让者"
-                                min-width="80">
-                        </el-table-column>
-                        <el-table-column
                                 prop="displayPoster"
                                 label="转让者"
                                 min-width="80">
                         </el-table-column>
-
+                        <el-table-column
+                                prop="displayReceiver"
+                                label="受让者"
+                                min-width="80">
+                        </el-table-column>
                         <el-table-column
                                 prop="displayStatus"
                                 label="转让状态"
