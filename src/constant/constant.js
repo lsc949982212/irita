@@ -16,7 +16,7 @@ export const constant = {
     SUCCESS:{
         code:10001
     },
-    TIME_OUT:10000,
+    TIME_OUT:30000,
     AUTHORIZATION_PROPERTIES:'authorizationProperties',
     SECRET_PROPERTIES:'secretProperties',
     ASSET_STATUS:{
