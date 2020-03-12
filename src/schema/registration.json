@@ -1,0 +1,205 @@
+{
+  "$schema":"http://json-schema.org/draft-07/schema#",
+  "$id":"http://example.com/product.schema.json",
+  "title":"Product",
+  "description":"A product from Acme's catalog",
+  "type":"object",
+  "properties":{
+    "basicInfo":{
+      "type":"object",
+      "title":"基本信息",
+      "required":[
+        "assetNo",
+        "assetType",
+        "assetOwner"
+      ],
+      "properties":{
+        "assetNo":{
+          "$id":"#/properties/basicInfo/properties/assetNo",
+          "type":"string",
+          "title":"The assetNo Schema",
+          "default":"",
+          "examples":[
+            "CDCD::8475:1111:3900:2020"
+          ],
+          "pattern":"^(.*)$"
+        },
+        "assetType":{
+          "$id":"#/properties/basicInfo/properties/assetType",
+          "type":"string",
+          "title":"The assetType Schema",
+          "default":"",
+          "examples":[
+            "receivableSchema"
+          ],
+          "pattern":"^(.*)$"
+        },
+        "assetName":{
+          "$id":"#/properties/basicInfo/properties/assetName",
+          "type":"string",
+          "title":"The assetName Schema",
+          "default":"",
+          "examples":[
+            "应收账款1"
+          ],
+          "pattern":"^(.*)$"
+        },
+        "assetOwner":{
+          "$id":"#/properties/basicInfo/properties/assetOwner",
+          "type":"string",
+          "title":"The assetOwner Schema",
+          "default":"",
+          "examples":[
+            "A公司"
+          ],
+          "pattern":"^(.*)$"
+        },
+        "productDescription":{
+          "type":"string",
+          "title":"商品描述"
+        }
+      }
+    },
+    "detailedInfo":{
+      "type":"object",
+      "title":"详细信息",
+      "properties":{
+        "productId":{
+          "description":"The unique identifier for a product",
+          "type":"integer",
+          "title":"productId"
+        },
+        "productName":{
+          "description":"Name of the product",
+          "type":"string",
+          "title":"productName"
+        },
+        "price":{
+          "description":"The price of the product",
+          "type":"number",
+          "exclusiveMinimum":0,
+          "title":"price"
+        },
+        "tags":{
+          "description":"Tags for the product",
+          "type":"array",
+          "items":{
+            "type":"string"
+          },
+          "minItems":1,
+          "uniqueItems":true,
+          "title":"tags"
+        },
+        "dimensions":{
+          "type":"object",
+          "title":"dimensions",
+          "properties":{
+            "length":{
+              "type":"number",
+              "title":"length"
+            },
+            "width":{
+              "type":"number",
+              "title":"width"
+            },
+            "height":{
+              "type":"number",
+              "title":"height"
+            }
+          },
+          "required":[
+            "length",
+            "width",
+            "height"
+          ]
+        },
+        "warehouseLocation":{
+          "type":"object",
+          "title":"warehouseLocation",
+          "properties":{
+            "latitude":{
+              "type":"number",
+              "title":"latitude"
+            },
+            "longitude":{
+              "type":"number",
+              "title":"longitude"
+            }
+          }
+        }
+      },
+      "required":[
+        "productId",
+        "productName",
+        "price"
+      ]
+    },
+    "dataInteract":{
+      "$id":"#/properties/dataInteract",
+      "type":"array",
+      "title":"The dataInteract Schema",
+      "items":{
+        "$id":"#/properties/dataInteract/items",
+        "type":"object",
+        "title":"The Items Schema",
+        "required":[
+          "xPath",
+          "interactType"
+        ],
+        "properties":{
+          "xPath":{
+            "$id":"#/properties/dataInteract/items/properties/xPath",
+            "type":"string",
+            "title":"The Xpath Schema",
+            "default":"",
+            "examples":[
+              "x.receivable.payerCode"
+            ],
+            "pattern":"^(.*)$"
+          },
+          "interactType":{
+            "$id":"#/properties/dataInteract/items/properties/interactType",
+            "type":"integer",
+            "title":"The Interacttype Schema",
+            "default":0,
+            "examples":[
+              1
+            ]
+          }
+        }
+      }
+    },
+    "authorizationProperties":{
+      "$id":"#/properties/authorizationProperties",
+      "type":"array",
+      "title":"The authorizationProperties Schema",
+      "items":{
+        "$id":"#/properties/authorizationProperties/items",
+        "type":"string",
+        "title":"The Items Schema",
+        "default":"",
+        "examples":[
+          "x.receivable.payerCode",
+          "x.receivable.payerName"
+        ],
+        "pattern":"^(.*)$"
+      }
+    },
+    "secretProperties":{
+      "$id":"#/properties/secretProperties",
+      "type":"array",
+      "title":"The secretProperties Schema",
+      "items":{
+        "$id":"#/properties/secretProperties/items",
+        "type":"string",
+        "title":"The Items Schema",
+        "default":"",
+        "examples":[
+          "x.receivable.receiverCode",
+          "x.receivable.receiverName"
+        ],
+        "pattern":"^(.*)$"
+      }
+    }
+  }
+}

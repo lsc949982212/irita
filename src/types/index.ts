@@ -63,5 +63,9 @@ export interface IDynamic {
       hash: string;
 }
 
+export interface IOptions {
+      label: string;
+      value: number;
+}
 
 

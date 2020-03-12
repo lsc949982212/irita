@@ -1,5 +1,5 @@
 import cfg from '../config/config.json';
-import {Params, Config, Cfg, Account} from '../types';
+import { Params, Config, Cfg, Account } from '../types';
 
 export default {
       getAccountList<T>(): Array<T> {
