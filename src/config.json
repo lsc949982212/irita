@@ -1,0 +1,26 @@
+{
+  "account":{
+    "usera":{
+      "psd": "${fistPsd}",
+      "publicKey":"${firstPublicKey}",
+      "address":"${firstAddress}",
+      "name":"供应商A",
+      "domain":"${firstDomain}",
+      "isSupervise":"${firstIsSupervise}"
+    },
+    "userb":{
+      "psd": "${secondPsd}",
+      "publicKey":"${secondPublicKey}",
+      "address":"${secondAddress}",
+      "name":"保理服务商B",
+      "domain":"${secondDomain}",
+      "isSupervise":"${secondIsSupervise}"
+    }
+  },
+  "app":{
+    "explorer":"${explorerAddress}"
+  },
+  "env":"${env}",
+  "chainId":"${chainId}",
+  "checkerAddress":"${checkerAddress}"
+}
