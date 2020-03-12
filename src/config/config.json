@@ -15,6 +15,14 @@
       "name":"保理服务商B",
       "domain":"${secondDomain}",
       "isSupervise":"${secondIsSupervise}"
+    },
+    "userc":{
+      "psd": "${thirdPsd}",
+      "publicKey":"${thirdPublicKey}",
+      "address":"${thirdAddress}",
+      "name":"监管账户C",
+      "domain":"${thirdDomain}",
+      "isSupervise":"${thirdIsSupervise}"
     }
   },
   "app":{

@@ -16,7 +16,8 @@ program
 console.log('Replacing environments ...');
 let env,explorerAddress,fistPsd,firstPublicKey,firstAddress,
     firstName,firstDomain,secondPsd,secondPublicKey,secondAddress,
-    secondName,secondDomain,chainId,checkerAddress,firstIsSupervise,secondIsSupervise;
+    secondName,secondDomain,chainId,checkerAddress,thirdPsd,thirdPublicKey,thirdAddress,
+    thirdName,thirdDomain,firstIsSupervise,secondIsSupervise,thirdIsSupervise;
 console.log(env);
 if (program.params) {
     env = program.params[0];
@@ -33,8 +34,14 @@ if (program.params) {
     secondDomain = program.params[11];
     chainId = program.params[12];
     checkerAddress = program.params[13];
-    firstIsSupervise = program.params[14];
-    secondIsSupervise = program.params[15];
+    thirdPsd = program.params[14];
+    thirdPublicKey = program.params[15];
+    thirdAddress = program.params[16];
+    thirdName = program.params[17];
+    thirdDomain = program.params[18];
+    firstIsSupervise = program.params[9];
+    secondIsSupervise = program.params[20];
+    thirdIsSupervise = program.params[21];
 
 }
 
@@ -59,7 +66,13 @@ replaceEnv([
         "chainId":chainId,
         "checkerAddress":checkerAddress,
         "firstIsSupervise":firstIsSupervise,
-        "secondIsSupervise":secondIsSupervise
+        "secondIsSupervise":secondIsSupervise,
+        "thirdIsSupervise":thirdIsSupervise,
+        "thirdPsd":thirdPsd,
+        "thirdPublicKey":thirdPublicKey,
+        "thirdAddress":thirdAddress,
+        "thirdName":thirdName,
+        "thirdDomain":thirdDomain,
     }
 );
 
