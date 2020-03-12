@@ -139,13 +139,12 @@
 
 <script lang="ts">
 import constant from "../constant/constant";
-//import cfg from '../config/config.json';
+import cfg from '../config/config.json';
 import axios from "../helper/httpHelper";
 import { dynamic } from "../constant/dictionary";
 import { getFormatAddress, formatDuring } from "../util/util";
 import { Component, Prop, Vue } from "vue-property-decorator";
 import { IDynamic, Cfg } from "../types";
-let cfg: any = {};
 
 @Component
 export default class Home extends Vue {
