@@ -1961,6 +1961,8 @@
                         this.evidenceListLoading = false;
                         console.error(e)
                     });
+                }else{
+                    this.evidenceListLoading = false;
                 }
 
             },
