@@ -42,7 +42,7 @@
           private beforeMount():void{
                 console.log(this.value)
                 if(this.value){
-                      const op: IOptions[] = this.options.find(o=>o.value === this.value);
+                      const op: IOptions | undefined = this.options.find((o:any)=>o.value === this.value);
                       this.label = op ? op.label :this.options[0].label
                 }else{
                       this.label = this.options[0].label;

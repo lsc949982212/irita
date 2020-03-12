@@ -65,7 +65,7 @@ export interface IDynamic {
 
 export interface IOptions {
       label: string;
-      value: number;
+      value: number | string;
 }
 
 

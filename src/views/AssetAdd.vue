@@ -101,245 +101,289 @@
 </template>
 
 <script lang="ts">
-    import Select from '../components/Select.vue';
-    import { dictionary } from '../constant/dictionary';
-    import JsonSchema from '../helper/JsonDataHelper';
-    import JsonSchemaHelper from '../helper/JsonSchemaHelper';
-    import axios from '../helper/httpHelper';
-    import { Message } from 'element-ui';
-    import getErrorMsgByErrorCode from '../helper/errorCodeHelper';
-    import { isJson } from '../util/util';
-    import data from './data.json';
-    import schemaConfig from '../schema/config.json';
-    import {Component, Vue} from 'vue-property-decorator';
-    import {IOptions} from '../types';
-    import jp from 'jsonpath';
-    let tempData: any = JSON.parse(JSON.stringify(data));
+      import Select from '../components/Select.vue';
+      import {dictionary} from '../constant/dictionary';
+      import JsonSchema from '../helper/JsonDataHelper';
+      import JsonSchemaHelper from '../helper/JsonSchemaHelper';
+      import axios from '../helper/httpHelper';
+      import {Message} from 'element-ui';
+      import getErrorMsgByErrorCode from '../helper/errorCodeHelper';
+      import {isJson} from '../util/util';
+      import data from './data.json';
+      import schemaConfig from '../schema/config.json';
+      import {Component, Vue} from 'vue-property-decorator';
+      import {IOptions} from '../types';
+      import accountHelper from '../helper/accountHelper';
+      //import $ from 'jquery';
+      import jp from 'jsonpath';
 
-    @Component({
-          components:{
-                Select
-          }
-    })
-    export default class AssetAdd extends Vue{
-          private options: IOptions[] = [];
-          private authList: any[] = [];
-          private dataInteract: any[] = [];
-          private value: string = '';
-          private step: number = 1;
-          private jsonData: any = null;
-          private downloadUrl: any = null;
-          private txListCurrentPage: number = 1;
-          private dictionary:any = dictionary;
+      let tempData: any = JSON.parse(JSON.stringify(data));
 
-          private mounted(): void{
-                this.getAssetType();
-          }
+      @Component({
+            components: {
+                  Select
+            }
+      })
+      export default class AssetAdd extends Vue {
+            private options: IOptions[] = [];
+            private authList: any[] = [];
+            private dataInteract: any[] = [];
+            private value: string = '';
+            private step: number = 1;
+            private jsonData: any = null;
+            private downloadUrl: any = null;
+            private txListCurrentPage: number = 1;
+            private dictionary: any = dictionary;
 
-          private get schemaDownloadUrl(): string{
-                if(this.value && this.downloadUrl){
-                      return this.downloadUrl[this.value].schema;
-                }else{
-                      return '';
-                }
-          }
+            private mounted(): void {
+                  this.getAssetType();
+            }
 
-          private get dataDownloadUrl(): string{
-                if(this.value && this.downloadUrl){
-                      return this.downloadUrl[this.value].template;
-                }else{
-                      return '';
-                }
-          }
+            private get schemaDownloadUrl(): string {
+                  if (this.value && this.downloadUrl) {
+                        return this.downloadUrl[this.value].schema;
+                  } else {
+                        return '';
+                  }
+            }
 
-          private add(): void{
-                this.$router.push('/asset_add');
-          }
-          private handleImportClick(): void{
-                document.getElementById('files').click();
-          }
-          private fileImport(): void{
-                const selectedFile:any = document.getElementById('files').files[0];
-                const reader:FileReader = new FileReader();
-                reader.readAsText(selectedFile);
-                reader.onload = ():void =>{
-                      if(!isJson(reader.result)){
-                            this.$message.error('json数据格式有误,请重新上传');
-                            return;
-                      }
-                      try {
-                            if(JSON.parse(reader.result).basicInfo.assetType !== this.value){
-                                  this.$message.error('资产类型不匹配,请重新上传');
-                                  setTimeout(()=>{
-                                        window.location.reload();
-                                  },2000)
-                            }
-                      }catch (e) {
-                            this.$message.error('导入数据错误,请重新上传');
-                      }
+            private get dataDownloadUrl(): string {
+                  if (this.value && this.downloadUrl) {
+                        return this.downloadUrl[this.value].template;
+                  } else {
+                        return '';
+                  }
+            }
 
-                      if(JSON.parse(reader.result).dataInteract){
-                            this.dataInteract = JSON.parse(reader.result).dataInteract
-                      }
-                      let tempData:any = JSON.parse(JSON.stringify(JSON.parse(reader.result)))
+            private add(): void {
+                  this.$router.push('/asset_add');
+            }
 
-                      tempData.basicInfo.assetOwner = JSON.parse(sessionStorage.getItem('token')).name;
-                      const el:any = document.getElementById('json_schema_node');
-                      const childs:any = el.childNodes;
-                      for(let i = childs.length - 1 ; i >= 0 ; i--){
-                            el.removeChild(childs[i]);
-                      }
-                      $("#json_schema_node").alpaca({
-                            "schemaSource" : JsonSchemaHelper.getFormatSchemaFile(require(`../schema/${this.value}`)),
-                            "dataSource" : tempData
-                      });
-                      setTimeout(() =>{
-                            document.getElementsByClassName('alpaca-required-indicator').forEach((node: any) =>{
-                                  node.innerHTML = '(必填)';
-                            });
-                            const assetType:any = document.getElementsByName('basicInfo_assetType');
-                            const assetOwner:any = document.getElementsByName('basicInfo_assetOwner');
-                            if(assetType && assetType.length){
-                                  assetType[0].setAttribute('disabled', true)
-                            }
-                            if(assetOwner && assetOwner.length){
-                                  assetOwner[0].setAttribute('disabled', true)
-                            }
+            private handleImportClick(): void {
+                  const fileNode: any = document.getElementById('files');
+                  if (fileNode) {
+                        fileNode.click();
+                  }
 
-                      }, 300)
-                }
-          }
+            }
 
-          private handleCancelClick(): void{
-                this.$router.go(-1);
-          }
-          
-          private getAssetType():void{
-                const url: string = `/assets/denoms`;
-                axios.get({url, ctx : this}).then((data :any) =>{
-                      console.log(data);
-                      if(data && data.status === 'success'){
-                            if(data && data.data && data.data.denoms){
-                                  data.data.denoms.forEach((item:string, index: number) =>{
-                                        if(schemaConfig.denoms.includes(item)){
-                                              this.options.push({
-                                                    value : item,
-                                                    label : item
-                                              })
-                                        }
-                                  });
-                                  this.downloadUrl = data.data.download_url;
-                                  if(data.data.denoms.length > 0){
-                                        this.value = data.data.denoms[0]
-                                        //this.value = 'car'
-                                  }
+            private fileImport(): void {
+                  const fileNode: any = document.getElementById('files');
+                  let selectedFile: any;
+                  if (fileNode) {
+                        selectedFile = fileNode.files[0];
+                  }
+                  const reader: FileReader = new FileReader();
+                  reader.readAsText(selectedFile);
+                  reader.onload = (): void => {
+                        if (!isJson(reader.result)) {
+                              this.$message.error('json数据格式有误,请重新上传');
+                              return;
+                        }
+                        try {
+                              if (reader.result && typeof reader.result === 'string') {
+                                    if (JSON.parse(reader.result).basicInfo.assetType !== this.value) {
+                                          this.$message.error('资产类型不匹配,请重新上传');
+                                          setTimeout(() => {
+                                                window.location.reload();
+                                          }, 2000)
+                                    }
+                              }
 
-                            }
-                      } else {
-                            this.$message.error('请求数据错误');
-                      }
-                }).catch((e:any) =>{
-                      console.error(e);
-                      this.$message.error('请求数据错误');
-                });
-          }
-          private changeStep(step: number): void{
-                this.step = step;
-                if(step === 1){
-                      const el:any = document.getElementById('json_schema_node');
-                      const childs:any = el.childNodes;
-                      for(let i = childs.length - 1 ; i >= 0 ; i--){
-                            el.removeChild(childs[i]);
-                      }
-                } else if(step === 2){
-                      console.log('当前选择的资产类型为:', this.value);
-                      if(sessionStorage.getItem('token')){
-                            tempData.basicInfo.assetOwner = JSON.parse(sessionStorage.getItem('token')).name;
-                            tempData.basicInfo.assetType = this.value;
-                      }
-                      $("#json_schema_node").alpaca({
-                            "schemaSource" : JsonSchemaHelper.getFormatSchemaFile(require(`../schema/${this.value}`)),
-                            "dataSource" : tempData
-                      });
-                      setTimeout(() =>{
-                            document.getElementsByClassName('alpaca-required-indicator').forEach((node:any) =>{
-                                  node.innerHTML = '(必填)';
-                            });
-                            const assetType:any = document.getElementsByName('basicInfo_assetType');
-                            const assetOwner:any = document.getElementsByName('basicInfo_assetOwner');
-                            if(assetType && assetType.length){
-                                  assetType[0].setAttribute('disabled', true)
-                            }
-                            if(assetOwner && assetOwner.length){
-                                  assetOwner[0].setAttribute('disabled', true)
-                            }
-                      }, 100);
-                }
-          }
-          private checkData():void{
-                let jsonData:any = $("#json_schema_node").alpaca().getValue();
-                console.log(jsonData);
-                
-                this.authList = new JsonSchema(jsonData,JsonSchemaHelper.getFormatSchemaFile(require(`../schema/${this.value}`))).setAddFormatAuthData().getAddAuthDataList();
-                console.log('auth list:', this.authList)
-                jsonData.authorizationProperties = [];
-                jsonData.secretProperties = [];
-                this.jsonData = jsonData;
-                this.changeStep(3);
-          }
-          private save(): void{
-                let authorization: any[] = this.authList.filter((a) => a.value === '2');
-                let secret:any[] = this.authList.filter((a) => a.value === '3');
-                this.jsonData.authorizationProperties = [];
-                this.jsonData.secretProperties = [];
-                this.jsonData.dataInteract = this.dataInteract;
-                authorization.forEach((a) => this.jsonData.authorizationProperties.push(a.str));
-                secret.forEach((a) => this.jsonData.secretProperties.push(a.str));
-                this.postData();
-          }
-          private postData():void{
-                const body:any = {
-                      asset_data : this.jsonData,
-                      owner : this.$accountHelper.getAccount().address,
-                      owner_pubkey : this.$accountHelper.getAccount().publicKey,
-                };
+                        } catch (e) {
+                              this.$message.error('导入数据错误,请重新上传');
+                        }
+                        let tempData: any;
+                        if (reader.result && typeof reader.result === 'string') {
+                              if (JSON.parse(reader.result).dataInteract) {
+                                    this.dataInteract = JSON.parse(reader.result).dataInteract
+                                    tempData = JSON.parse(JSON.stringify(JSON.parse(reader.result)))
+                              }
+                        }
 
-                console.log('save asset', this.jsonData);
-                axios.post({url : `/assets`, body, ctx : this}).then((data:any) =>{
-                      console.log(data);
-                      if(data && data.data && data.data.status === 'success'){
-                            Message({
-                                  message : '新增资产成功',
-                                  type : 'success'
-                            });
-                            this.$router.go(-1);
-                      } else if(data && data.data && data.data.status === 'fail'){
-                            this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
-                      } else {
-                            this.$message.error('新增资产失败');
-                      }
-                }).catch((e:any) =>{
-                      console.error(e);
-                      this.$message.error('新增资产失败');
-                });
-          }
-          private changeAuth(res): void{
-                this.authList[res.index].value = res.auth;
-          }
-          private handleThirdStepPre(): void{
-                this.authList = [];
-                this.changeStep(2);
-          }
-          private closeOtherOps(index): void{
-                for(let i = 0 ; i < this.authList.length ; i++){
-                      if(index !== i && this.$refs[`select_${index}`][0].getSelectOpsShow()){
-                            this.$refs[`select_${i}`][0].setSelectOpsShow(false);
-                      }
-                }
+                        const token: string | null = sessionStorage.getItem('token');
+                        if (token && typeof token === 'string') {
+                              tempData.basicInfo.assetOwner = JSON.parse(token).name;
+                        }
 
-          }
-    }
-    
+                        const el: any = document.getElementById('json_schema_node');
+                        const childs: any = el.childNodes;
+                        for (let i = childs.length - 1; i >= 0; i--) {
+                              el.removeChild(childs[i]);
+                        }
+                        $("#json_schema_node").alpaca({
+                              "schemaSource": JsonSchemaHelper.getFormatSchemaFile(require(`../schema/${this.value}`)),
+                              "dataSource": tempData
+                        });
+                        setTimeout(() => {
+                              const node: any = document.getElementsByClassName('alpaca-required-indicator');
+                              if (node) {
+                                    node.forEach((node: any) => {
+                                          node.innerHTML = '(必填)';
+                                    });
+                              }
+
+                              const assetType: any = document.getElementsByName('basicInfo_assetType');
+                              const assetOwner: any = document.getElementsByName('basicInfo_assetOwner');
+                              if (assetType && assetType.length) {
+                                    assetType[0].setAttribute('disabled', true)
+                              }
+                              if (assetOwner && assetOwner.length) {
+                                    assetOwner[0].setAttribute('disabled', true)
+                              }
+
+                        }, 300)
+                  }
+            }
+
+            private handleCancelClick(): void {
+                  this.$router.go(-1);
+            }
+
+            private getAssetType(): void {
+                  const url: string = `/assets/denoms`;
+                  axios.get({url, ctx: this}).then((data: any) => {
+                        console.log(data);
+                        if (data && data.status === 'success') {
+                              if (data && data.data && data.data.denoms) {
+                                    data.data.denoms.forEach((item: string, index: number) => {
+                                          if (schemaConfig.denoms.includes(item)) {
+                                                this.options.push({
+                                                      value: item,
+                                                      label: item
+                                                })
+                                          }
+                                    });
+                                    this.downloadUrl = data.data.download_url;
+                                    if (data.data.denoms.length > 0) {
+                                          this.value = data.data.denoms[0]
+                                          //this.value = 'car'
+                                    }
+
+                              }
+                        } else {
+                              this.$message.error('请求数据错误');
+                        }
+                  }).catch((e: any) => {
+                        console.error(e);
+                        this.$message.error('请求数据错误');
+                  });
+            }
+
+            private changeStep(step: number): void {
+                  this.step = step;
+                  if (step === 1) {
+                        const el: any = document.getElementById('json_schema_node');
+                        const childs: any = el.childNodes;
+                        for (let i = childs.length - 1; i >= 0; i--) {
+                              el.removeChild(childs[i]);
+                        }
+                  } else if (step === 2) {
+                        console.log('当前选择的资产类型为:', this.value);
+                        const token: string | null = sessionStorage.getItem('token');
+                        if (token) {
+
+                              if (token && typeof token === 'string') {
+                                    tempData.basicInfo.assetOwner = JSON.parse(token).name;
+                              }
+                              tempData.basicInfo.assetType = this.value;
+                        }
+                        if ($("#json_schema_node")) {
+                              $("#json_schema_node").alpaca({
+                                    "schemaSource": JsonSchemaHelper.getFormatSchemaFile(require(`../schema/${this.value}`)),
+                                    "dataSource": tempData
+                              });
+                        }
+
+                        setTimeout(() => {
+                              const node = document.getElementsByClassName('alpaca-required-indicator');
+                              if (node) {
+                                    for(const item of node){
+                                          item.innerHTML = '(必填)';
+                                    }
+                              }
+
+                              const assetType: any = document.getElementsByName('basicInfo_assetType');
+                              const assetOwner: any = document.getElementsByName('basicInfo_assetOwner');
+                              if (assetType && assetType.length) {
+                                    assetType[0].setAttribute('disabled', true)
+                              }
+                              if (assetOwner && assetOwner.length) {
+                                    assetOwner[0].setAttribute('disabled', true)
+                              }
+                        }, 100);
+                  }
+            }
+
+            private checkData(): void {
+                  let jsonData: any = $("#json_schema_node").alpaca().getValue();
+                  console.log(jsonData);
+
+                  this.authList = new JsonSchema(jsonData, JsonSchemaHelper.getFormatSchemaFile(require(`../schema/${this.value}`))).setAddFormatAuthData().getAddAuthDataList();
+                  console.log('auth list:', this.authList)
+                  jsonData.authorizationProperties = [];
+                  jsonData.secretProperties = [];
+                  this.jsonData = jsonData;
+                  this.changeStep(3);
+            }
+
+            private save(): void {
+                  let authorization: any[] = this.authList.filter((a) => a.value === '2');
+                  let secret: any[] = this.authList.filter((a) => a.value === '3');
+                  this.jsonData.authorizationProperties = [];
+                  this.jsonData.secretProperties = [];
+                  this.jsonData.dataInteract = this.dataInteract;
+                  authorization.forEach((a) => this.jsonData.authorizationProperties.push(a.str));
+                  secret.forEach((a) => this.jsonData.secretProperties.push(a.str));
+                  this.postData();
+            }
+
+            private postData(): void {
+                  const body: any = {
+                        asset_data: this.jsonData,
+                        owner: accountHelper.getAccount().address,
+                        owner_pubkey: accountHelper.getAccount().publicKey,
+                  };
+
+                  console.log('save asset', this.jsonData);
+                  axios.post({url: `/assets`, body, ctx: this}).then((data: any) => {
+                        console.log(data);
+                        if (data && data.data && data.data.status === 'success') {
+                              Message({
+                                    message: '新增资产成功',
+                                    type: 'success'
+                              });
+                              this.$router.go(-1);
+                        } else if (data && data.data && data.data.status === 'fail') {
+                              this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
+                        } else {
+                              this.$message.error('新增资产失败');
+                        }
+                  }).catch((e: any) => {
+                        console.error(e);
+                        this.$message.error('新增资产失败');
+                  });
+            }
+
+            private changeAuth(res: any): void {
+                  this.authList[res.index].value = res.auth;
+            }
+
+            private handleThirdStepPre(): void {
+                  this.authList = [];
+                  this.changeStep(2);
+            }
+
+            private closeOtherOps(index: number): void {
+                  for (let i = 0; i < this.authList.length; i++) {
+                        if (index !== i && this.$refs[`select_${index}`][0].getSelectOpsShow()) {
+                              this.$refs[`select_${i}`][0].setSelectOpsShow(false);
+                        }
+                  }
+
+            }
+      }
+
 </script>
 <style lang="scss">
     @import "../style/mixin";
@@ -456,8 +500,8 @@
                     border-color: #EDEDED;
                 }
                 .form-group {
-                    display:flex;
-                    flex-direction:row;
+                    display: flex;
+                    flex-direction: row;
                     align-items: center;
                     .alpaca-control-label {
                         font-size: 14px;

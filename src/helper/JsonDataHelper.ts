@@ -12,7 +12,7 @@ export default class JsonDataHelper {
       public secretProperties: any;
       public schema: any;
 
-      constructor(jsonData: any, schema: any, authorizationProperties?: any, secretProperties?: any) {
+      constructor(jsonData: any, schema?: any, authorizationProperties?: any, secretProperties?: any) {
             this.data = jsonData;
             this.addAuthDataList = [];
             this.editAuthDataList = [];
