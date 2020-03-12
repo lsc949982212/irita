@@ -72,6 +72,7 @@
             <div class="table_container">
                 <el-table
                         :data="tableData"
+                        v-loading="loading"
                         style="width: 100%">
                     <el-table-column
                             fixed
@@ -206,6 +207,7 @@
                 checkStatusValue:constant.CHECK_STATUS_OPTIONS.ALL,
                 userAccountValue,
                 input:'',
+                loading:true,
 
             }
         },
@@ -300,6 +302,7 @@
                 console.log(assetTypeValue,assetStatusValue,checkStatusValue,userAccountValue,input);
 
                 let url =  `/assets/search?pageNum=${page}&pageSize=10&used_count=true&asset_type=${assetTypeValue}&transfer_status=${assetStatusValue}&check_status=${checkStatusValue}&owner=${userAccountValue}`;
+                this.loading = true;
                 if(this.input){
                     url += `&query_data=${input}`
                 }
@@ -307,7 +310,9 @@
                     if(data && data.data){
                         this.handleData(data);
                     }
+                    this.loading = false;
                 }).catch(e =>{
+                    this.loading = false;
                     console.error(e)
                 });
             },

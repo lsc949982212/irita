@@ -114,6 +114,7 @@
                 <div class="content_table_wrap">
                     <el-table
                             :data="evidenceDetailListData"
+                            v-loading="evidenceLoading"
                             style="width: 100%">
                         <el-table-column
                                 fixed
@@ -213,6 +214,7 @@
                 <div class="content_table_wrap">
                     <el-table
                             :data="transferData"
+                            v-loading="transLoading"
                             style="width: 100%">
                         <el-table-column
                                 fixed
@@ -318,6 +320,7 @@
                 <div class="content_table_wrap">
                     <el-table
                             :data="applyAndAuthDataList"
+                            v-loading="applyLoading"
                             style="width: 100%">
                         <el-table-column
                                 fixed
@@ -388,6 +391,7 @@
                 <div class="content_table_wrap">
                     <el-table
                             :data="checkDataList"
+                            v-loading="checkLoading"
                             style="width: 100%">
                         <el-table-column type="expand">
                             <template slot-scope="props">
@@ -474,6 +478,7 @@
                 <div class="content_table_wrap" v-show="tab === 0">
                     <el-table
                             :data="assetListData"
+                            v-loading="txTransferLoading"
                             style="width: 100%">
                         <el-table-column
                                 fixed
@@ -538,6 +543,7 @@
                 <div class="content_table_wrap" v-show="tab === 1">
                     <el-table
                             :data="serviceListData"
+                            v-loading="serviceLoading"
                             style="width: 100%">
                         <el-table-column
                                 fixed
@@ -603,6 +609,7 @@
                 <div class="content_table_wrap" v-show="tab === 2">
                     <el-table
                             :data="evidenceListData"
+                            v-loading="evidenceListLoading"
                             style="width: 100%">
                         <el-table-column
                                 fixed
@@ -851,6 +858,13 @@
                 transAssetOwnerAddr:'',
                 isDecrypto:false,
                 assetOwner:this.$route.query.owner,
+                evidenceLoading:true,
+                transLoading:true,
+                applyLoading:true,
+                checkLoading:true,
+                txTransferLoading:true,
+                serviceLoading:true,
+                evidenceListLoading:true,
             }
         },
         components : {},
@@ -1589,6 +1603,7 @@
                 });
             },
             getCheckStatus(page){
+                this.checkLoading = true;
                 let url = `/assets_check?pageNum=${page}&pageSize=10&used_count=false&nft_id=${this.$route.query.nft_id}`;
                 axios.get({
                     url,
@@ -1619,7 +1634,9 @@
                             }
                         })
                     }
+                    this.checkLoading = false;
                 }).catch(e =>{
+                    this.checkLoading = false;
                     console.error(e);
 
                 });
@@ -1767,6 +1784,7 @@
                 this.drawNoteNode();
             },
             getAssetTransList(page){
+                this.transLoading = true;
                 axios.get({
                     url : `/assets_transfer/${this.$route.query.nft_id}/transfer_records?pageNum=${page}&pageSize=10`,
                     ctx : this
@@ -1774,8 +1792,9 @@
                     if(data && data.data){
                         this.handleAssetTransData(data, page);
                     }
-
+                    this.transLoading = false;
                 }).catch(e =>{
+                    this.transLoading = false;
                     console.error(e)
                 });
             },
@@ -1836,6 +1855,7 @@
                 })
             },
             getAssetAuthList(page){
+                this.applyLoading = true;
                 axios.get({
                     url : `/assets_authorization/${this.$route.query.nft_id}/authorization_records?pageNum=${page}&pageSize=10`,
                     ctx : this
@@ -1843,7 +1863,9 @@
                     if(data && data.data){
                         this.handleAssetAuthData(data, page);
                     }
+                    this.applyLoading = false;
                 }).catch(e =>{
+                    this.applyLoading = false;
                     console.error(e)
                 });
             },
@@ -1876,6 +1898,7 @@
             },
             getAssetTxList(page){
                 const {query_type, number} = this.$route.query;
+                this.txTransferLoading = true;
                 axios.get({
                     url : `/assets_tx?pageNum=${page}&pageSize=10&used_count=true&asset_no=${number}&asset_type=${query_type}`,
                     ctx : this
@@ -1883,7 +1906,9 @@
                     if(data && data.data){
                         this.handleTxListData(data);
                     }
+                    this.txTransferLoading = false;
                 }).catch(e =>{
+                    this.txTransferLoading = false;
                     console.error(e)
                 });
             },
@@ -1903,6 +1928,7 @@
                 })
             },
             getServiceDataList(page){
+                this.serviceLoading = true;
                 axios.get({
                     url : `/assets_tx/service_tx?pageNum=${page}&pageSize=10&used_count=true&nft_id=${this.$route.query.nft_id}`,
                     ctx : this
@@ -1910,12 +1936,15 @@
                     if(data && data.data){
                         this.handleServiceDataData(data);
                     }
+                    this.serviceLoading = false;
                 }).catch(e =>{
+                    this.serviceLoading = false;
                     console.error(e)
                 });
             },
             getEvidenceDataList(page){
                 console.log(this.recordIds)
+                this.evidenceListLoading = true;
                 if(this.recordIds && this.recordIds.length){
                     let recordIdStr = this.recordIds.join();
                     axios.get({
@@ -1925,7 +1954,9 @@
                         if(data && data.data){
                             this.handleEvidenceDataData(data);
                         }
+                        this.evidenceListLoading = false;
                     }).catch(e =>{
+                        this.evidenceListLoading = false;
                         console.error(e)
                     });
                 }
@@ -1933,6 +1964,7 @@
             },
             getEvidenceDetail(){
                 if(this.currentRecordId){
+                    this.evidenceLoading = true;
                     axios.get({
                         url : `/assets_record/detail/${this.currentRecordId}`,
                         ctx : this
@@ -1945,9 +1977,13 @@
                                 item.tx_hash = data.data.tx_hash
                             })
                         }
+                        this.evidenceLoading = false;
                     }).catch(e =>{
+                        this.evidenceLoading = false;
                         console.error(e)
                     });
+                }else{
+                    this.evidenceLoading = false;
                 }
 
             },
