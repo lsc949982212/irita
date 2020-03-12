@@ -16,7 +16,7 @@
       "domain":"${secondDomain}",
       "isSupervise":"${secondIsSupervise}"
     },
-    "userc":{
+    "userz":{
       "psd": "${thirdPsd}",
       "publicKey":"${thirdPublicKey}",
       "address":"${thirdAddress}",
