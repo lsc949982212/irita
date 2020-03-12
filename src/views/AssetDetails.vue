@@ -1051,7 +1051,8 @@
                         }
                         break;
                     case 'evi':
-                        this.getEvidenceDetail();
+                        //this.getEvidenceDetail();
+                        this.getDetails();
                         break;
 
 
@@ -1963,8 +1964,8 @@
 
             },
             getEvidenceDetail(){
+                this.evidenceLoading = true;
                 if(this.currentRecordId){
-                    this.evidenceLoading = true;
                     axios.get({
                         url : `/assets_record/detail/${this.currentRecordId}`,
                         ctx : this
