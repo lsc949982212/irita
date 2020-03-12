@@ -39,7 +39,7 @@ if (program.params) {
     thirdAddress = program.params[16];
     thirdName = program.params[17];
     thirdDomain = program.params[18];
-    firstIsSupervise = program.params[9];
+    firstIsSupervise = program.params[19];
     secondIsSupervise = program.params[20];
     thirdIsSupervise = program.params[21];
 
