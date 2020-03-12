@@ -20,7 +20,7 @@
       "psd": "${thirdPsd}",
       "publicKey":"${thirdPublicKey}",
       "address":"${thirdAddress}",
-      "name":"监管账户C",
+      "name":"监管用户",
       "domain":"${thirdDomain}",
       "isSupervise":"${thirdIsSupervise}"
     }
