@@ -1,5 +1,5 @@
 
-const error = new Map([
+const error: Map<string, string> = new Map([
     ['40000','请求参数错误'],
     ['40001','未认证'],
     ['40002','参数转化异常'],
@@ -13,11 +13,11 @@ const error = new Map([
 
 const DEFAULT_ERROR_MSG = '请求出错';
 
-export const getErrorMsgByErrorCode = function (code){
-    if(!code) return DEFAULT_ERROR_MSG;
-    if(error.has(code)){
-        return error.get(code);
-    }else{
-        return DEFAULT_ERROR_MSG;
-    }
-};
+export default function getErrorMsgByErrorCode(code: string | undefined | null){
+      if(!code) return DEFAULT_ERROR_MSG;
+      if(error.has(code)){
+            return error.get(code);
+      }else{
+            return DEFAULT_ERROR_MSG;
+      }
+}

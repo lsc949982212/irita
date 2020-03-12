@@ -102,7 +102,7 @@
                     </el-table-column>
                     <el-table-column
                             prop="displayCheckStatus"
-                            label="查验状态"
+                            label="查验结果"
                             min-width="60">
                     </el-table-column>
                     <el-table-column
@@ -187,10 +187,13 @@
                   label: '全部查验状态'
             }, {
                   value: constant.CHECK_STATUS_OPTIONS.CHECKED,
-                  label: '已查验'
+                  label: '已通过'
             }, {
                   value: constant.CHECK_STATUS_OPTIONS.NOT_CHECK,
                   label: '未查验'
+            },{
+                  value: constant.CHECK_STATUS_OPTIONS.CHECK_FAILED,
+                  label: '未通过'
             }];
             private userAccount: IOptions[] = [{
                   value: constant.ASSETS_BELONG.ALL,
@@ -264,9 +267,9 @@
                         case constant.CHECK_RESULT.NOT_CHECK:
                               return '未查验';
                         case constant.CHECK_RESULT.CHECKED:
-                              return '已查验';
+                              return '已通过';
                         case constant.CHECK_RESULT.CHECK_FAILED:
-                              return '查验失败';
+                              return '未通过';
                   }
             }
 

@@ -60,6 +60,7 @@ const constant: any = {
             ALL: -1,
             CHECKED: 1,
             NOT_CHECK: 0,
+            CHECK_FAILED:2
       },
       ASSETS_BELONG: {
             ALL: 0,
