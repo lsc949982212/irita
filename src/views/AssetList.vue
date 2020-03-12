@@ -106,7 +106,7 @@
                     </el-table-column>
                     <el-table-column
                             prop="displayCheckStatus"
-                            label="查验状态"
+                            label="查验结果"
                             min-width="60">
                     </el-table-column>
                     <el-table-column
@@ -184,13 +184,16 @@
                 },],
                 checkStatus : [{
                     value: constant.CHECK_STATUS_OPTIONS.ALL,
-                    label: '全部查验状态'
+                    label: '全部查验结果'
                 },{
                     value: constant.CHECK_STATUS_OPTIONS.CHECKED,
-                    label: '已查验'
+                    label: '已通过'
                 },{
                     value: constant.CHECK_STATUS_OPTIONS.NOT_CHECK,
                     label: '未查验'
+                },{
+                    value: constant.CHECK_STATUS_OPTIONS.CHECK_FAILED,
+                    label: '未通过'
                 }],
                 userAccount : [{
                     value: constant.ASSETS_BELONG.ALL,
@@ -270,13 +273,10 @@
                 switch (status){
                     case constant.CHECK_RESULT.NOT_CHECK:
                         return '未查验';
-                        break;
                     case constant.CHECK_RESULT.CHECKED:
-                        return '已查验';
-                        break;
+                        return '已通过';
                     case constant.CHECK_RESULT.CHECK_FAILED:
-                        return '查验失败';
-                        break;
+                        return '未通过';
 
                 }
             },
