@@ -92,6 +92,7 @@
 <script>
     import { Message } from 'element-ui';
     import loginHelper from './helper/loginHelper';
+    import cfg from '../config/config';
 
     export default {
         name : "app",
@@ -175,6 +176,7 @@
             if(this.expired){
                 this.$router.push('/login');
             }
+            console.error(cfg)
         },
         methods : {
             handleTabClick(tab){

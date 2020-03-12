@@ -7,6 +7,7 @@ export default class loginHelper {
 
     static login(params){
         const {username, psd, ctx} = params;
+console.error(cfg,username, psd,)
 
         if(cfg.account[username] && cfg.account[username].psd === psd){
             ctx.$store.commit('SET_EXPIRED_STATUS',false);
