@@ -983,6 +983,7 @@
                             type : 'success'
                         });
                         this.loadData();
+                        this.getDetails();
                     } else if(data && data.data && data.data.status === 'fail'){
                         this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
                     } else {
@@ -1318,7 +1319,7 @@
                         });
                         this.loadData();
                         this.getDetails();
-                        this.assetOwner = this.provider;
+                        //this.assetOwner = this.provider;
                         this.centerDialogVisible = false;
                     } else if(data && data.data && data.data.status === 'fail'){
                         this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
