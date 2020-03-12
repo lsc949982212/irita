@@ -92,7 +92,7 @@
 <script>
     import { Message } from 'element-ui';
     import loginHelper from './helper/loginHelper';
-    import cfg from '../config/config';
+    import cfg from './config/config';
 
     export default {
         name : "app",
