@@ -1,26 +1,34 @@
 {
-  "account": {
-    "usera": {
-      "psd": "qqqqqqqqq1",
-      "publicKey": "039b65f54785658c394b6d14f9fcfd7d56d7d9c1213d17bf50549429f7262095ff",
-      "address": "faa1f7jnpkt2yxd8h72w6hf03juy3uk6m2sur845kq",
-      "name": "供应商A",
-      "domain": "http://edge1.dev.bianjie.ai",
-      "isSupervise": "true"
+  "account":{
+    "usera":{
+      "psd": "${fistPsd}",
+      "publicKey":"${firstPublicKey}",
+      "address":"${firstAddress}",
+      "name":"供应商A",
+      "domain":"${firstDomain}",
+      "isSupervise":"${firstIsSupervise}"
     },
-    "userb": {
-      "psd": "qqqqqqqqq2",
-      "publicKey": "02ee7a9fce53b2e64d3c68fe8c6cf13f6a2e564e34f9beb16f0daa4178edcf659b",
-      "address": "faa1tzlqyrykyvqnqv2hj7g9y2777recf0nawfyv45",
-      "name": "保理服务商B",
-      "domain": "http://edge2.dev.bianjie.ai",
-      "isSupervise": "false"
+    "userb":{
+      "psd": "${secondPsd}",
+      "publicKey":"${secondPublicKey}",
+      "address":"${secondAddress}",
+      "name":"保理服务商B",
+      "domain":"${secondDomain}",
+      "isSupervise":"${secondIsSupervise}"
+    },
+    "userz":{
+      "psd": "${thirdPsd}",
+      "publicKey":"${thirdPublicKey}",
+      "address":"${thirdAddress}",
+      "name":"监管用户",
+      "domain":"${thirdDomain}",
+      "isSupervise":"${thirdIsSupervise}"
     }
   },
-  "app": {
-    "explorer": "http://dev.iritaplorer.io"
+  "app":{
+    "explorer":"${explorerAddress}"
   },
-  "env": "dev",
-  "chainId": "irita-dev",
-  "checkerAddress": "faa1fwgw9ej3yzq6frn8rq7pswfhkdcsq8szgx0xkq"
+  "env":"${env}",
+  "chainId":"${chainId}",
+  "checkerAddress":"${checkerAddress}"
 }
