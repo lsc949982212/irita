@@ -760,7 +760,7 @@
       import jp from 'jsonpath';
       import accountHelper from '../helper/accountHelper';
       import {Component, Vue} from 'vue-property-decorator';
-      import {IOptions, IChainInfo, Cfg} from "../types";
+      import {IOptions, IChainInfo, ICfg} from "../types";
 
       @Component
       export default class AssetDetails extends Vue {
@@ -839,7 +839,7 @@
 
             private beforeMount(): void {
                   const token: string | null = sessionStorage.getItem('token');
-                  const config: Cfg = JSON.parse(JSON.stringify(cfg));
+                  const config: ICfg = JSON.parse(JSON.stringify(cfg));
                   if (token) {
                         for (const key of Object.keys(config.account)) {
                               this.options.push({

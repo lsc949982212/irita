@@ -376,7 +376,7 @@
             }
 
             private closeOtherOps(index: number): void {
-                  let nodeList: any = this.$refs[`select_${index}`];
+                  const nodeList: any = this.$refs[`select_${index}`];
                   if(nodeList.length){
                         for (let i = 0; i < this.authList.length; i++) {
                               if (index !== i && nodeList[0].getSelectOpsShow()) {
@@ -385,8 +385,6 @@
                               }
                         }
                   }
-
-
             }
       }
 

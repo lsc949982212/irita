@@ -1,17 +1,17 @@
 import cfg from '../config/config.json';
 import constant from '../constant/constant';
-import {Params, Config, Cfg} from '../types';
+import {IParams, IConfig, ICfg} from '../types';
 
 
 export default class LoginHelper {
 
-      public static login(params: Params): boolean {
+      public static login(params: IParams): boolean {
             const {username, psd, ctx} = params;
-            const config: Cfg = JSON.parse(JSON.stringify(cfg));
+            const config: ICfg = JSON.parse(JSON.stringify(cfg));
 
             if (config.account[params.username] && config.account[username].psd === psd) {
                   ctx.$store.commit('SET_EXPIRED_STATUS', false);
-                  const token: Config = {
+                  const token: IConfig = {
                         address: config.account[username].address,
                         publicKey: config.account[username].publicKey,
                         name: config.account[username].name,

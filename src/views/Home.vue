@@ -144,7 +144,7 @@
       import {dynamic} from "../constant/dictionary";
       import {getFormatAddress, formatDuring} from "../util/util";
       import {Component, Prop, Vue} from "vue-property-decorator";
-      import {IDynamic, Cfg} from "../types";
+      import {IDynamic, ICfg} from "../types";
 
       @Component
       export default class Home extends Vue {

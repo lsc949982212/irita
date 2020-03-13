@@ -174,7 +174,7 @@
       import cfg from '../config/config.json';
       import {Message} from 'element-ui';
       import {Component, Vue} from 'vue-property-decorator';
-      import {IOptions, Cfg} from "../types";
+      import {IOptions, ICfg} from "../types";
 
       @Component
       export default class DataAuthShared extends Vue {
@@ -224,7 +224,7 @@
             private consumer: string = '';
             private nftId: string = '';
             private dialogType: number = 0;//0 授权, 1 拒绝;
-            private cfg: Cfg = JSON.parse(JSON.stringify(cfg));
+            private cfg: ICfg = JSON.parse(JSON.stringify(cfg));
 
             private beforeMount(): void {
                   this.authStatusValue = this.$route.query.auth_status_value ? Number(this.$route.query.auth_status_value) : constant.AUTH_STATUS.ALL;

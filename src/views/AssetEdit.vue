@@ -149,11 +149,12 @@
           }
           
           private closeOtherOps(index: number): void{
-                const nodeList :any = this.$refs[`select_${index}`];
+                const nodeList: any = this.$refs[`select_${index}`];
                 if(nodeList.length){
-                      for(let i = 0 ; i < this.authList.length ; i++){
-                            if(index !== i && nodeList[0].getSelectOpsShow()){
-                                  nodeList[0].setSelectOpsShow(false);
+                      for (let i = 0; i < this.authList.length; i++) {
+                            if (index !== i && nodeList[0].getSelectOpsShow()) {
+                                  const subNodeList = this.$refs[`select_${i}`];
+                                  subNodeList[0].setSelectOpsShow(false);
                             }
                       }
                 }

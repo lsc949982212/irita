@@ -1,23 +1,23 @@
-export interface Params {
+export interface IParams {
       username: string;
       psd: string;
       ctx: any;
 }
 
-interface App {
+interface IApp {
       explorer: string;
 }
 
-export interface Cfg {
+export interface ICfg {
       account: any;
-      app: App;
+      app: IApp;
       env: string;
       chainId: string;
       checkerAddress: string;
 }
 
 
-export interface Account {
+export interface IAccount {
       psd: string;
       publicKey: string;
       address: string;
@@ -26,7 +26,7 @@ export interface Account {
       isSupervise: string;
 }
 
-export interface Config {
+export interface IConfig {
       address: string;
       publicKey: string;
       name: string;

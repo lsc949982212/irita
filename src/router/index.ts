@@ -6,6 +6,7 @@ import AssetList from '../views/AssetList.vue';
 import AssetAdd from '../views/AssetAdd.vue';
 import DataAuthShared from '../views/DataAuthShared.vue';
 import AssetDetails from '../views/AssetDetails.vue';
+import AssetEdit from '../views/AssetEdit.vue';
 Vue.use(VueRouter);
 
 const routes = [
@@ -44,6 +45,11 @@ const routes = [
             component : AssetDetails,
             props: (route: any) => ({ type: route.query.type })
       },
+      {
+            path : '/asset_edit',
+            name : 'asset_edit',
+            component : AssetEdit
+      }
 ];
 
 const router = new VueRouter({
