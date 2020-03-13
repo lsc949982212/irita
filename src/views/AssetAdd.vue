@@ -114,7 +114,7 @@
       import {Component, Vue} from 'vue-property-decorator';
       import {IOptions} from '../types';
       import accountHelper from '../helper/accountHelper';
-      //import $ from 'jquery';
+      let $:any=(<any>window).$;
       import jp from 'jsonpath';
 
       let tempData: any = JSON.parse(JSON.stringify(data));
@@ -376,12 +376,15 @@
             }
 
             private closeOtherOps(index: number): void {
-                  const nodeList: any = this.$refs[`select_${index}`];
-                  if(nodeList.length){
+                  const nodeList: Element | Element[] | Vue | Vue[] = this.$refs[`select_${index}`];
+                  if(nodeList instanceof Array){
                         for (let i = 0; i < this.authList.length; i++) {
-                              if (index !== i && nodeList[0].getSelectOpsShow()) {
-                                    const subNodeList = this.$refs[`select_${i}`];
-                                    subNodeList[0].setSelectOpsShow(false);
+                              if (index !== i && (nodeList[0] as any).getSelectOpsShow()) {
+                                    const subNodeList: Element | Element[] | Vue | Vue[] = this.$refs[`select_${i}`];
+                                    if(subNodeList instanceof Array){
+                                          (subNodeList[0] as any).setSelectOpsShow(false);
+                                    }
+
                               }
                         }
                   }

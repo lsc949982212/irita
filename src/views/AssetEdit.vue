@@ -71,6 +71,7 @@
     import getErrorMsgByErrorCode  from '../helper/errorCodeHelper';
     import {Component, Vue} from 'vue-property-decorator';
     import accountHelper from '../helper/accountHelper';
+    let $:any=(<any>window).$;
     
     @Component({
           components:{
@@ -78,8 +79,8 @@
           }
     })
     export default class AssetEdit extends Vue{
-          private step : number = 1
-          private authList : any[] = []
+          private step : number = 1;
+          private authList : any[] = [];
           private jsonData : any = null;
           private dictionary: any = dictionary;
           private authorizationProperties: any[] = [];
@@ -149,12 +150,15 @@
           }
           
           private closeOtherOps(index: number): void{
-                const nodeList: any = this.$refs[`select_${index}`];
-                if(nodeList.length){
+                const nodeList: Element | Element[] | Vue | Vue[] = this.$refs[`select_${index}`];
+                if(nodeList instanceof Array){
                       for (let i = 0; i < this.authList.length; i++) {
-                            if (index !== i && nodeList[0].getSelectOpsShow()) {
-                                  const subNodeList = this.$refs[`select_${i}`];
-                                  subNodeList[0].setSelectOpsShow(false);
+                            if (index !== i && (nodeList[0] as any).getSelectOpsShow()) {
+                                  const subNodeList: Element | Element[] | Vue | Vue[] = this.$refs[`select_${i}`];
+                                  if(subNodeList instanceof Array){
+                                        (subNodeList[0] as any).setSelectOpsShow(false);
+                                  }
+
                             }
                       }
                 }

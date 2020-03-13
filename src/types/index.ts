@@ -77,6 +77,7 @@ export interface IChainInfo{
       owner?: string;
       nft_uri?: string;
       nft_owner?: string;
+      token_id?: string;
 }
 
 

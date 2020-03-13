@@ -179,7 +179,7 @@
                                 token_id:
                             </span>
                             <span class="content_chain_info_item_content link" @click="toExplorer('nft_id')">
-                                {{ chainInfo.number }}
+                                {{ chainInfo.token_id }}
                             </span>
                         </div>
                         <div class="content_chain_info_item_wrap flexRow">
@@ -761,6 +761,7 @@
       import accountHelper from '../helper/accountHelper';
       import {Component, Vue} from 'vue-property-decorator';
       import {IOptions, IChainInfo, ICfg} from "../types";
+      let $:any=(<any>window).$;
 
       @Component
       export default class AssetDetails extends Vue {
@@ -922,7 +923,6 @@
             private loadData(): void {
                   this.getAssetTransList(1);
                   this.getAssetAuthList(1);
-                  this.onAssetTxPaginationClick(1);
                   this.getEvidenceDetail();
 
             }
@@ -935,7 +935,7 @@
             }
 
             private fileImport(): void {
-                  const fileList: any = document.form.file.files;
+                  const fileList: any = document.getElementsByTagName('form')[0].file.files;
                   if (fileList) {
                         this.fileList = Array.from(fileList);
                         console.error(this.fileList);
@@ -1453,7 +1453,7 @@
                   }
 
                   this.loading = true;
-                  const fm: FormData = new FormData(), fileList: any = document.form.file.files,
+                  const fm: FormData = new FormData(), fileList: any = document.getElementsByTagName('form')[0].file.files,
                       url: string = `${accountHelper.getAccount().domain}/assets_transfer/${this.$route.query.nft_id}/transfer_owner`;
                   for (let item of fileList) {
                         fm.append('files', item);
@@ -1702,6 +1702,7 @@
                   }
                   if (data && data.chain_info) {
                         this.chainInfo = data.chain_info;
+                        this.onAssetTxPaginationClick(1);
                   }
             }
 
@@ -1878,7 +1879,7 @@
                         this.transLatestUpdateTime = formatTimestamp(data.data[0].update_at)
                   }
                   this.transferData = data.data.map((t: any) => {
-                        let displayHashOk: string;
+                        let displayHashOk: string = '';
                         if(t.hashok === -1){
                               displayHashOk = '--';
                         }else if(t.hashok){
@@ -1955,7 +1956,7 @@
                   const {query_type, number} = this.$route.query;
                   this.txTransferLoading = true;
                   axios.get({
-                        url: `/assets_tx?pageNum=${page}&pageSize=10&used_count=true&asset_no=${number}&asset_type=${query_type}`,
+                        url: `/assets_tx?pageNum=${page}&pageSize=10&used_count=true&tokenid=${this.chainInfo.token_id}&asset_type=${query_type}`,
                         ctx: this
                   }).then((data: any) => {
                         if (data && data.data) {
