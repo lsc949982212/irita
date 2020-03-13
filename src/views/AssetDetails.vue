@@ -22,19 +22,13 @@
                                @click="applyCheck"
                                v-show="applyAuthShow"
                                :loading="applyBtnLoading"
-                               class="btn" type="primary">申请查看
+                               class="btn" type="primary">{{ applyToCheck }}
                     </el-button>
                     <el-button size="small"
                                @click="unlock"
                                v-show="unlockShow"
                                class="btn" type="primary">点击解密
                     </el-button>
-                    <el-button size="small"
-                               @click="handleSuperviseClick"
-                               v-show="superviseShow"
-                               class="btn" type="primary">监管查看
-                    </el-button>
-
                 </div>
 
 
@@ -120,6 +114,7 @@
                 <div class="content_table_wrap">
                     <el-table
                             :data="evidenceDetailListData"
+                            v-loading="evidenceLoading"
                             style="width: 100%">
                         <el-table-column
                                 fixed
@@ -140,9 +135,10 @@
                                 label="存证数据"
                                 min-width="80">
                             <template slot-scope="scope">
-                                <a class="link_url" :href="scope.row.uri">
+                                <span class="link_url"
+                                      @click="decryptoFile(scope.row)">
                                     {{ getFormatAddress(scope.row.uri) }}
-                                </a>
+                                </span>
                             </template>
                         </el-table-column>
                         <el-table-column
@@ -218,12 +214,18 @@
                 <div class="content_table_wrap">
                     <el-table
                             :data="transferData"
+                            v-loading="transLoading"
                             style="width: 100%">
                         <el-table-column
                                 fixed
                                 prop="time"
                                 label="提出时间"
                                 min-width="100">
+                        </el-table-column>
+                        <el-table-column
+                                prop="displayPoster"
+                                label="转让者"
+                                min-width="80">
                         </el-table-column>
                         <el-table-column
                                 prop="displayReceiver"
@@ -248,7 +250,7 @@
                                 label="文件一致性校验"
                                 min-width="60">
                             <template slot-scope="scope">
-                                <span>{{ scope.row.hashok ? '校验成功' : '校验失败' }}</span>
+                                <span>{{ scope.row.displayHashOk }}</span>
                                 <img src="../assets/check_failed.png"
                                      v-show="!scope.row.hashok"
                                      class="check_failed">
@@ -318,6 +320,7 @@
                 <div class="content_table_wrap">
                     <el-table
                             :data="applyAndAuthDataList"
+                            v-loading="applyLoading"
                             style="width: 100%">
                         <el-table-column
                                 fixed
@@ -388,6 +391,7 @@
                 <div class="content_table_wrap">
                     <el-table
                             :data="checkDataList"
+                            v-loading="checkLoading"
                             style="width: 100%">
                         <el-table-column type="expand">
                             <template slot-scope="props">
@@ -474,6 +478,7 @@
                 <div class="content_table_wrap" v-show="tab === 0">
                     <el-table
                             :data="assetListData"
+                            v-loading="txTransferLoading"
                             style="width: 100%">
                         <el-table-column
                                 fixed
@@ -538,6 +543,7 @@
                 <div class="content_table_wrap" v-show="tab === 1">
                     <el-table
                             :data="serviceListData"
+                            v-loading="serviceLoading"
                             style="width: 100%">
                         <el-table-column
                                 fixed
@@ -603,13 +609,14 @@
                 <div class="content_table_wrap" v-show="tab === 2">
                     <el-table
                             :data="evidenceListData"
+                            v-loading="evidenceListLoading"
                             style="width: 100%">
                         <el-table-column
                                 fixed
                                 label="交易哈希"
                                 min-width="100">
                             <template slot-scope="scope">
-                                <span class="link_url" @click="toExplorer('hash',scope.row.hash)">
+                                <span class="link_url" @click="toExplorer('hash',scope.row.tx_hash)">
                                     {{ getFormatAddress(scope.row.tx_hash) }}
                                 </span>
                             </template>
@@ -618,7 +625,7 @@
                                 label="存证ID"
                                 min-width="80">
                             <template slot-scope="scope">
-                                <span class="link_url" @click="toExplorer('hash',scope.row.serviceHash)">
+                                <span class="link_url" @click="toExplorer('hash',scope.row.tx_hash)">
                                     {{ getFormatAddress(scope.row.record_id) }}
                                 </span>
                             </template>
@@ -759,19 +766,24 @@
     import { getErrorMsgByErrorCode } from '../helper/errorCodeHelper';
     import { conversionHelper } from '../helper/conversionHelper';
     import jp from 'jsonpath';
+    import {accountHelper} from '../helper/accountHelper';
 
     export default {
         name : 'AssetAdd',
         data(){
             let token = sessionStorage.getItem('token');
-            let recevieAddr, receiverName;
+            //let recevieAddr, receiverName;
+
+
+            let options = [];
 
             if(token){
                 for(let key in cfg.account){
-                    if(cfg.account[key].address !== JSON.parse(token).address){
-                        recevieAddr = cfg.account[key].address;
-                        receiverName = cfg.account[key].name;
-                    }
+                    options.push({
+                        value:cfg.account[key].address,
+                        label:cfg.account[key].name,
+                        disabled:cfg.account[key].address === JSON.parse(token).address
+                    })
                 }
             }
             return {
@@ -789,11 +801,8 @@
                 totalServiceListCount : 1,
                 totalEvidenceListCount : 0,
                 totalEvidenceDetailCount : 0,
-                options : [{
-                    value : recevieAddr,
-                    label : receiverName
-                }],
-                value : recevieAddr,
+                options,
+                value : '',
                 centerDialogVisible : false,
                 evidenceMaskVisible : false,
                 dialogTitle : '确认转让?',
@@ -846,77 +855,21 @@
                 superviseShow : false,
                 evidenceLatestUpdateTime : '',
                 currentRecordId : '',
+                transAssetOwnerAddr:'',
+                isDecrypto:false,
+                assetOwner:this.$route.query.owner,
+                evidenceLoading:true,
+                transLoading:true,
+                applyLoading:true,
+                checkLoading:true,
+                txTransferLoading:true,
+                serviceLoading:true,
+                evidenceListLoading:true,
             }
         },
         components : {},
         mounted(){
             this.loadData();
-
-
-            /*$(".upload").click(function (){
-                //通过FormData对象 异步提交文件 返回提交结果
-                var img = document.form.file.files;
-                console.error(img)
-                //var companyid = $("[name='companyid']").val();
-                //var userid = $("[name='userid']").val();
-                var fm = new FormData();
-                //fm.append('files', img);
-                fm.append('nft_id', "aada111应收账款");
-                fm.append('provider', 'faa1tzlqyrykyvqnqv2hj7g9y2777recf0nawfyv45');
-                fm.append('provider_pubkey', '02ee7a9fce53b2e64d3c68fe8c6cf13f6a2e564e34f9beb16f0daa4178edcf659b');
-                //fm.append('companyid', companyid);
-                //var url = saasurl+"/management/uploadFile";
-                console.error(fm)
-                fetch(`http://edge1.dev.bianjie.ai/assets_transfer/${this.$route.query.nft_id}/transfer_owner`, {
-                    method : "POST",
-                    headers : {
-                        "Content-Type" : 'application/x-www-form-urlencoded'
-                    },
-                    body : fm
-                }).then(function (response){
-                    console.error(response);
-                }).catch(e=>{
-                    console.error(e)
-                })
-                return false;
-
-                /!*$.ajax({
-                    url : `/assets_transfer/${this.$route.query.nft_id}/transfer_owner`,
-                    cache : false,
-                    type : "POST",
-                    data : fm,
-                    headers : {"X-usertoken" : sessionStorage.getItem("token")},
-                    processData : false,
-                    contentType : false,
-                    complete : function (xhr){
-                        /!*if(xhr.readyState==4&&xhr.status==200){
-                            var result = xhr.responseText;
-                            var json = JSON.parse(result);
-                            var code =json.ret_code;
-                            if(code=="000"){
-                                var url = json.fileUrl;
-                                var name = json.fileName;
-                                var innerHtml = "<a style='cursor: pointer;color: yellow;' target='_blank' href="+url+">&nbsp;点击查看&nbsp;</a>";
-                                $(".msg").html("上传成功（"+innerHtml+"）！");
-                                $(".alerttop").fadeToggle();
-                            }else{
-                                $(".myadmin-alert").removeClass("alert-success").addClass("alert-warning");
-                                $(".msg").text(json.ret_msg);
-                                $(".alerttop").fadeToggle();
-                            }
-
-                        }else{
-                            $(".myadmin-alert").removeClass("alert-success").addClass("alert-warning");
-                            $(".msg").text("上传失败！");
-                            $(".alerttop").fadeToggle();
-                        }*!/
-                        console.error(xhr)
-
-                    }
-                })*!/
-                //return false; //防止刷新页面
-            });*/
-
         },
         computed : {
             editBtnShow(){
@@ -937,8 +890,34 @@
                 return this.$route.query.type === 'check' && !this.isOwner && this.hasSecret && this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.AUTH;
             },
             isOwner(){
-                return this.$route.query.owner === this.$accountHelper.getAccount().address
-            }
+                return this.assetOwner === this.$accountHelper.getAccount().address
+            },
+            applyToCheck(){
+                let isSupervise = false;
+                let token = sessionStorage.getItem('token');
+                if(token){
+                    isSupervise = JSON.parse(token).isSupervise;
+                }
+                if(isSupervise === 'true'){
+                    return '监管查看'
+                }else{
+                    return '申请查看'
+                }
+            },
+            replaceAuthorizationDataToStar(){
+                //判断授权查看数据是否展示***
+                // 非资产拥有者 && 没有'点击解密'操作 && 没有直接调用解密接口
+                return !this.isDecrypto && !this.isOwner && !this.useUnlock
+
+            },
+            replaceSecretDataToStar(){
+                //判断仅自己可见数据是否展示***
+                //!this.$accountHelper.isSupervise()
+                //资产拥有者 || 监管查看 || 直接调用解密接口正常展示
+                return !(this.isOwner || (this.$accountHelper.isSupervise() && this.isDecrypto) || this.useUnlock)
+
+            },
+
         },
         methods : {
             loadData(){
@@ -961,11 +940,31 @@
             },
             download(item){
                 console.log(item)
-                window.open(item.uri);
+                let url = `${accountHelper.getAccount().domain}/common/decrypt_download_file?file_url=${item.uri}`;
+                if(item.meta){
+                    url += `&filename=${item.meta}`
+                }
+                window.open(url)
             },
             handleFileClick(file){
                 this.evidenceMaskVisible = true;
                 this.currentTfs = file.tfs;
+            },
+            decryptoFile(row){
+                console.error(row)
+                if(!row.decryptoUri){
+                    let url = `${accountHelper.getAccount().domain}/common/decrypt_download_file?file_url=${row.uri}`;
+                    if(row.meta){
+                        url += `&filename=${row.meta}`
+                    }
+                    window.open(url)
+                }else{
+                    let url = `${accountHelper.getAccount().domain}/common/decrypt_download_file?file_url=${row.decryptoUri}`;
+                    if(row.meta){
+                        url += `&filename=${row.meta}`
+                    }
+                    window.open(url)
+                }
             },
             postCheckData(data){
                 console.log(data)
@@ -983,8 +982,8 @@
                             message : '查验已提交成功,请耐心等待',
                             type : 'success'
                         });
-                        //this.loadData();
-                        this.getCheckStatus(1);
+                        this.loadData();
+                        this.getDetails();
                     } else if(data && data.data && data.data.status === 'fail'){
                         this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
                     } else {
@@ -1003,7 +1002,7 @@
                 };
                 this.loading = true;
                 axios.post({
-                    url : ` /assets_transfer/${this.$route.query.nft_id}/transfer_refuse`,
+                    url : `/assets_transfer/${this.$route.query.nft_id}/transfer_refuse`,
                     body,
                     ctx : this
                 }).then((data) =>{
@@ -1032,12 +1031,15 @@
                     case 'trans':
                         this.transCurrentPage = 1;
                         this.getAssetTransList(1);
+                        break;
                     case 'auth':
                         this.authCurrentPage = 1;
                         this.getAssetAuthList(1);
+                        break;
                     case 'check':
                         this.checkCurrentPage = 1;
                         this.getCheckStatus(1);
+                        break;
                     case 'list':
                         this.assetTxCurrentPage = 1;
                         this.authCurrentPage = 1;
@@ -1048,8 +1050,11 @@
                         } else if(this.tab === 2){
                             this.onEvidenceTxPaginationClick(1);
                         }
+                        break;
                     case 'evi':
-                        this.getEvidenceDetail();
+                        //this.getEvidenceDetail();
+                        this.getDetails();
+                        break;
 
 
                 }
@@ -1058,14 +1063,23 @@
                 switch (status){
                     case constant.ASSET_LIST_STATUS.APPLYING:
                         return '转让申请中';
+                        break;
                     case constant.ASSET_LIST_STATUS.ACCEPT:
                         return '已接受待转让';
+                        break;
                     case constant.ASSET_LIST_STATUS.TRANSFERED:
                         return '已转让';
+                        break;
                     case constant.ASSET_LIST_STATUS.REFUSED:
                         return '已拒绝';
+                        break;
                     case constant.ASSET_LIST_STATUS.INVALID:
                         return '已失效';
+                        break;
+                    case constant.ASSET_LIST_STATUS.REFUSED_TRANS:
+                        return '转让方拒绝';
+                        break;
+
 
                 }
             },
@@ -1073,14 +1087,19 @@
                 switch (status){
                     case constant.AUTHORIZATION_STATUS.APPLYING:
                         return '申请中';
+                        break;
                     case constant.AUTHORIZATION_STATUS.AUTH:
                         return '已授权';
+                        break;
                     case constant.AUTHORIZATION_STATUS.REFUSED:
                         return '已拒绝';
+                        break;
                     case constant.AUTHORIZATION_STATUS.INVALID:
                         return '已失效';
+                        break;
                     case constant.AUTHORIZATION_STATUS.EXPIRED:
                         return '已过期';
+                        break;
 
 
                 }
@@ -1133,6 +1152,7 @@
                 this.dialogType = 2;
                 this.operateNftId = row.id;
                 this.requestId = row.requestId;
+                this.transAssetOwnerAddr = row.consumer;
             },
             refused(row){
                 this.centerDialogVisible = true;
@@ -1240,21 +1260,12 @@
 
             },
             postAcceptTrans(){
-                let token = sessionStorage.getItem('token');
-                let displayUserName = '';
-                let pubkey = '';
-                if(token){
-                    displayUserName = JSON.parse(token).name;
-                    for(let key in cfg.account){
-                        if(cfg.account[key].address !== JSON.parse(token).address){
-                            pubkey = cfg.account[key].publicKey;
-                        }
-                    }
-                }
+                console.log('this asset owner address:', this.transAssetOwnerAddr);
+
                 const body = {
                     request_id : this.requestId,
-                    owner_name : displayUserName,
-                    assetowner_pubkey:pubkey,
+                    accepter_name : this.$accountHelper.getUserNameByAddress(this.$accountHelper.getAccount().address),
+                    assetowner_pubkey:this.$accountHelper.getPublicKeyByAddress(this.transAssetOwnerAddr),
                 };
                 this.loading = true;
                 axios.post({
@@ -1307,6 +1318,8 @@
                             type : 'success'
                         });
                         this.loadData();
+                        this.getDetails();
+                        //this.assetOwner = this.provider;
                         this.centerDialogVisible = false;
                     } else if(data && data.data && data.data.status === 'fail'){
                         this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
@@ -1425,38 +1438,28 @@
                 });
             },
             transfer(){
-                let publicKey, address;
-                let token = sessionStorage.getItem('token');
-                if(token){
-                    for(let key in cfg.account){
-                        if(cfg.account[key].address !== JSON.parse(token).address){
-                            publicKey = cfg.account[key].publicKey;
-                            address = cfg.account[key].address;
-                        }
-                    }
+                if(!this.value){
+                    this.$message.error('请选择要转让的账户');
+                    return;
                 }
 
                 this.loading = true;
                 const fm = new FormData(), fileList = document.form.file.files,
-                    url = `http://edge1.dev.bianjie.ai/assets_transfer/${this.$route.query.nft_id}/transfer_owner`;
+                    url = `${accountHelper.getAccount().domain}/assets_transfer/${this.$route.query.nft_id}/transfer_owner`;
                 for(let item of fileList){
                     fm.append('files', item);
                 }
-
-                fm.append('provider', address);
-                fm.append('provider_pubkey', publicKey);
+                fm.append('provider', this.value);
+                fm.append('provider_pubkey', this.$accountHelper.getPublicKeyByAddress(this.value));
                 fetch(url, {
                     method : "POST",
-                    headers : {
-                        "Content-Type" : 'multipart/form-data'
-                    },
                     body : fm
                 }).then((response)=>{
                     return response.json();
                 }).then((data)=>{
                     this.loading = false;
                     console.error(data)
-                    if(data && data.data && data.data.status === 'success'){
+                    if(data && data.status === 'success'){
                         Message({
                             message : '申请转让成功',
                             type : 'success'
@@ -1464,8 +1467,8 @@
                         this.centerDialogVisible = false;
                         //this.$router.go(-1);
                         this.loadData();
-                    } else if(data && data.data && data.data.status === 'fail'){
-                        this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
+                    } else if(data && data.status === 'fail'){
+                        this.$message.error(getErrorMsgByErrorCode(data.errCode));
                         this.centerDialogVisible = false;
                     } else {
                         this.$message.error('申请转让失败');
@@ -1492,17 +1495,28 @@
                             message : '解密成功',
                             type : 'success'
                         });
-                        this.jsonData = JSON.parse(data.data.data);
-                        this.secretList = JSON.parse(data.data.data).secretProperties;
-                        document.getElementById('detail_json_schema_node').style.display = 'none';
-                        document.getElementById('locked_detail_json_schema_node').style.display = 'block';
+                        this.jsonData = JSON.parse(data.data.data.asset_content);
+                        this.secretList = JSON.parse(data.data.data.asset_content).secretProperties;
+                        this.evidenceDetailListData.forEach((item)=>{
+                            let uri = data.data.data.record_files.find((f)=>f.origin_file === item.uri);
+                            if(uri){
+                                item.decryptoUri = uri.re_encrypted_file
+                            }
+
+                        });
+                        const el = document.getElementById('detail_json_schema_node');
+                        const childs = el.childNodes;
+                        for(let i = childs.length - 1 ; i >= 0 ; i--){
+                            el.removeChild(childs[i]);
+                        }
                         setTimeout(() =>{
-                            $("#locked_detail_json_schema_node").alpaca({
+                            $("#detail_json_schema_node").alpaca({
                                 "schemaSource" : JsonSchemaHelper.getFormatSchemaFile(require(`../schema/${this.$route.query.query_type}`)),
-                                "dataSource" : JSON.parse(data.data.data),
+                                "dataSource" : JSON.parse(data.data.data.asset_content),
                                 "view" : "bootstrap-display"
                             });
                             this.drawNoteNode();
+                            this.isDecrypto = true;
                             this.setSecretFieldStyle(true);
                         }, 100);
 
@@ -1520,9 +1534,6 @@
                     this.$message.error('解密失败');
                 });
             },
-            handleSuperviseClick(){
-
-            },
             handleCancelBtnClick(){
                 this.centerDialogVisible = false;
             },
@@ -1530,14 +1541,19 @@
                 switch (type){
                     case 'address':
                         window.open(`${cfg.app.explorer}/#/address/${param ? param : this.chainInfo.nft_owner}`);
+                        break;
                     case 'nft_id':
                         window.open(`${cfg.app.explorer}/#/nft/token?denom=${this.chainInfo.type}&tokenId=${this.chainInfo.number}`);
+                        break;
                     case 'hash':
                         window.open(`${cfg.app.explorer}/#/tx?txHash=${param}`);
+                        break;
                     case 'height':
                         window.open(`${cfg.app.explorer}/#/block/${param}`);
+                        break;
                     case 'serviceName':
                         window.open(`${cfg.app.explorer}/#/service?serviceName=${param}&chainId=${cfg.chainId}`);
+                        break;
                 }
             },
             getCheckElement(tag, dataAttr, reg){
@@ -1567,9 +1583,6 @@
                 }
                 return aEle;
             },
-            handleCheck(path){
-                console.log(path)
-            },
             getDetails(){
                 let url = `/assets/detail/${this.$route.query.nft_id}`;
                 if(this.useUnlock){
@@ -1592,6 +1605,7 @@
                 });
             },
             getCheckStatus(page){
+                this.checkLoading = true;
                 let url = `/assets_check?pageNum=${page}&pageSize=10&used_count=false&nft_id=${this.$route.query.nft_id}`;
                 axios.get({
                     url,
@@ -1622,7 +1636,9 @@
                             }
                         })
                     }
+                    this.checkLoading = false;
                 }).catch(e =>{
+                    this.checkLoading = false;
                     console.error(e);
 
                 });
@@ -1688,25 +1704,41 @@
                         if(pathMap.has(replaced)){
                             pathMap.get(replaced).style.color = 'yellow';
                             pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].style.color = '#FF6200';
-                            if(!this.isOwner && !this.useUnlock){
-                                pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
+                            //监管人员解密以后是可以查看所有数据
+                            if(showSecret){
+                                if(!this.$accountHelper.isSupervise()){
+                                    pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
+                                }
+
+                            }else{
+                                if(!this.isOwner && !this.useUnlock){
+                                    pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
+                                }
                             }
+
                         } else {
                             Array.from(pathMap.keys()).forEach((p) =>{
                                 if(p.includes('[') && p.includes(']')){
                                     let num = p.split('[')[1].split(']')[0];
                                     if(p.replace(num, '*') === replaced){
                                         pathMap.get(p).getElementsByClassName('alpaca-control')[0].style.color = '#FF6200';
-                                        if(!this.isOwner && !this.useUnlock){
-                                            pathMap.get(p).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
+                                        if(showSecret){
+                                            if(!this.$accountHelper.isSupervise()){
+                                                pathMap.get(p).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
+                                            }
+                                        }else{
+                                            if(!this.isOwner && !this.useUnlock){
+                                                pathMap.get(p).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
+                                            }
                                         }
+
                                     }
                                 }
                             })
                         }
                     });
 
-                }, 250)
+                }, 500)
             },
             //添加密文注释
             drawNoteNode(){
@@ -1739,15 +1771,22 @@
                 }, 500)
             },
             renderUI(){
+                const el = document.getElementById('detail_json_schema_node');
+                const childs = el.childNodes;
+                for(let i = childs.length - 1 ; i >= 0 ; i--){
+                    el.removeChild(childs[i]);
+                }
                 $("#detail_json_schema_node").alpaca({
                     "schemaSource" : JsonSchemaHelper.getFormatSchemaFile(require(`../schema/${this.$route.query.query_type}`)),
                     "dataSource" : this.jsonData,
                     "view" : "bootstrap-display"
                 });
+                this.isDecrypto = false;
                 this.setSecretFieldStyle(false);
                 this.drawNoteNode();
             },
             getAssetTransList(page){
+                this.transLoading = true;
                 axios.get({
                     url : `/assets_transfer/${this.$route.query.nft_id}/transfer_records?pageNum=${page}&pageSize=10`,
                     ctx : this
@@ -1755,8 +1794,9 @@
                     if(data && data.data){
                         this.handleAssetTransData(data, page);
                     }
-
+                    this.transLoading = false;
                 }).catch(e =>{
+                    this.transLoading = false;
                     console.error(e)
                 });
             },
@@ -1797,6 +1837,14 @@
                     this.transLatestUpdateTime = formatTimestamp(data.data[0].update_at)
                 }
                 this.transferData = data.data.map((t) =>{
+                    let displayHashOk;
+                    if(t.hashok === -1){
+                        displayHashOk = '--';
+                    }else if(t.hashok){
+                        displayHashOk = '校验成功';
+                    }else if(!t.hashok){
+                        displayHashOk = '校验失败';
+                    }
                     return {
                         id : t.nft_id,
                         requestId : t.request_id,
@@ -1805,17 +1853,20 @@
                         txStatus : t.status,
                         displayStatus : this.getDisplayAssetTransStatus(t.status),
                         displayReceiver : this.$accountHelper.getUserNameByAddress(t.provider),
+                        displayPoster : this.$accountHelper.getUserNameByAddress(t.consumer),
                         consumer : t.consumer,
                         provider : t.provider,
                         showAcceptBtn : t.status === constant.ASSET_LIST_STATUS.APPLYING && t.provider === this.$accountHelper.getAccount().address,
                         showTransBtn : t.status === constant.ASSET_LIST_STATUS.ACCEPT && t.consumer === this.$accountHelper.getAccount().address && t.hashok,
                         showRefusedBtn : t.status === constant.ASSET_LIST_STATUS.ACCEPT && t.consumer === this.$accountHelper.getAccount().address && t.hashok,
                         tfs : t.tfs,
-                        hashok : t.hashok
+                        hashok : t.hashok,
+                        displayHashOk
                     }
                 })
             },
             getAssetAuthList(page){
+                this.applyLoading = true;
                 axios.get({
                     url : `/assets_authorization/${this.$route.query.nft_id}/authorization_records?pageNum=${page}&pageSize=10`,
                     ctx : this
@@ -1823,7 +1874,9 @@
                     if(data && data.data){
                         this.handleAssetAuthData(data, page);
                     }
+                    this.applyLoading = false;
                 }).catch(e =>{
+                    this.applyLoading = false;
                     console.error(e)
                 });
             },
@@ -1856,6 +1909,7 @@
             },
             getAssetTxList(page){
                 const {query_type, number} = this.$route.query;
+                this.txTransferLoading = true;
                 axios.get({
                     url : `/assets_tx?pageNum=${page}&pageSize=10&used_count=true&asset_no=${number}&asset_type=${query_type}`,
                     ctx : this
@@ -1863,7 +1917,9 @@
                     if(data && data.data){
                         this.handleTxListData(data);
                     }
+                    this.txTransferLoading = false;
                 }).catch(e =>{
+                    this.txTransferLoading = false;
                     console.error(e)
                 });
             },
@@ -1883,6 +1939,7 @@
                 })
             },
             getServiceDataList(page){
+                this.serviceLoading = true;
                 axios.get({
                     url : `/assets_tx/service_tx?pageNum=${page}&pageSize=10&used_count=true&nft_id=${this.$route.query.nft_id}`,
                     ctx : this
@@ -1890,39 +1947,58 @@
                     if(data && data.data){
                         this.handleServiceDataData(data);
                     }
+                    this.serviceLoading = false;
                 }).catch(e =>{
+                    this.serviceLoading = false;
                     console.error(e)
                 });
             },
             getEvidenceDataList(page){
-                console.error('-------', this.recordIds)
-                let recordIdStr = this.recordIds.join();
-                axios.get({
-                    url : `/assets_record?pageNum=${page}&pageSize=10&used_count=true&record_ids=${recordIdStr}`,
-                    ctx : this
-                }).then((data) =>{
-                    if(data && data.data){
-                        this.handleEvidenceDataData(data);
-                    }
-                }).catch(e =>{
-                    console.error(e)
-                });
+                console.log(this.recordIds)
+                this.evidenceListLoading = true;
+                if(this.recordIds && this.recordIds.length){
+                    let recordIdStr = this.recordIds.join();
+                    axios.get({
+                        url : `/assets_record?pageNum=${page}&pageSize=10&used_count=true&record_ids=${recordIdStr}`,
+                        ctx : this
+                    }).then((data) =>{
+                        if(data && data.data){
+                            this.handleEvidenceDataData(data);
+                        }
+                        this.evidenceListLoading = false;
+                    }).catch(e =>{
+                        this.evidenceListLoading = false;
+                        console.error(e)
+                    });
+                }else{
+                    this.evidenceListLoading = false;
+                }
+
             },
             getEvidenceDetail(){
-                axios.get({
-                    url : `/assets_record/detail/eb8e0a3d8462710404f7fe3d75dbbf71d960703ac07899f4a227cc020a6b6886`,
-                    //url : `/assets_record/detail/${this.currentRecordId}`,
-                    ctx : this
-                }).then((data) =>{
-                    if(data && data.data){
-                        console.error('---------', data)
-                        this.evidenceCount = data.data.file_nums;
-                        this.evidenceLatestUpdateTime = formatTimestamp(data.data.time);
-                        this.evidenceDetailListData = data.data.contents;
-                    }
-                }).catch(e =>{
-                    console.error(e)
-                });
+                this.evidenceLoading = true;
+                if(this.currentRecordId){
+                    axios.get({
+                        url : `/assets_record/detail/${this.currentRecordId}`,
+                        ctx : this
+                    }).then((data) =>{
+                        if(data && data.data){
+                            this.evidenceCount = data.data.file_nums;
+                            this.evidenceLatestUpdateTime = formatTimestamp(data.data.time);
+                            this.evidenceDetailListData = data.data.contents;
+                            this.evidenceDetailListData.forEach((item)=>{
+                                item.tx_hash = data.data.tx_hash
+                            })
+                        }
+                        this.evidenceLoading = false;
+                    }).catch(e =>{
+                        this.evidenceLoading = false;
+                        console.error(e)
+                    });
+                }else{
+                    this.evidenceLoading = false;
+                }
+
             },
 
             handleServiceDataData(data){
@@ -1941,7 +2017,7 @@
                 })
             },
             handleEvidenceDataData(data){
-                console.error('evidence list data', data);
+                console.log('evidence list data', data);
                 this.totalServiceListCount = data.total;
                 this.evidenceListData = data.data;
                 this.evidenceListData.forEach((item) =>{
@@ -1997,6 +2073,7 @@
                     font-size: 14px;
                     color: @mainFontColor;
                     margin-right: 10px;
+                    width:100px;
                 }
                 .asset_details_trans_btn {
                     margin-left: 20px;
@@ -2009,18 +2086,19 @@
                 align-items: flex-start;
                 margin-bottom: 20px;
                 .upload_title {
-                    margin-right: 20px;
+                    margin-right: 10px;
                     height: 34px;
                     line-height: 34px;
                     color: #464646;
                     font-size: 14px;
+                    width:100px;
                 }
                 .file_list_container {
                     .flexColumn;
-                    width: 200px;
+                    width: 192px;
                     margin-right: 20px;
                     .file_list {
-                        width: 200px;
+                        width: 192px;
                         margin-bottom: 10px;
                         height: 34px;
                         line-height: 34px;

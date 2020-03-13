@@ -35,5 +35,19 @@ export const accountHelper = {
     getPublicKeyByAddress(address){
         return this.getAccountList().find(item=>item.address === address) ? this.getAccountList().find(item=>item.address === address).publicKey : ''
     },
+    isSupervise(){
+        let isSupervise = false;
+        let token = sessionStorage.getItem('token');
+        if(token){
+            isSupervise = JSON.parse(token).isSupervise;
+            if(isSupervise === 'true'){
+                return true;
+            }else{
+                return false;
+            }
+        }else{
+            return isSupervise;
+        }
+    }
 
 };

@@ -72,6 +72,7 @@
             <div class="table_container">
                 <el-table
                         :data="tableData"
+                        v-loading="loading"
                         style="width: 100%">
                     <el-table-column
                             fixed
@@ -105,7 +106,7 @@
                     </el-table-column>
                     <el-table-column
                             prop="displayCheckStatus"
-                            label="查验状态"
+                            label="查验结果"
                             min-width="60">
                     </el-table-column>
                     <el-table-column
@@ -183,13 +184,16 @@
                 },],
                 checkStatus : [{
                     value: constant.CHECK_STATUS_OPTIONS.ALL,
-                    label: '全部查验状态'
+                    label: '全部查验结果'
                 },{
                     value: constant.CHECK_STATUS_OPTIONS.CHECKED,
-                    label: '已查验'
+                    label: '已通过'
                 },{
                     value: constant.CHECK_STATUS_OPTIONS.NOT_CHECK,
                     label: '未查验'
+                },{
+                    value: constant.CHECK_STATUS_OPTIONS.CHECK_FAILED,
+                    label: '未通过'
                 }],
                 userAccount : [{
                     value: constant.ASSETS_BELONG.ALL,
@@ -206,6 +210,7 @@
                 checkStatusValue:constant.CHECK_STATUS_OPTIONS.ALL,
                 userAccountValue,
                 input:'',
+                loading:true,
 
             }
         },
@@ -219,10 +224,13 @@
                 switch (status){
                     case constant.ASSET_STATUS.NORMAL:
                         return '正常';
+                        break;
                     case constant.ASSET_STATUS.APPLyING:
                         return '转让申请中';
+                        break;
                     case constant.ASSET_STATUS.ACCEPT:
                         return '已接受待转让';
+                        break;
 
                 }
             },
@@ -266,9 +274,9 @@
                     case constant.CHECK_RESULT.NOT_CHECK:
                         return '未查验';
                     case constant.CHECK_RESULT.CHECKED:
-                        return '已查验';
+                        return '已通过';
                     case constant.CHECK_RESULT.CHECK_FAILED:
-                        return '查验失败';
+                        return '未通过';
 
                 }
             },
@@ -276,6 +284,7 @@
                 switch (type){
                     case 'address':
                         window.open(`${cfg.app.explorer}/#/address/${param ? param : this.chainInfo.nft_owner}`);
+                        break;
                 }
             },
             handleCheckClick(row){
@@ -293,6 +302,7 @@
                 console.log(assetTypeValue,assetStatusValue,checkStatusValue,userAccountValue,input);
 
                 let url =  `/assets/search?pageNum=${page}&pageSize=10&used_count=true&asset_type=${assetTypeValue}&transfer_status=${assetStatusValue}&check_status=${checkStatusValue}&owner=${userAccountValue}`;
+                this.loading = true;
                 if(this.input){
                     url += `&query_data=${input}`
                 }
@@ -300,7 +310,9 @@
                     if(data && data.data){
                         this.handleData(data);
                     }
+                    this.loading = false;
                 }).catch(e =>{
+                    this.loading = false;
                     console.error(e)
                 });
             },

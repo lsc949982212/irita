@@ -16,7 +16,7 @@ export const constant = {
     SUCCESS:{
         code:10001
     },
-    TIME_OUT:10000,
+    TIME_OUT:30000,
     AUTHORIZATION_PROPERTIES:'authorizationProperties',
     SECRET_PROPERTIES:'secretProperties',
     ASSET_STATUS:{
@@ -30,6 +30,7 @@ export const constant = {
         TRANSFERED:2,
         REFUSED:3,
         INVALID:4,
+        REFUSED_TRANS:5
     },
     AUTHORIZATION_STATUS:{
         APPLYING:0,
@@ -58,7 +59,8 @@ export const constant = {
     CHECK_STATUS_OPTIONS:{
         ALL:-1,
         CHECKED:1,
-        NOT_CHECK:0
+        NOT_CHECK:0,
+        CHECK_FAILED:2
     },
     ASSETS_BELONG:{
         ALL:0,

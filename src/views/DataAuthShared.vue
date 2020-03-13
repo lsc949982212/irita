@@ -242,14 +242,19 @@
                 switch (status){
                     case constant.AUTH_STATUS.APPLYING:
                         return '申请中';
+                        break;
                     case constant.AUTH_STATUS.AUTHORIZED:
                         return '已授权';
+                        break;
                     case constant.AUTH_STATUS.REFUSED:
                         return '已拒绝';
+                        break;
                     case constant.AUTH_STATUS.INVALID:
                         return '已失效';
+                        break;
                     case constant.AUTH_STATUS.EXPIRED:
                         return '已过期';
+                        break;
                 }
             },
             handleAuthClick(item){
