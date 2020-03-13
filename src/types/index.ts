@@ -66,6 +66,17 @@ export interface IDynamic {
 export interface IOptions {
       label: string;
       value: number | string;
+      disabled?: boolean;
+}
+
+export interface IChainInfo{
+      nft_id?: string;
+      number?: string;
+      asset_name?: string;
+      type?: string;
+      owner?: string;
+      nft_uri?: string;
+      nft_owner?: string;
 }
 
 

@@ -5,6 +5,7 @@ import Home from '../views/Home.vue';
 import AssetList from '../views/AssetList.vue';
 import AssetAdd from '../views/AssetAdd.vue';
 import DataAuthShared from '../views/DataAuthShared.vue';
+import AssetDetails from '../views/AssetDetails.vue';
 Vue.use(VueRouter);
 
 const routes = [
@@ -36,6 +37,12 @@ const routes = [
             path : '/auth_share',
             name : 'auth_share',
             component : DataAuthShared
+      },
+      {
+            path : '/asset_detail',
+            name : 'asset_detail',
+            component : AssetDetails,
+            props: (route: any) => ({ type: route.query.type })
       },
 ];
 

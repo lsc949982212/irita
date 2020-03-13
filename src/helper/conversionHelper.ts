@@ -1,12 +1,12 @@
 
 export const conversionHelper = {
-    booleanToDisplayField(data){
+    booleanToDisplayField(data: any): void{
         if(!(data instanceof Array) && typeof data === 'object'){
             for(let key in data){
                 if(!(data[key] instanceof Array) && typeof data[key] === 'object'){
                     this.booleanToDisplayField(data[key])
                 }else if(data[key] instanceof Array){
-                    data[key].forEach((d)=>this.booleanToDisplayField(d))
+                    data[key].forEach((d: any)=>this.booleanToDisplayField(d))
                 }else if(typeof data[key] === "boolean"){
                     if(data[key] === true){
                         data[key] = '是';
