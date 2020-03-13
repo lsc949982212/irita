@@ -250,7 +250,7 @@
                                 label="文件一致性校验"
                                 min-width="60">
                             <template slot-scope="scope">
-                                <span>{{ scope.row.hashok ? '校验成功' : '校验失败' }}</span>
+                                <span>{{ scope.row.displayHashOk }}</span>
                                 <img src="../assets/check_failed.png"
                                      v-show="!scope.row.hashok"
                                      class="check_failed">
@@ -1837,6 +1837,14 @@
                     this.transLatestUpdateTime = formatTimestamp(data.data[0].update_at)
                 }
                 this.transferData = data.data.map((t) =>{
+                    let displayHashOk;
+                    if(t.hashok === -1){
+                        displayHashOk = '--';
+                    }else if(t.hashok){
+                        displayHashOk = '校验成功';
+                    }else if(!t.hashok){
+                        displayHashOk = '校验失败';
+                    }
                     return {
                         id : t.nft_id,
                         requestId : t.request_id,
@@ -1852,7 +1860,8 @@
                         showTransBtn : t.status === constant.ASSET_LIST_STATUS.ACCEPT && t.consumer === this.$accountHelper.getAccount().address && t.hashok,
                         showRefusedBtn : t.status === constant.ASSET_LIST_STATUS.ACCEPT && t.consumer === this.$accountHelper.getAccount().address && t.hashok,
                         tfs : t.tfs,
-                        hashok : t.hashok
+                        hashok : t.hashok,
+                        displayHashOk
                     }
                 })
             },
