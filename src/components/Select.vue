@@ -65,6 +65,7 @@
           }
           
           private setSelectOpsShow(show: boolean): void{
+                console.error(show)
                 this.optionsShow = show;
           }
           

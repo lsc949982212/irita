@@ -195,9 +195,10 @@
                         }
                         let tempData: any;
                         if (reader.result && typeof reader.result === 'string') {
+                              console.error(JSON.parse(reader.result))
+                              tempData = JSON.parse(JSON.stringify(JSON.parse(reader.result)))
                               if (JSON.parse(reader.result).dataInteract) {
-                                    this.dataInteract = JSON.parse(reader.result).dataInteract
-                                    tempData = JSON.parse(JSON.stringify(JSON.parse(reader.result)))
+                                    this.dataInteract = JSON.parse(reader.result).dataInteract;
                               }
                         }
 
@@ -353,7 +354,7 @@
                                     message: '新增资产成功',
                                     type: 'success'
                               });
-                              this.$router.go(-1);
+                              this.$router.replace('/asset_list');
                         } else if (data && data.data && data.data.status === 'fail') {
                               this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
                         } else {
@@ -375,11 +376,16 @@
             }
 
             private closeOtherOps(index: number): void {
-                  for (let i = 0; i < this.authList.length; i++) {
-                        if (index !== i && this.$refs[`select_${index}`][0].getSelectOpsShow()) {
-                              this.$refs[`select_${i}`][0].setSelectOpsShow(false);
+                  let nodeList: any = this.$refs[`select_${index}`];
+                  if(nodeList.length){
+                        for (let i = 0; i < this.authList.length; i++) {
+                              if (index !== i && nodeList[0].getSelectOpsShow()) {
+                                    const subNodeList = this.$refs[`select_${i}`];
+                                    subNodeList[0].setSelectOpsShow(false);
+                              }
                         }
                   }
+
 
             }
       }

@@ -4,6 +4,7 @@ import Login from '../views/Login.vue';
 import Home from '../views/Home.vue';
 import AssetList from '../views/AssetList.vue';
 import AssetAdd from '../views/AssetAdd.vue';
+import DataAuthShared from '../views/DataAuthShared.vue';
 Vue.use(VueRouter);
 
 const routes = [
@@ -30,6 +31,11 @@ const routes = [
             path : '/asset_add',
             name : 'asset_add',
             component : AssetAdd
+      },
+      {
+            path : '/auth_share',
+            name : 'auth_share',
+            component : DataAuthShared
       },
 ];
 

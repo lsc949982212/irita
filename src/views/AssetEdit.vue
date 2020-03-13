@@ -149,12 +149,14 @@
           }
           
           private closeOtherOps(index: number): void{
-                for(let i = 0 ; i < this.authList.length ; i++){
-                      if(index !== i && this.$refs[`select_${index}`][0].getSelectOpsShow()){
-                            this.$refs[`select_${i}`][0].setSelectOpsShow(false);
+                const nodeList :any = this.$refs[`select_${index}`];
+                if(nodeList.length){
+                      for(let i = 0 ; i < this.authList.length ; i++){
+                            if(index !== i && nodeList[0].getSelectOpsShow()){
+                                  nodeList[0].setSelectOpsShow(false);
+                            }
                       }
                 }
-
           }
           
           private getDetails(): void{
@@ -168,7 +170,7 @@
                 });
           }
           
-          private handleDetailData(data): void{
+          private handleDetailData(data: any): void{
                 console.log('detail data', data)
                 if(data.asset_info){
                       this.jsonData =  JSON.parse(data.asset_info);
@@ -200,10 +202,10 @@
                       let assetNode: any = document.getElementsByName('basicInfo_assetType');
                       let ownerNode: any = document.getElementsByName('basicInfo_assetType');
                       if(assetNode && assetNode.length){
-                            document.getElementsByName('basicInfo_assetType')[0].setAttribute('disabled',true)
+                            document.getElementsByName('basicInfo_assetType')[0].setAttribute('disabled','true')
                       }
                       if(ownerNode && ownerNode.length){
-                            document.getElementsByName('basicInfo_assetOwner')[0].setAttribute('disabled',true)
+                            document.getElementsByName('basicInfo_assetOwner')[0].setAttribute('disabled','true')
                       }
 
                 }, 300)

@@ -13,10 +13,15 @@ const error: Map<string, string> = new Map([
 
 const DEFAULT_ERROR_MSG = '请求出错';
 
-export default function getErrorMsgByErrorCode(code: string | undefined | null): string | undefined{
+export default function getErrorMsgByErrorCode(code: string | undefined | null): string{
       if(!code) return DEFAULT_ERROR_MSG;
       if(error.has(code)){
-            return error.get(code);
+            const ErrMsg: string | undefined = error.get(code);
+            if(ErrMsg){
+                  return ErrMsg;
+            }else{
+                  return DEFAULT_ERROR_MSG;
+            }
       }else{
             return DEFAULT_ERROR_MSG;
       }
