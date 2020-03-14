@@ -1,14 +1,14 @@
-export interface IParams {
+export type IParams = {
       username: string;
       psd: string;
       ctx: any;
 }
 
-interface IApp {
+type IApp = {
       explorer: string;
 }
 
-export interface ICfg {
+export type ICfg = {
       account: any;
       app: IApp;
       env: string;
@@ -17,7 +17,7 @@ export interface ICfg {
 }
 
 
-export interface IAccount {
+export type IAccount = {
       psd: string;
       publicKey: string;
       address: string;
@@ -26,7 +26,7 @@ export interface IAccount {
       isSupervise: string;
 }
 
-export interface IConfig {
+export type IConfig = {
       address: string;
       publicKey: string;
       name: string;
@@ -34,24 +34,24 @@ export interface IConfig {
       isSupervise: string;
 }
 
-export interface IHttpGetParams {
+export type IHttpGetParams = {
       url: string;
       ctx: any;
 }
 
-export interface IHttpPostParams {
-      url: string;
-      ctx: any;
-      body: any;
-}
-
-export interface IHttpPutParams {
+export type IHttpPostParams = {
       url: string;
       ctx: any;
       body: any;
 }
 
-export interface IDynamic {
+export type IHttpPutParams = {
+      url: string;
+      ctx: any;
+      body: any;
+}
+
+export type IDynamic = {
       address: string;
       displayAddress: string;
       displayContent: string;
@@ -63,13 +63,13 @@ export interface IDynamic {
       hash: string;
 }
 
-export interface IOptions {
+export type IOptions = {
       label: string;
       value: number | string;
       disabled?: boolean;
 }
 
-export interface IChainInfo{
+export type IChainInfo = {
       nft_id?: string;
       number?: string;
       asset_name?: string;
