@@ -113,12 +113,12 @@
                                 详情
                             </span>
                             <span @click="handleAuthClick(scope.row)"
-                                  v-show="scope.row.status === constant.AUTH_STATUS.APPLYING && scope.row.provider === $accountHelper.getAccount().address"
+                                  v-show="showBtn"
                                   class="data_auth_link">
                                 授权
                             </span>
                             <span @click="handleRefuseClick(scope.row)"
-                                  v-show="scope.row.status === constant.AUTH_STATUS.APPLYING && scope.row.provider === $accountHelper.getAccount().address"
+                                  v-show="showBtn"
                                   class="data_auth_link data_auth_link_refuse">
                                 拒绝
                             </span>
@@ -380,6 +380,7 @@
                   this.totalTxCount = data.total;
                   this.totalAssets = data.total;
                   this.tableData = data.data.map((asset: any) => {
+                        const isNotSupervise: any = accountHelper.getAccountList().find((item: any)=>item.isSupervise === 'true') !== asset.consumer;
                         return {
                               number: asset.asset_no,
                               id: asset.nft_id,
@@ -397,6 +398,7 @@
                               request_id: asset.request_id,
                               consumer: asset.consumer,
                               resp_resource_url: asset.resp_resource_url,
+                              showBtn:asset.status === constant.AUTH_STATUS.APPLYING && asset.provider === accountHelper.getAccount().address && isNotSupervise
                         };
                   })
             }

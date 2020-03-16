@@ -1936,6 +1936,7 @@
                   }).then((data: any) =>{
                         if(data && data.data && data.data[0]){
                               this.accountApplyAuthorizeStatus = data.data[0].status;
+                              this.authRequestId = data.data[0].request_id;
                         }
 
                   }).catch((e: any) =>{
@@ -1949,7 +1950,6 @@
                   //判断是否展示'点击解密'按钮和'申请查看'按钮;  accountApplyAuthorizeStatus
                   if (data.data.length > 0 && page === 1) {
                         this.consumer = data.data[0].consumer;
-                        this.authRequestId = data.data[0].request_id;
                         this.flUnlock = true;
                         this.nftId = data.data[0].nft_id;
                   }
@@ -1957,13 +1957,14 @@
                         this.authLatestUpdateTime = formatTimestamp(data.data[0].update_at)
                   }
                   this.applyAndAuthDataList = data.data.map((a: any) => {
+                        const isNotSupervise: any = accountHelper.getAccountList().find((item: any)=>item.isSupervise === 'true') !== a.consumer;
                         return {
                               id: a.nft_id,
                               requestId: a.request_id,
                               time: formatTimestamp(a.create_at),
                               applicant: accountHelper.getUserNameByAddress(a.consumer),
                               applyStatus: this.getDisplayAssetAuthStatus(a.status),
-                              showAuthBtn: a.status === constant.AUTHORIZATION_STATUS.APPLYING && a.provider === accountHelper.getAccount().address && accountHelper.getAccountList().find((item: any)=>item.isSupervise === 'true').address !== a.consumer,
+                              showAuthBtn: a.status === constant.AUTHORIZATION_STATUS.APPLYING && a.provider === accountHelper.getAccount().address && isNotSupervise,
                               provider: a.provider,
                               consumer: a.consumer,
                         }
