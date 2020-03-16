@@ -86,6 +86,11 @@ const constant: any = {
       },
       SERVICE:{
             CHECK:1,
+      },
+      DATA_VISIBILITY:{
+            PUBLIC:1,
+            AUTHORIZATION:2,
+            SECRET:3,
       }
 
 

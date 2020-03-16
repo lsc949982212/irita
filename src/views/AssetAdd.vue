@@ -52,17 +52,7 @@
                         设置数据可见范围
                     </p>
                     <div class="content_item_wrap step_third_wrap">
-                        <div class="content_visibility_item flexRow"
-                             :class="info.type ? 'first_item' : ''"
-                             v-for="(info, index) in authList">
-                            <span class="content_visibility_title">
-                                {{ info.title ? info.title : info.str.split('.')[info.str.split('.').length - 1] }}
-                            </span>
-                            <Select :options="info.data" :index="index"
-                                    @closeOtherOps="closeOtherOps"
-                                    :ref="`select_${index}`"
-                                    @changeAuth="changeAuth"/>
-                        </div>
+                        <data-visibility-setting-tree :treeData="treeData"  @handleSelect="handleSelect"/>
                     </div>
                 </div>
             </div>
@@ -75,6 +65,7 @@
                         <div class="tree_wrap">
                             <el-tree
                                     :data="treeData"
+                                    default-expand-all
                                     show-checkbox
                                     ref="tree"
                                     node-key="$id">
@@ -155,7 +146,7 @@
                 <el-button class="btn" size="medium" @click="handleCancelClick">取消</el-button>
             </div>
             <div class="btn_container flexRow" v-show="step === 3">
-                <el-button class="btn" size="medium" @click="handleThirdStepPre" type="default">上一步</el-button>
+                <el-button class="btn" size="medium" @click="changeStep(2)" type="default">上一步</el-button>
                 <el-button size="medium"
                            @click="changeStep(4)"
                            class="btn" type="primary">下一步
@@ -176,8 +167,6 @@
 
 <script lang="ts">
       import Select from '../components/Select.vue';
-      import {dictionary} from '../constant/dictionary';
-      import JsonSchema from '../helper/JsonDataHelper';
       import JsonSchemaHelper from '../helper/JsonSchemaHelper';
       import axios from '../helper/httpHelper';
       import {Message} from 'element-ui';
@@ -189,21 +178,19 @@
       import {IOptions} from '../types';
       import accountHelper from '../helper/accountHelper';
       import constant from '../constant/constant';
-
+      import DataVisibilitySettingTree from '../components/DataVisibilitySettingTree.vue';
       let $: any = (window as any).$;
-      //import jp from 'jsonpath';
 
       let tempData: any = JSON.parse(JSON.stringify(data));
 
       @Component({
             components: {
-                  Select
+                  Select,DataVisibilitySettingTree
             }
       })
       export default class AssetAdd extends Vue {
             private options: IOptions[] = [];
             private serviceList: IOptions[] = [];
-            private authList: any[] = [];
             private dataInteract: any[] = [];
             private checkDataList: any[] = [];
             private treeData: any[] = [];
@@ -211,9 +198,9 @@
             private step: number = 1;
             private jsonData: any = null;
             private downloadUrl: any = null;
-            private txListCurrentPage: number = 1;
-            private dictionary: any = dictionary;
             private service: number = constant.SERVICE.CHECK;
+            private authorizationProperties: string[] = [];
+            private secretProperties: string[] = [];
 
             private mounted(): void {
                   this.getAssetType();
@@ -226,6 +213,37 @@
                         label: '查验'
                   })
             }
+
+            private handleSelect(id: string, value:number): void{
+                  console.log(id, value)
+                  if(value === constant.DATA_VISIBILITY.PUBLIC){
+                        this.removeExistAuthItem(id);
+                        this.removeExistSecItem(id);
+                  }else if(value === constant.DATA_VISIBILITY.AUTHORIZATION){
+                        this.removeExistSecItem(id);
+                        this.authorizationProperties.push(id);
+                  }else if(value === constant.DATA_VISIBILITY.SECRET){
+                        this.removeExistAuthItem(id);
+                        this.secretProperties.push(id);
+                  }
+
+            }
+
+            private removeExistAuthItem(id: string): void{
+                  const existAuthItem: string | undefined = this.authorizationProperties.find((i: string)=> i === id);
+                  if(existAuthItem){
+                        this.authorizationProperties.splice(this.authorizationProperties.findIndex((i: string)=> i === id),1)
+                  }
+            }
+
+            private removeExistSecItem(id: string): void{
+                  const existSecItem: string | undefined = this.secretProperties.find((i: string)=> i === id);
+
+                  if(existSecItem){
+                        this.secretProperties.splice(this.secretProperties.findIndex((i: string)=> i === id),1)
+                  }
+            }
+
 
 
             private get schemaDownloadUrl(): string {
@@ -413,6 +431,7 @@
             }
 
             private changeStep(step: number): void {
+
                   this.step = step;
                   if (step === 1) {
                         const el: any = document.getElementById('json_schema_node');
@@ -454,7 +473,7 @@
                                     assetOwner[0].setAttribute('disabled', true)
                               }
                         }, 100);
-                  } else if (step === 4) {
+                  } else if (step === 3) {
                         let schema: any = require(`../schema/${this.value}`);
                         JsonSchemaHelper.resetArrayToObject(schema);
                         JsonSchemaHelper.formatJsonSchemaToTreeData(schema);
@@ -465,30 +484,20 @@
             }
 
             private checkData(): void {
-                  let jsonData: any = $("#json_schema_node").alpaca().getValue();
-                  console.log(jsonData);
-
-                  this.authList = new JsonSchema(jsonData, JsonSchemaHelper.getFormatSchemaFile(require(`../schema/${this.value}`))).setAddFormatAuthData().getAddAuthDataList();
-                  console.log('auth list:', this.authList)
-                  jsonData.authorizationProperties = [];
-                  jsonData.secretProperties = [];
-                  this.jsonData = jsonData;
+                  this.jsonData = $("#json_schema_node").alpaca().getValue();
                   this.changeStep(3);
             }
 
             private save(): void {
-                  let authorization: any[] = this.authList.filter((a) => a.value === '2');
-                  let secret: any[] = this.authList.filter((a) => a.value === '3');
-                  this.jsonData.authorizationProperties = [];
-                  this.jsonData.secretProperties = [];
+                  this.jsonData.authorizationProperties = this.authorizationProperties.map((item)=>item.replace(/#/g, '$').replace(/\/properties\//g, '.').replace(/\/items/, '[*]'));
+                  this.jsonData.secretProperties = this.secretProperties.map((item)=>item.replace(/#/g, '$').replace(/\/properties\//g, '.').replace(/\/items/, '[*]'));
                   let dataInteract: any[] = [];
                   this.checkDataList.forEach((item) => dataInteract = [...dataInteract, ...item.interact]);
+                  console.error(this.authorizationProperties)
+                  console.error(this.secretProperties)
                   console.error(this.checkDataList)
                   console.error(dataInteract)
                   this.jsonData.dataInteract = dataInteract;
-
-                  authorization.forEach((a) => this.jsonData.authorizationProperties.push(a.str));
-                  secret.forEach((a) => this.jsonData.secretProperties.push(a.str));
                   this.postData();
             }
 
@@ -517,30 +526,6 @@
                         console.error(e);
                         this.$message.error('新增资产失败');
                   });
-            }
-
-            private changeAuth(res: any): void {
-                  this.authList[res.index].value = res.auth;
-            }
-
-            private handleThirdStepPre(): void {
-                  this.authList = [];
-                  this.changeStep(2);
-            }
-
-            private closeOtherOps(index: number): void {
-                  const nodeList: Element | Element[] | Vue | Vue[] = this.$refs[`select_${index}`];
-                  if (nodeList instanceof Array) {
-                        for (let i = 0; i < this.authList.length; i++) {
-                              if (index !== i && (nodeList[0] as any).getSelectOpsShow()) {
-                                    const subNodeList: Element | Element[] | Vue | Vue[] = this.$refs[`select_${i}`];
-                                    if (subNodeList instanceof Array) {
-                                          (subNodeList[0] as any).setSelectOpsShow(false);
-                                    }
-
-                              }
-                        }
-                  }
             }
       }
 

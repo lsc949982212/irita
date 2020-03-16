@@ -397,6 +397,9 @@
                 .el-upload__input {
                     display: none;
                 }
+                .el-tree-node__content{
+                    height:34px;
+                }
             }
         }
     }
