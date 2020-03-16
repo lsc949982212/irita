@@ -1922,6 +1922,18 @@
                         this.applyLoading = false;
                         console.error(e)
                   });
+
+                  axios.get({
+                        url : `/assets_authorization/${this.$route.query.nft_id}/authorization_records?pageNum=1&pageSize=1&consumer=${accountHelper.getAccount().address}`,
+                        ctx : this
+                  }).then((data: any) =>{
+                        if(data && data.data && data.data[0]){
+                              this.accountApplyAuthorizeStatus = data.data[0].status;
+                        }
+
+                  }).catch((e: any) =>{
+                        console.error(e)
+                  });
             }
 
             private handleAssetAuthData(data: any, page?: number):void {
@@ -1933,7 +1945,6 @@
                         this.authRequestId = data.data[0].request_id;
                         this.flUnlock = true;
                         this.nftId = data.data[0].nft_id;
-                        this.accountApplyAuthorizeStatus = data.data[0].status;
                   }
                   if (data.data.length > 0) {
                         this.authLatestUpdateTime = formatTimestamp(data.data[0].update_at)
@@ -1945,7 +1956,7 @@
                               time: formatTimestamp(a.create_at),
                               applicant: accountHelper.getUserNameByAddress(a.consumer),
                               applyStatus: this.getDisplayAssetAuthStatus(a.status),
-                              showAuthBtn: a.status === constant.AUTHORIZATION_STATUS.APPLYING && a.provider === accountHelper.getAccount().address,
+                              showAuthBtn: a.status === constant.AUTHORIZATION_STATUS.APPLYING && a.provider === accountHelper.getAccount().address && accountHelper.getAccountList().find((item: any)=>item.isSupervise === 'true').address !== a.consumer,
                               provider: a.provider,
                               consumer: a.consumer,
                         }
