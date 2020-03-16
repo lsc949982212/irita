@@ -1696,7 +1696,14 @@
                         this.onEvidenceTxPaginationClick(1);
                         if (data.chain_info.record_id) {
                               this.currentRecordId = data.chain_info.record_id;
-                              this.getEvidenceDetail()
+                              if(this.currentRecordId){
+                                    this.getEvidenceDetail()
+                              }else{
+                                    this.evidenceLoading = false;
+                                    this.evidenceCount = 0;
+                                    this.evidenceLatestUpdateTime = '';
+                                    this.evidenceDetailListData = [];
+                              }
                         }
 
                   }
@@ -2037,27 +2044,23 @@
 
             private getEvidenceDetail(): void {
                   this.evidenceLoading = true;
-                  if (this.currentRecordId) {
-                        axios.get({
-                              url: `/assets_record/detail/${this.currentRecordId}`,
-                              ctx: this
-                        }).then((data: any) => {
-                              if (data && data.data) {
-                                    this.evidenceCount = data.data.file_nums;
-                                    this.evidenceLatestUpdateTime = formatTimestamp(data.data.time);
-                                    this.evidenceDetailListData = data.data.contents;
-                                    this.evidenceDetailListData.forEach((item) => {
-                                          item.tx_hash = data.data.tx_hash
-                                    })
-                              }
-                              this.evidenceLoading = false;
-                        }).catch((e: any) => {
-                              this.evidenceLoading = false;
-                              console.error(e)
-                        });
-                  } else {
+                  axios.get({
+                        url: `/assets_record/detail/${this.currentRecordId}`,
+                        ctx: this
+                  }).then((data: any) => {
+                        if (data && data.data) {
+                              this.evidenceCount = data.data.file_nums;
+                              this.evidenceLatestUpdateTime = formatTimestamp(data.data.time);
+                              this.evidenceDetailListData = data.data.contents;
+                              this.evidenceDetailListData.forEach((item) => {
+                                    item.tx_hash = data.data.tx_hash
+                              })
+                        }
                         this.evidenceLoading = false;
-                  }
+                  }).catch((e: any) => {
+                        this.evidenceLoading = false;
+                        console.error(e)
+                  });
 
             }
 
