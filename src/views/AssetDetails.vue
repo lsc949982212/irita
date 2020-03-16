@@ -293,6 +293,7 @@
                 </span>
                 <el-pagination
                         background
+                        :pageSize="smallPageSize"
                         @current-change="onTxTransPaginationClick"
                         :current-page="transCurrentPage"
                         layout="prev, pager, next"
@@ -362,6 +363,7 @@
                 </span>
                 <el-pagination
                         background
+                        :pageSize="smallPageSize"
                         @current-change="onAuthPaginationClick"
                         :current-page="authCurrentPage"
                         layout="prev, pager, next"
@@ -433,6 +435,7 @@
                 </span>
                 <el-pagination
                         background
+                        :pageSize="smallPageSize"
                         @current-change="onCheckPaginationClick"
                         :current-page="checkCurrentPage"
                         layout="prev, pager, next"
@@ -837,6 +840,7 @@
             private assetType: string = '';
             private assetOwner: string = '';
             private currentTfs: any[] = [];
+            private smallPageSize: number = 5;
 
             private beforeMount(): void {
                   const token: string | null = sessionStorage.getItem('token');
@@ -956,7 +960,7 @@
                   this.currentTfs = file.tfs;
             }
 
-            private getFormatAddress(address: string): string {
+            private getFormatAddress(address: string, prefix?: number): string {
                   return getFormatAddress(address)
             }
 
@@ -1616,9 +1620,9 @@
             }
 
             private getDetails(): void {
-                  let url = `/assets/detail/${this.$route.query.nft_id}?address=${accountHelper.getAccount().address}`;
+                  let url = `/assets/detail/${this.$route.query.nft_id}`;
                   if (this.useUnlock) {
-                        url += `&request_id=${this.transRequestId}`;
+                        url += `?request_id=${this.transRequestId}`;
                   }
 
                   axios.get({
@@ -1639,7 +1643,7 @@
 
             private getCheckStatus(page: number): void {
                   this.checkLoading = true;
-                  let url = `/assets_check?pageNum=${page}&pageSize=10&used_count=false&nft_id=${this.$route.query.nft_id}`;
+                  let url = `/assets_check?pageNum=${page}&pageSize=5&used_count=true&nft_id=${this.$route.query.nft_id}`;
                   axios.get({
                         url,
                         ctx: this
@@ -1836,7 +1840,7 @@
             private getAssetTransList(page: number):void {
                   this.transLoading = true;
                   axios.get({
-                        url: `/assets_transfer/${this.$route.query.nft_id}/transfer_records?pageNum=${page}&pageSize=10`,
+                        url: `/assets_transfer/${this.$route.query.nft_id}/transfer_records?pageNum=${page}&pageSize=5&used_count=true`,
                         ctx: this
                   }).then((data: any) => {
                         if (data && data.data) {
@@ -1918,7 +1922,7 @@
             private getAssetAuthList(page: number): void {
                   this.applyLoading = true;
                   axios.get({
-                        url: `/assets_authorization/${this.$route.query.nft_id}/authorization_records?pageNum=${page}&pageSize=10`,
+                        url: `/assets_authorization/${this.$route.query.nft_id}/authorization_records?pageNum=${page}&pageSize=5&used_count=true`,
                         ctx: this
                   }).then((data: any) => {
                         if (data && data.data) {
@@ -1931,7 +1935,7 @@
                   });
 
                   axios.get({
-                        url : `/assets_authorization/${this.$route.query.nft_id}/authorization_records?pageNum=1&pageSize=1&consumer=${accountHelper.getAccount().address}`,
+                        url : `/assets_authorization/${this.$route.query.nft_id}/authorization_records?pageNum=1&pageSize=1&used_count=true&consumer=${accountHelper.getAccount().address}`,
                         ctx : this
                   }).then((data: any) =>{
                         if(data && data.data && data.data[0]){

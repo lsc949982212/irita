@@ -75,7 +75,7 @@
                         show-password
                         clearable>
                 </el-input>
-                <div slot="footer" class="dialog-footer">
+                <div class="dialog-footer">
                     <el-button type="primary"
                                class="login_container"
                                style="width:100%;"
@@ -156,7 +156,7 @@
                   }
                   if (this.expired) {
                         this.$router.push('/login');
-                  }
+                  }\
             }
 
             private handleTabClick(tab: number): void {
@@ -351,6 +351,10 @@
 
                 }
 
+                pre{
+                    border-color:#EDEDED;
+                }
+
                 .fade-enter-active, .fade-leave-active {
                     transition: opacity .28s;
                 }
@@ -386,6 +390,10 @@
                 .el-button--medium {
                     height: 34px;
                 }
+                .el-tree {
+                    background: #f8f8f8;
+                }
+
                 .el-upload__input {
                     display: none;
                 }

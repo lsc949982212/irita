@@ -30,4 +30,42 @@ export default class JsonSchemaHelper {
 
     }
 
+      static formatJsonSchemaToTreeData(schema: any): void{//algorithm need to be optimized
+            if('properties' in schema){
+                  schema.children = [];
+                  for(let key in schema.properties){
+                        if(key === 'dataInteract' || key === 'authorizationProperties' || key === 'secretProperties') continue;
+                        //schema.properties[key].id = schema.properties[key]['$id'];
+                        schema.properties[key].label = schema.properties[key].title;
+                        //set disabled items
+                        /*if(schema.properties[key]['$id'] && schema.properties[key]['$id'].includes('basicInfo')){
+                            schema.properties[key].disabled = true;
+                        }*/
+                        schema.children.push(schema.properties[key]);
+                        if('properties' in schema.properties[key]){
+
+                              JsonSchemaHelper.formatJsonSchemaToTreeData(schema.properties[key])
+                        }
+
+                  }
+            }else{
+                  schema.id = schema['$id'];
+                  schema.label = schema.title;
+            }
+
+      }
+
+      static resetArrayToObject(schema: any){
+            for(let key in schema){
+                  if(key === 'dataInteract' || key === 'authorizationProperties' || key === 'secretProperties') continue;
+                  if(Array.isArray(schema[key]) || typeof schema[key] !== 'object') continue;
+                  if('items' in schema[key]){
+                        schema[key].properties = schema[key].items.properties;
+                  }else{
+                        JsonSchemaHelper.resetArrayToObject(schema[key])
+                  }
+            }
+      }
+
+
 }

@@ -113,12 +113,12 @@
                                 详情
                             </span>
                             <span @click="handleAuthClick(scope.row)"
-                                  v-show="showBtn"
+                                  v-show="scope.row.showBtn"
                                   class="data_auth_link">
                                 授权
                             </span>
                             <span @click="handleRefuseClick(scope.row)"
-                                  v-show="showBtn"
+                                  v-show="scope.row.showBtn"
                                   class="data_auth_link data_auth_link_refuse">
                                 拒绝
                             </span>

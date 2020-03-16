@@ -145,7 +145,7 @@
               "pattern":"^(.*)$"
             },
             "receiverCode":{
-              "$id":"#/properties/detailedInfo/properties/contracts/items/properties/receiverCode",
+              "$id":"#/properties/detailedInfo/properties/receivable/properties/receiverCode",
               "type":"string",
               "title":"收款人代码",
               "default":"",
@@ -155,7 +155,7 @@
               "pattern":"^(.*)$"
             },
             "receiverName":{
-              "$id":"#/properties/detailedInfo/properties/contracts/items/properties/receiverName",
+              "$id":"#/properties/detailedInfo/properties/receivable/properties/receiverName",
               "type":"string",
               "title":"收款人名称",
               "default":"",
@@ -253,7 +253,7 @@
                 ]
               },
               "currency":{
-                "$id":"#/properties/detailedInfo/properties/contracts/items/properties/currency",
+                "$id":"#/properties/detailedInfo/properties/payments/items/properties/currency",
                 "type":"string",
                 "title":"币种",
                 "default":"",

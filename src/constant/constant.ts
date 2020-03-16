@@ -84,6 +84,9 @@ const constant: any = {
             ASSETS: ['nft_mint', 'nft_edit', 'nft_transfer', 'nft_burn'],
             SERVICE: ['service_define', 'service_bind', 'service_request', 'service_response'],
       },
+      SERVICE:{
+            CHECK:1,
+      }
 
 
 };
