@@ -841,6 +841,7 @@
             private assetOwner: string = '';
             private currentTfs: any[] = [];
             private smallPageSize: number = 5;
+            private uploadFileTooLarge:boolean = false;
 
             private beforeMount(): void {
                   const token: string | null = sessionStorage.getItem('token');
@@ -942,6 +943,13 @@
                   const fileList: any = document.getElementsByTagName('form')[0].file.files;
                   if (fileList) {
                         this.fileList = Array.from(fileList);
+                        if(this.fileList.some((item: any)=>{
+                              return (item.size/1024).toFixed(0) > constant.MAX_FILE_UPLOAD_SIZE
+                        })){
+                              this.uploadFileTooLarge = true;
+                        }else{
+                              this.uploadFileTooLarge = false;
+                        }
                         console.error(this.fileList);
                   }
             }
@@ -1455,7 +1463,10 @@
                         this.$message.error('请选择要转让的账户');
                         return;
                   }
-
+                  if(this.uploadFileTooLarge){
+                        this.$message.error('存在大小超过4M的文件, 请重新上传');
+                        return;
+                  }
                   this.loading = true;
                   const fm: FormData = new FormData(), fileList: any = document.getElementsByTagName('form')[0].file.files,
                       url: string = `${accountHelper.getAccount().domain}/assets_transfer/${this.$route.query.nft_id}/transfer_owner`;

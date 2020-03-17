@@ -18,12 +18,12 @@
                         </span>
                     </div>
                     <div class="content_item_wrap step_third_wrap">
-                        <div class="content_visibility_item flexRow"
+                        <!--<div class="content_visibility_item flexRow"
                              :class="info.type ? 'first_item' : ''"
                              v-for="(info, index) in authList">
-                            <!--<span class="content_visibility_type" v-if="info.type">
+                            &lt;!&ndash;<span class="content_visibility_type" v-if="info.type">
                                 {{ dictionary.get(info.type) }}
-                            </span>-->
+                            </span>&ndash;&gt;
                             <span class="content_visibility_title">
                                 {{ info.title ? info.title : info.str.split('.')[info.str.split('.').length - 1] }}
                             </span>
@@ -32,7 +32,10 @@
                                     :value="info.value"
                                     :ref="`select_${index}`"
                                     @changeAuth="changeAuth"/>
-                        </div>
+                        </div>-->
+                        <data-visibility-setting-tree :treeData="treeData"
+                                                      :defaultChoosed="defaultChoosed"
+                                                      @handleSelect="handleSelect"/>
                     </div>
                 </div>
 
@@ -71,11 +74,13 @@
     import getErrorMsgByErrorCode  from '../helper/errorCodeHelper';
     import {Component, Vue} from 'vue-property-decorator';
     import accountHelper from '../helper/accountHelper';
+    import DataVisibilitySettingTree from '../components/DataVisibilitySettingTree.vue';
+    import constant from '../constant/constant';
     let $:any=(<any>window).$;
     
     @Component({
           components:{
-                Select
+                Select, DataVisibilitySettingTree
           }
     })
     export default class AssetEdit extends Vue{
@@ -83,11 +88,13 @@
           private authList : any[] = [];
           private jsonData : any = null;
           private dictionary: any = dictionary;
-          private authorizationProperties: any[] = [];
-          private secretProperties: any[] = [];
+          private authorizationProperties: string[] = [];
+          private secretProperties: string[] = [];
           private assetType: string | (string | null)[];
           private dataInteract: any[] = [];
           private transferHistories: any[] = [];
+          private treeData: any[] = [];
+          private defaultChoosed: any = null;
           
           private beforeMount(): void{
                 this.assetType = this.$route.query.asset_type;
@@ -104,20 +111,50 @@
           }
           private next(): void{
                 this.step = 2;
-                this.setAuthListUI();
+                let schema: any = require(`../schema/${this.assetType}`);
+                JsonSchemaHelper.resetArrayToObject(schema);
+                JsonSchemaHelper.formatJsonSchemaToTreeData(schema);
+                this.treeData = schema.children;
+                console.error(schema)
           }
           private save(): void{
-                let authorization: any[] = this.authList.filter((a: any) => a.value === '2');
-                let secret: any[] = this.authList.filter((a: any) => a.value === '3');
                 let jsonData:any = $("#edit_json_schema_node").alpaca().getValue();
-                jsonData.authorizationProperties = [];
-                jsonData.secretProperties = [];
+                jsonData.authorizationProperties = this.authorizationProperties;
+                jsonData.secretProperties = this.secretProperties;
                 jsonData.dataInteract = this.dataInteract;
                 jsonData.transferHistories = this.transferHistories;
-                authorization.forEach((a:any) => jsonData.authorizationProperties.push(a.str));
-                secret.forEach((a:any) => jsonData.secretProperties.push(a.str));
                 this.jsonData = jsonData;
                 this.postData();
+          }
+
+          private handleSelect(id: string, value:number): void{
+                console.log(id, value)
+                if(value === constant.DATA_VISIBILITY.PUBLIC){
+                      this.removeExistAuthItem(id);
+                      this.removeExistSecItem(id);
+                }else if(value === constant.DATA_VISIBILITY.AUTHORIZATION){
+                      this.removeExistSecItem(id);
+                      this.authorizationProperties.push(id);
+                }else if(value === constant.DATA_VISIBILITY.SECRET){
+                      this.removeExistAuthItem(id);
+                      this.secretProperties.push(id);
+                }
+
+          }
+
+          private removeExistAuthItem(id: string): void{
+                const existAuthItem: string | undefined = this.authorizationProperties.find((i: string)=> i === id);
+                if(existAuthItem){
+                      this.authorizationProperties.splice(this.authorizationProperties.findIndex((i: string)=> i === id),1)
+                }
+          }
+
+          private removeExistSecItem(id: string): void{
+                const existSecItem: string | undefined = this.secretProperties.find((i: string)=> i === id);
+
+                if(existSecItem){
+                      this.secretProperties.splice(this.secretProperties.findIndex((i: string)=> i === id),1)
+                }
           }
           
           private postData(): void{
@@ -145,25 +182,6 @@
                 });
           }
           
-          private changeAuth(res: any): void{
-                this.authList[res.index].value = res.auth;
-          }
-          
-          private closeOtherOps(index: number): void{
-                const nodeList: Element | Element[] | Vue | Vue[] = this.$refs[`select_${index}`];
-                if(nodeList instanceof Array){
-                      for (let i = 0; i < this.authList.length; i++) {
-                            if (index !== i && (nodeList[0] as any).getSelectOpsShow()) {
-                                  const subNodeList: Element | Element[] | Vue | Vue[] = this.$refs[`select_${i}`];
-                                  if(subNodeList instanceof Array){
-                                        (subNodeList[0] as any).setSelectOpsShow(false);
-                                  }
-
-                            }
-                      }
-                }
-          }
-          
           private getDetails(): void{
                 axios.get({url:`/assets/detail/${this.$route.query.nft_id}?address=${accountHelper.getAccount().address}`,ctx:this}).then((data:any)=>{
                       if(data){
@@ -189,6 +207,10 @@
 
                       this.authorizationProperties = this.jsonData.authorizationProperties;
                       this.secretProperties = this.jsonData.secretProperties;
+                      this.defaultChoosed = {
+                            authorizationProperties: this.authorizationProperties.map((item: string)=>item.replace(/\$/g, '#').replace(/\./g, '\/properties\/').replace(/\[\*\]/, '\/items')),
+                            secretProperties: this.secretProperties.map((item: string)=>item.replace(/\$/g, '#').replace(/\./g, '\/properties\/').replace(/\[\*\]/, '\/items')),
+                      };
                       this.renderUI();
                 }
 
@@ -217,8 +239,7 @@
           }
           
           private setAuthListUI(): void{
-                let jsonData:any = $("#edit_json_schema_node").alpaca().getValue();
-                this.authList = new JsonSchema(jsonData,this.authorizationProperties,this.secretProperties).setEditFormatAuthData().getEditAuthDataList();
+
           }
           
     }

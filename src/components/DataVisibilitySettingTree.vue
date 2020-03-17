@@ -8,6 +8,7 @@
              slot-scope="{ node, data }">
             <span class="data_visibility_setting_tree_label">{{ node.label }}</span>
             <Options :id="data.$id" v-show="node.isLeaf"
+                     :defaultValue="defaultValue(data.$id)"
                      @handleSelect="(id, value)=>$emit('handleSelect',id, value)"/>
         </div>
     </el-tree>
@@ -24,7 +25,17 @@
       })
       export default class DataVisibilitySettingTree extends Vue {
             @Prop() private treeData: any;
-            @Prop() private defaultChecked?: any;
+            @Prop() private defaultChoosed?: any;
+
+            private defaultValue(id: string): number | void{
+                  if(this.defaultChoosed){
+                        if(this.defaultChoosed.authorizationProperties.includes(id)){
+                              return 2;
+                        }else if(this.defaultChoosed.secretProperties.includes(id)){
+                              return 3;
+                        }
+                  }
+            }
 
       }
 </script>

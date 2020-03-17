@@ -489,8 +489,8 @@
             }
 
             private save(): void {
-                  this.jsonData.authorizationProperties = this.authorizationProperties.map((item)=>item.replace(/#/g, '$').replace(/\/properties\//g, '.').replace(/\/items/, '[*]'));
-                  this.jsonData.secretProperties = this.secretProperties.map((item)=>item.replace(/#/g, '$').replace(/\/properties\//g, '.').replace(/\/items/, '[*]'));
+                  this.jsonData.authorizationProperties = this.authorizationProperties;
+                  this.jsonData.secretProperties = this.secretProperties;
                   let dataInteract: any[] = [];
                   this.checkDataList.forEach((item) => dataInteract = [...dataInteract, ...item.interact]);
                   console.error(this.authorizationProperties)
