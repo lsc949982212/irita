@@ -928,7 +928,14 @@
             private loadData(): void {
                   this.getAssetTransList(1);
                   this.getAssetAuthList(1);
-                  this.getEvidenceDetail();
+                  if(this.currentRecordId){
+                        this.getEvidenceDetail()
+                  }else{
+                        this.evidenceLoading = false;
+                        this.evidenceCount = 0;
+                        this.evidenceLatestUpdateTime = '';
+                        this.evidenceDetailListData = [];
+                  }
 
             }
 
@@ -1521,6 +1528,7 @@
                                     type: 'success'
                               });
                               this.jsonData = JSON.parse(data.data.data.asset_content);
+                              this.getCheckStatus(1);
                               this.secretList = JSON.parse(data.data.data.asset_content).secretProperties;
                               this.evidenceDetailListData.forEach((item) => {
                                     const uri: any = data.data.data.record_files.find((f: any) => f.origin_file === item.uri);
@@ -1660,6 +1668,7 @@
                         ctx: this
                   }).then((data: any) => {
                         console.error(data)
+                        console.error(this.jsonData)
                         if (data && data.data && data.data.length) {
                               this.checkDataList = data.data.map((item: any) => {
                                     let displayStatus = '', displayResult = '';
@@ -1697,8 +1706,8 @@
                   if (data && data.asset_info) {
                         let jsonData: any = JSON.parse(data.asset_info);
 
-                        conversionHelper.booleanToDisplayField(jsonData);
-                        console.log('json data after conversion', jsonData);
+                        //conversionHelper.booleanToDisplayField(jsonData);
+                        //console.log('json data after conversion', jsonData);
                         this.jsonData = jsonData;
                         this.authorizationList = jsonData.authorizationProperties;
                         this.secretList = jsonData.secretProperties;

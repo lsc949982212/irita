@@ -18,43 +18,100 @@
                         </span>
                     </div>
                     <div class="content_item_wrap step_third_wrap">
-                        <!--<div class="content_visibility_item flexRow"
-                             :class="info.type ? 'first_item' : ''"
-                             v-for="(info, index) in authList">
-                            &lt;!&ndash;<span class="content_visibility_type" v-if="info.type">
-                                {{ dictionary.get(info.type) }}
-                            </span>&ndash;&gt;
-                            <span class="content_visibility_title">
-                                {{ info.title ? info.title : info.str.split('.')[info.str.split('.').length - 1] }}
-                            </span>
-                            <Select :options="info.data" :index="index"
-                                    @closeOtherOps="closeOtherOps"
-                                    :value="info.value"
-                                    :ref="`select_${index}`"
-                                    @changeAuth="changeAuth"/>
-                        </div>-->
                         <data-visibility-setting-tree :treeData="treeData"
                                                       :defaultChoosed="defaultChoosed"
                                                       @handleSelect="handleSelect"/>
                     </div>
                 </div>
+            </div>
+            <div class="content_container step_third" v-show="step === 3">
+                <div class="content_item">
+                    <p class="content_item_title">
+                        设置数据交互服务
+                    </p>
+                    <div class="step_fourth_wrap flexRow">
+                        <div class="tree_wrap">
+                            <el-tree
+                                    :data="treeData"
+                                    default-expand-all
+                                    show-checkbox
+                                    ref="tree"
+                                    node-key="$id">
+                            </el-tree>
+                        </div>
+                        <div class="content_wrap">
+                            <div class="content_head_container flexRow">
+                                <el-select v-model="service" placeholder="请选择跨链服务" size="small">
+                                    <el-option
+                                            v-for="item in serviceList"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :disabled="item.disabled"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                                <el-button size="medium"
+                                           @click="addServiceItem"
+                                           class="btn" type="primary">新增
+                                </el-button>
+                            </div>
+                            <div class="service_content_container">
+                                <el-table
+                                        :data="checkDataList"
+                                        style="width: 100%">
+                                    <el-table-column type="expand">
+                                        <template slot-scope="props">
+                                            <el-form label-position="left" inline class="demo-table-expand">
+                                                <pre>{{ props.row.interact }}</pre>
+                                            </el-form>
+                                        </template>
+                                    </el-table-column>
+                                    <el-table-column
+                                            label="数据信息"
+                                            min-width="60">
+                                        <template>
+                                            <span>
+                                                数据信息
+                                            </span>
+                                        </template>
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="displayService"
+                                            label="对应的服务"
+                                            min-width="80">
+                                    </el-table-column>
+                                    <el-table-column
+                                            label="操作"
+                                            min-width="60">
+                                        <template slot-scope="scope">
+                                            <el-button @click="handleDeleteClick(scope.row)"
+                                                       type="text" size="small" class="table_delete_btn">
+                                                删除
+                                            </el-button>
+                                        </template>
+                                    </el-table-column>
+                                </el-table>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
 
             </div>
             <div class="btn_container flexRow">
-
-                <el-button size="medium"
-                           @click="next"
-                           v-show="step === 1"
-                           class="btn" type="primary">下一步
-                </el-button>
                 <el-button size="medium"
                            @click="previous"
-                           v-show="step === 2"
+                           v-show="step === 2 || step === 3"
                            class="btn" type="default">上一步
                 </el-button>
                 <el-button size="medium"
+                           @click="next"
+                           v-show="step === 1 || step === 2"
+                           class="btn" type="primary">下一步
+                </el-button>
+                <el-button size="medium"
                            @click="save"
-                           v-show="step === 2"
+                           v-show="step === 3"
                            class="btn" type="primary">保存
                 </el-button>
                 <el-button class="btn" size="medium" @click="handleCancelClick">取消</el-button>
@@ -76,6 +133,7 @@
     import accountHelper from '../helper/accountHelper';
     import DataVisibilitySettingTree from '../components/DataVisibilitySettingTree.vue';
     import constant from '../constant/constant';
+    import {IOptions} from '../types';
     let $:any=(<any>window).$;
     
     @Component({
@@ -95,9 +153,16 @@
           private transferHistories: any[] = [];
           private treeData: any[] = [];
           private defaultChoosed: any = null;
+          private service: number = constant.SERVICE.CHECK;
+          private serviceList: IOptions[] = [];
+          private checkDataList: any[] = [];
           
           private beforeMount(): void{
                 this.assetType = this.$route.query.asset_type;
+                this.serviceList.push({
+                      value: constant.SERVICE.CHECK,
+                      label: '查验'
+                })
           }
           private mounted(): void{
                 this.getDetails();
@@ -107,15 +172,25 @@
                 this.$router.go(-1);
           }
           private previous(): void{
-                this.step = 1;
+                if(this.step === 2){
+                      this.step = 1;
+                }else if(this.step === 3){
+                      this.step = 2;
+                }
           }
           private next(): void{
-                this.step = 2;
-                let schema: any = require(`../schema/${this.assetType}`);
-                JsonSchemaHelper.resetArrayToObject(schema);
-                JsonSchemaHelper.formatJsonSchemaToTreeData(schema);
-                this.treeData = schema.children;
-                console.error(schema)
+                if(this.step === 1){
+                      this.step = 2;
+                      let schema: any = require(`../schema/${this.assetType}`);
+                      JsonSchemaHelper.resetArrayToObject(schema);
+                      JsonSchemaHelper.formatJsonSchemaToTreeData(schema);
+                      this.treeData = schema.children;
+                      console.error(schema)
+                }else if(this.step === 2){
+                      this.step = 3;
+
+                }
+
           }
           private save(): void{
                 let jsonData:any = $("#edit_json_schema_node").alpaca().getValue();
@@ -125,6 +200,49 @@
                 jsonData.transferHistories = this.transferHistories;
                 this.jsonData = jsonData;
                 this.postData();
+          }
+
+          private addServiceItem(): void {
+
+                const treeNode: Element | Element[] | Vue | Vue[] = this.$refs.tree;
+                if (<Vue>treeNode) {
+                      const keys: string[] = (treeNode as any).getCheckedKeys();
+                      if (keys instanceof Array) {
+                            //console.error(this.$refs.tree.getCheckedKeys())
+                            let data = keys.map((item: string) => {
+                                  return item.replace(/#/g, '$').replace(/\/properties\//g, '.').replace(/\/items/, '[*]')
+                            });
+                            this.checkDataList.push({
+                                  timestamp: new Date().getTime(),
+                                  service: this.service,
+                                  interact: data.map((item: string) => {
+                                        return {
+                                              xPath: item,
+                                              interactType: this.service,
+                                        }
+                                  })
+                            });
+                            this.resetChecked();
+                            console.error(data)
+                      }
+                }
+          }
+
+          private resetChecked(): void {
+                const treeNode: Element | Element[] | Vue | Vue[] = this.$refs.tree;
+                if (<Vue>treeNode) {
+                      (treeNode as any).setCheckedKeys([]);
+                }
+          }
+
+          private handleDeleteClick(row: any): void {
+                console.log(row.timestamp)
+                for (let i = 0; i < this.checkDataList.length; i++) {
+                      if (this.checkDataList[i].timestamp === row.timestamp) {
+                            this.checkDataList.splice(i, 1);
+                            break;
+                      }
+                }
           }
 
           private handleSelect(id: string, value:number): void{
@@ -322,6 +440,48 @@
                         .first_item {
                             margin-top: 60px;
                         }
+                    }
+                    .step_fourth_wrap {
+                        padding-top: 15px;
+                        .tree_wrap {
+                            min-width: 350px;
+                        }
+                        .content_wrap {
+                            flex: 1;
+
+                            .el-select {
+                                width: 300px;
+                            }
+                            .content_head_container {
+                                margin-bottom: 10px;
+                                .btn {
+                                    width: 136px;
+                                    margin-left: 20px;
+                                }
+                            }
+                            .service_content_container {
+                                background: #ffffff;
+                                .table_delete_btn {
+                                    color: #FE2F5D;
+                                }
+
+                                .el-table {
+                                    background: #ffffff;
+                                }
+                                .el-table th, .el-table tr {
+                                    background-color: #F8F8F8;
+                                }
+                                .el-table__expanded-cell[class*=cell] {
+                                    padding: 10px 15px;
+                                }
+                                pre {
+                                    font-size: 12px;
+                                    color: $mainFontColor;
+                                    background: #ffffff;
+                                }
+                            }
+                        }
+
                     }
                 }
 
