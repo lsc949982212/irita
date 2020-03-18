@@ -10,9 +10,6 @@ export interface IResponse<T> {
       data: T;
 }
 
-
-
-
 interface IHttpParams {
       url: string;
       ctx: Vue;
@@ -44,7 +41,7 @@ export type IDynamic = {
 }
 
 export type IOptions = {
-      label: string;
+      label: string | undefined;
       value: number | string;
       disabled?: boolean;
 }

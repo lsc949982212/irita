@@ -176,9 +176,9 @@
       import schemaConfig from '../schema/config.json';
       import {Component, Vue} from 'vue-property-decorator';
       import * as types from "../types";
-      import * as dic from "../constant";
       import accountHelper from '../helper/accountHelper';
       import constant from '../constant/constant';
+      import * as constant1 from "../constant";
       import DataVisibilitySettingTree from '../components/DataVisibilitySettingTree.vue';
       let $: any = (window as any).$;
 
@@ -210,20 +210,20 @@
 
             private beforeMount(): void {
                   this.serviceList.push({
-                        value: constant.SERVICE.CHECK,
+                        value: types.Service.check,
                         label: '查验'
                   })
             }
 
             private handleSelect(id: string, value:number): void{
                   console.log(id, value)
-                  if(value === constant.DATA_VISIBILITY.PUBLIC){
+                  if(value === constant1.DataVisibility.Public){
                         this.removeExistAuthItem(id);
                         this.removeExistSecItem(id);
-                  }else if(value === constant.DATA_VISIBILITY.AUTHORIZATION){
+                  }else if(value === constant1.DataVisibility.Authorization){
                         this.removeExistSecItem(id);
                         this.authorizationProperties.push(id);
-                  }else if(value === constant.DATA_VISIBILITY.SECRET){
+                  }else if(value === constant1.DataVisibility.Secret){
                         this.removeExistAuthItem(id);
                         this.secretProperties.push(id);
                   }
@@ -306,7 +306,7 @@
                                     timestamp: new Date().getTime(),
                                     service: this.service,
                                     interact: currentInteractList,
-                                    serviceName: dic.service.get(this.service),
+                                    serviceName: constant1.service.get(this.service),
                               });
                               this.resetChecked();
                               console.error(data)

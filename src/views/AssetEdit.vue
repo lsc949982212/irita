@@ -123,7 +123,6 @@
 
 <script lang="ts">
     import Select from '../components/Select.vue';
-    import { dictionary } from '../constant/dictionary';
     import JsonSchemaHelper from '../helper/JsonSchemaHelper';
     import axios from '../helper/httpHelper';
     import { Message } from 'element-ui';
@@ -131,9 +130,8 @@
     import {Component, Vue} from 'vue-property-decorator';
     import accountHelper from '../helper/accountHelper';
     import DataVisibilitySettingTree from '../components/DataVisibilitySettingTree.vue';
-    import constant from '../constant/constant';
     import * as types from "../types";
-    import * as dic from '../constant';
+    import * as constant from "../constant";
     let $:any=(<any>window).$;
     
     @Component({
@@ -145,7 +143,6 @@
           private step : number = 1;
           private authList : any[] = [];
           private jsonData : any = null;
-          private dictionary: any = dictionary;
           private authorizationProperties: string[] = [];
           private secretProperties: string[] = [];
           private assetType: string | (string | null)[];
@@ -160,7 +157,7 @@
           private beforeMount(): void{
                 this.assetType = this.$route.query.asset_type;
                 this.serviceList.push({
-                      value: constant.SERVICE.CHECK,
+                      value: types.Service.check,
                       label: '查验'
                 })
           }
@@ -242,7 +239,7 @@
                                   timestamp: new Date().getTime(),
                                   service: this.service,
                                   interact: currentInteractList,
-                                  serviceName:dic.service.get(this.service),
+                                  serviceName:constant.service.get(this.service),
                             });
                             this.resetChecked();
                             console.error(data)
@@ -269,13 +266,13 @@
 
           private handleSelect(id: string, value:number): void{
                 console.log(id, value)
-                if(value === constant.DATA_VISIBILITY.PUBLIC){
+                if(value === constant.DataVisibility.Public){
                       this.removeExistAuthItem(id);
                       this.removeExistSecItem(id);
-                }else if(value === constant.DATA_VISIBILITY.AUTHORIZATION){
+                }else if(value === constant.DataVisibility.Authorization){
                       this.removeExistSecItem(id);
                       this.authorizationProperties.push(id);
-                }else if(value === constant.DATA_VISIBILITY.SECRET){
+                }else if(value === constant.DataVisibility.Secret){
                       this.removeExistAuthItem(id);
                       this.secretProperties.push(id);
                 }
@@ -354,7 +351,7 @@
                                               timestamp: new Date().getTime(),
                                               service: s,
                                               interact:[],
-                                              serviceName:dic.service.get(s),
+                                              serviceName:constant.service.get(s),
                                         };
                                         dataInteract.forEach((i: types.InteractPath)=>{
                                               if(i.interactType === s){

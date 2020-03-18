@@ -90,7 +90,7 @@
                         <template slot-scope="scope">
                             <a :href="scope.row.resp_resource_url"
                                target="_blank"
-                               v-if="scope.row.status === constant.AUTH_STATUS.AUTHORIZED"
+                               v-if="scope.row.status === constant1.AuthStatus.Authorized"
                                class="data_auth_link">
                                 已授权
                             </a>
@@ -175,46 +175,48 @@
       import {Message} from 'element-ui';
       import {Component, Vue} from 'vue-property-decorator';
       import * as types from "../types";
+      import * as constant1 from "../constant";
 
       @Component
       export default class DataAuthShared extends Vue {
-            private authStatusValue: number = constant.AUTH_STATUS.ALL;
-            private relevantStatusValue: number = constant.RELEVANT.ALL;
+            private authStatusValue: number = constant1.AuthStatus.All;
+            private relevantStatusValue: number = constant1.Relevant.All;
             private tableData: any[] = [];
             private totalAssets: number = 0;
             private totalTxCount: number = 1;
             private txListCurrentPage: number = 1;
             private authStatus: types.IOptions[] = [{
-                  value: constant.AUTH_STATUS.ALL,
+                  value: constant1.AuthStatus.All,
                   label: '全部授权状态'
             }, {
-                  value: constant.AUTH_STATUS.APPLYING,
+                  value: constant1.AuthStatus.Applying,
                   label: '申请中'
             }, {
-                  value: constant.AUTH_STATUS.AUTHORIZED,
+                  value: constant1.AuthStatus.Authorized,
                   label: '已授权'
             }, {
-                  value: constant.AUTH_STATUS.REFUSED,
+                  value: constant1.AuthStatus.Refused,
                   label: '已拒绝'
             }, {
-                  value: constant.AUTH_STATUS.INVALID,
+                  value: constant1.AuthStatus.Invalid,
                   label: '已失效'
             }, {
-                  value: constant.AUTH_STATUS.EXPIRED,
+                  value: constant1.AuthStatus.Expired,
                   label: '已过期'
             },];
 
             private relevantStatus: types.IOptions[] = [{
-                  value: constant.RELEVANT.ALL,
-                  label: '和我有关的全部记录'
+                  value: constant1.Relevant.All,
+                  label: constant1.RelevantMap.get(constant1.Relevant.All)
             }, {
-                  value: constant.RELEVANT.MY_POST,
-                  label: '我发起申请的'
+                  value: constant1.Relevant.MyPost,
+                  label: constant1.RelevantMap.get(constant1.Relevant.MyPost)
             }, {
-                  value: constant.RELEVANT.MY_RECEIVE,
-                  label: '向我申请的'
+                  value: constant1.Relevant.MyReceive,
+                  label: constant1.RelevantMap.get(constant1.Relevant.MyReceive)
             }];
             private constant: any = constant;
+            private constant1: any = constant1;
             private input: string = '';
             private consumer_pubkey: string = '';
             private request_id: string = '';
@@ -227,29 +229,12 @@
             private cfg: types.ICfg = JSON.parse(JSON.stringify(cfg));
 
             private beforeMount(): void {
-                  this.authStatusValue = this.$route.query.auth_status_value ? Number(this.$route.query.auth_status_value) : constant.AUTH_STATUS.ALL;
-                  this.relevantStatusValue = this.$route.query.relevant_status_value ? Number(this.$route.query.relevant_status_value) : constant.RELEVANT.ALL;
+                  this.authStatusValue = this.$route.query.auth_status_value ? Number(this.$route.query.auth_status_value) : constant1.AuthStatus.All;
+                  this.relevantStatusValue = this.$route.query.relevant_status_value ? Number(this.$route.query.relevant_status_value) : constant1.Relevant.All;
             }
 
             private mounted(): void {
                   this.onPageChange(1);
-            }
-
-            private getDisplayAuthStatus(status: number): string {
-                  switch (status) {
-                        case constant.AUTH_STATUS.APPLYING:
-                              return '申请中';
-                        case constant.AUTH_STATUS.AUTHORIZED:
-                              return '已授权';
-                        case constant.AUTH_STATUS.REFUSED:
-                              return '已拒绝';
-                        case constant.AUTH_STATUS.INVALID:
-                              return '已失效';
-                        case constant.AUTH_STATUS.EXPIRED:
-                              return '已过期';
-                        default:
-                              return '';
-                  }
             }
 
             private handleAuthClick(item: any): void {
@@ -389,7 +374,7 @@
                               lastUpdateTime: formatTimestamp(asset.update_at),
                               applyer: getFormatAddress(asset.consumer),
                               responser: getFormatAddress(asset.provider),
-                              authStatus: this.getDisplayAuthStatus(asset.status),
+                              authStatus: constant1.AuthStatusMap.get(asset.status),
                               type: asset.type,
                               owner: asset.nft_owner,
                               provider: asset.provider,
@@ -398,7 +383,7 @@
                               request_id: asset.request_id,
                               consumer: asset.consumer,
                               resp_resource_url: asset.resp_resource_url,
-                              showBtn:asset.status === constant.AUTH_STATUS.APPLYING && asset.provider === accountHelper.getAccount().address && isNotSupervise
+                              showBtn:asset.status === constant1.AuthStatus.Applying && asset.provider === accountHelper.getAccount().address && isNotSupervise
                         };
                   })
             }

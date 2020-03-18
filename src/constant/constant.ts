@@ -67,32 +67,10 @@ const constant: any = {
             MINE: 1,
             OTHERS: 2,
       },
-      AUTH_STATUS: {
-            ALL: -1,
-            APPLYING: 0,
-            AUTHORIZED: 1,
-            REFUSED: 2,
-            INVALID: 3,
-            EXPIRED: 4,
-      },
-      RELEVANT: {
-            ALL: 1,
-            MY_POST: 2,
-            MY_RECEIVE: 3,
-      },
       DYNAMIC: {
             ASSETS: ['nft_mint', 'nft_edit', 'nft_transfer', 'nft_burn'],
             SERVICE: ['service_define', 'service_bind', 'service_request', 'service_response'],
-      },
-      SERVICE:{
-            CHECK:1,
-      },
-      DATA_VISIBILITY:{
-            PUBLIC:1,
-            AUTHORIZATION:2,
-            SECRET:3,
       }
-
 
 };
 export default constant;

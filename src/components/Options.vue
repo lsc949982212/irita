@@ -16,27 +16,25 @@
 <script lang="ts">
       import {Component, Prop, Vue} from 'vue-property-decorator';
       import * as types from "../types";
-      import constant from '../constant/constant';
+      import * as constant from "../constant";
 
       @Component
       export default class Options extends Vue {
             @Prop() private id: string;
             @Prop() private defaultValue?: number;
 
-            private value: number = this.defaultValue ? this.defaultValue : constant.DATA_VISIBILITY.PUBLIC;
+            private value: number = this.defaultValue ? this.defaultValue : constant.DataVisibility.Public;
 
             private options: types.IOptions[] = [{
-                  value: constant.DATA_VISIBILITY.PUBLIC,
+                  value: constant.DataVisibility.Public,
                   label: '公开信息'
             }, {
-                  value: constant.DATA_VISIBILITY.AUTHORIZATION,
+                  value: constant.DataVisibility.Authorization,
                   label: '授权查看',
             }, {
-                  value: constant.DATA_VISIBILITY.SECRET,
+                  value: constant.DataVisibility.Secret,
                   label: '仅自己可见',
             }];
-            private constant : any = constant;
-
 
             private handleChange(value: any): void{
                   this.$emit('handleSelect', this.id.replace(/#/g, '$').replace(/\/properties\//g, '.').replace(/\/items/, '[*]'), value);

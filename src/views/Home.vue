@@ -141,10 +141,10 @@
       import constant from "../constant/constant";
       import cfg from '../config/config.json';
       import axios from "../helper/httpHelper";
-      import {dynamic} from "../constant/dictionary";
       import {getFormatAddress, formatDuring} from "../util/util";
-      import {Component, Prop, Vue} from "vue-property-decorator";
+      import {Component, Vue} from "vue-property-decorator";
       import * as types from "../types";
+      import * as constant1 from "../constant";
 
       @Component
       export default class Home extends Vue {
@@ -168,28 +168,28 @@
             private toAssetsList(type: string, pageType: string): void {
                   let assetStatusValue: number = constant.ASSET_STATUS_OPTIONS.ALL,
                       userAccountValue: number = constant.ASSETS_BELONG.ALL,
-                      authStatusValue: number = constant.AUTH_STATUS.ALL,
-                      relevantStatusValue: number = constant.RELEVANT.ALL;
+                      authStatusValue: number = constant1.AuthStatus.All,
+                      relevantStatusValue: number = constant1.Relevant.All;
 
                   switch (type) {
                         case "totalAsset":
                               userAccountValue = constant.ASSETS_BELONG.MINE;
                               break;
                         case "auth":
-                              authStatusValue = constant.AUTH_STATUS.APPLYING;
-                              relevantStatusValue = constant.RELEVANT.MY_RECEIVE;
+                              authStatusValue = constant1.AuthStatus.Applying;
+                              relevantStatusValue = constant1.Relevant.MyReceive;
                               break;
                         case "trans":
                               userAccountValue = constant.ASSETS_BELONG.MINE;
                               assetStatusValue = constant.ASSET_STATUS_OPTIONS.ACCEPT;
                               break;
                         case "secret":
-                              authStatusValue = constant.AUTH_STATUS.AUTHORIZED;
-                              relevantStatusValue = constant.RELEVANT.MY_POST;
+                              authStatusValue = constant1.AuthStatus.Authorized;
+                              relevantStatusValue = constant1.Relevant.MyPost;
                               break;
                         case "applying":
-                              authStatusValue = constant.AUTH_STATUS.APPLYING;
-                              relevantStatusValue = constant.RELEVANT.MY_POST;
+                              authStatusValue = constant1.AuthStatus.Applying;
+                              relevantStatusValue = constant1.Relevant.MyPost;
                               break;
                         case "accept":
                               userAccountValue = constant.ASSETS_BELONG.OTHERS;
@@ -268,7 +268,7 @@
                         return {
                               address: item.address,
                               displayAddress: getFormatAddress(item.address),
-                              displayContent: dynamic.get(item.type),
+                              displayContent: constant1.dynamic.get(item.type),
                               name,
                               type: item.type,
                               displayTimePassed: this.formatTime(

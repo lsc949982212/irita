@@ -1,5 +1,4 @@
-
-const error: Map<string, string> = new Map([
+const error = new Map<string, string>([
     ['40000','请求参数错误'],
     ['40001','未认证'],
     ['40002','参数转化异常'],

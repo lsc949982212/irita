@@ -875,7 +875,6 @@
 
             private get applyAuthShow(): boolean {
                   //非资产拥有者  &&  有授权查看的数据 && (授权状态是: 已拒绝 || 已失效 || 已过期)
-                  console.error('-----',this.$route.query.type === 'check',!this.isOwner,this.hasSecret,(this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.REFUSED || this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.INVALID || this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.EXPIRED || this.accountApplyAuthorizeStatus === 5))
                   return this.$route.query.type === 'check' && !this.isOwner && this.hasSecret && (this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.REFUSED || this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.INVALID || this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.EXPIRED || this.accountApplyAuthorizeStatus === 5);
             }
 
@@ -1745,7 +1744,7 @@
             private setSecretFieldStyle(showSecret?: boolean): void{
                   setTimeout(() => {
                         const node: any = this.getCheckElement('div', 'data-alpaca-field-path', /^\//);
-                        const pathMap:Map<string, any> = new Map();
+                        const pathMap = new Map<string, any>();
                         for (let item of node) {
                               const name: string = item.getAttribute('data-alpaca-field-path');
                               pathMap.set(name, item);

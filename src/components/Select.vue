@@ -31,7 +31,7 @@
 
           private info: types.IOptions[];
           private optionsShow: boolean = false;
-          private label: string;
+          private label: string | undefined;
 
           private mounted():void{
                 document.body.addEventListener('click',()=>{
