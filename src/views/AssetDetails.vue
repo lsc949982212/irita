@@ -875,6 +875,7 @@
 
             private get applyAuthShow(): boolean {
                   //非资产拥有者  &&  有授权查看的数据 && (授权状态是: 已拒绝 || 已失效 || 已过期)
+                  console.error('-----',this.$route.query.type === 'check',!this.isOwner,this.hasSecret,(this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.REFUSED || this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.INVALID || this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.EXPIRED || this.accountApplyAuthorizeStatus === 5))
                   return this.$route.query.type === 'check' && !this.isOwner && this.hasSecret && (this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.REFUSED || this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.INVALID || this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.EXPIRED || this.accountApplyAuthorizeStatus === 5);
             }
 
@@ -1710,7 +1711,12 @@
                         this.jsonData = jsonData;
                         this.authorizationList = jsonData.authorizationProperties;
                         this.secretList = jsonData.secretProperties;
-                        this.hasSecret = this.jsonData.authorizationProperties.length > 0 && !accountHelper.isOwner(data.chain_info.owner);
+                        if(accountHelper.isSupervise()){
+                              //监管账户可以申请查看仅自己可见项, 非监管只能在有授权可见的项时才可以展示申请查看按钮
+                              this.hasSecret = (this.jsonData.authorizationProperties.length > 0 || this.jsonData.secretProperties.length > 0) && !accountHelper.isOwner(data.chain_info.owner);
+                        }else{
+                              this.hasSecret = this.jsonData.authorizationProperties.length > 0 && !accountHelper.isOwner(data.chain_info.owner);
+                        }
                         this.recordIds = jsonData.transferHistories;
                         this.renderUI();
                         //获取完json数据才能获取查验信息
