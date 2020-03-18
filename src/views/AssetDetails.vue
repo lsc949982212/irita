@@ -1999,7 +1999,7 @@
                   const {query_type, number} = this.$route.query;
                   this.txTransferLoading = true;
                   axios.get({
-                        url: `/assets_tx?pageNum=${page}&pageSize=10&used_count=true&tokenid=${this.chainInfo.token_id}&asset_type=${query_type}`,
+                        url: `/assets_tx?pageNum=${page}&pageSize=10&used_count=true&token_id=${this.chainInfo.token_id}&asset_type=${query_type}`,
                         ctx: this
                   }).then((data: any) => {
                         if (data && data.data) {
@@ -2208,7 +2208,8 @@
                     background: #EDEDED;
                     cursor: pointer;
                     text-align: center;
-                    font-size: 14px;
+                    font-size: 12px;
+                    font-weight:400;
                 }
             }
             .schema_container {

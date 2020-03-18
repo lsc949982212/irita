@@ -175,7 +175,7 @@
       import data from './data.json';
       import schemaConfig from '../schema/config.json';
       import {Component, Vue} from 'vue-property-decorator';
-      import {IOptions} from '../types';
+      import {IOptions, InteractPath} from '../types';
       import accountHelper from '../helper/accountHelper';
       import constant from '../constant/constant';
       import DataVisibilitySettingTree from '../components/DataVisibilitySettingTree.vue';
@@ -272,19 +272,39 @@
                   if (<Vue>treeNode) {
                         const keys: string[] = (treeNode as any).getCheckedKeys();
                         if (keys instanceof Array) {
-                              //console.error(this.$refs.tree.getCheckedKeys())
-                              let data = keys.map((item: string) => {
+                              if(keys.length === 0){
+                                    this.$message.error('请选择需要添加服务项');
+                                    return;
+                              }
+                              let data: string[] = keys.map((item: string) => {
                                     return item.replace(/#/g, '$').replace(/\/properties\//g, '.').replace(/\/items/, '[*]')
                               });
+                              let tempInteractList : InteractPath[] = [];
+                              let currentInteractList : InteractPath[] = data.map((item: string) => {
+                                    return {
+                                          xPath: item,
+                                          interactType: this.service,
+                                    }
+                              });
+                              this.checkDataList.forEach((item: any)=>{
+                                    tempInteractList = [...tempInteractList, ...item.interact]
+                              });
+                              let isRepeat: boolean = false;
+                              tempInteractList.forEach((t: InteractPath)=>{
+                                    currentInteractList.forEach((c: InteractPath)=>{
+                                          if(c.xPath === t.xPath && c.interactType === t.interactType){
+                                                isRepeat = true;
+                                          }
+                                    })
+                              });
+                              if(isRepeat){
+                                    this.$message.error('新增数据重复,请重新选择');
+                                    return;
+                              }
                               this.checkDataList.push({
                                     timestamp: new Date().getTime(),
                                     service: this.service,
-                                    interact: data.map((item: string) => {
-                                          return {
-                                                xPath: item,
-                                                interactType: this.service,
-                                          }
-                                    })
+                                    interact: currentInteractList,
                               });
                               this.resetChecked();
                               console.error(data)
