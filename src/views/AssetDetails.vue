@@ -759,16 +759,15 @@
       import {Message} from 'element-ui';
       import {formatTimestamp, getFormatAddress} from '../util/util';
       import getErrorMsgByErrorCode from '../helper/errorCodeHelper';
-      import {conversionHelper} from '../helper/conversionHelper';
       import jp from 'jsonpath';
       import accountHelper from '../helper/accountHelper';
       import {Component, Vue} from 'vue-property-decorator';
-      import {IOptions, IChainInfo, ICfg} from "../types";
+      import * as types from "../types";
       let $:any=(<any>window).$;
 
       @Component
       export default class AssetDetails extends Vue {
-            private options: IOptions[] = [];
+            private options: types.IOptions[] = [];
 
             private jsonData: any = null;
             private transferData: any[] = [];
@@ -836,7 +835,7 @@
             private txTransferLoading: boolean = true;
             private serviceLoading: boolean = true;
             private evidenceListLoading: boolean = true;
-            private chainInfo: IChainInfo = {};
+            private chainInfo: types.IChainInfo = {};
             private assetType: string = '';
             private assetOwner: string = '';
             private currentTfs: any[] = [];
@@ -845,7 +844,7 @@
 
             private beforeMount(): void {
                   const token: string | null = sessionStorage.getItem('token');
-                  const config: ICfg = JSON.parse(JSON.stringify(cfg));
+                  const config: types.ICfg = JSON.parse(JSON.stringify(cfg));
                   if (token) {
                         for (const key of Object.keys(config.account)) {
                               this.options.push({

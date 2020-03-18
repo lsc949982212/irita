@@ -175,7 +175,7 @@
       import data from './data.json';
       import schemaConfig from '../schema/config.json';
       import {Component, Vue} from 'vue-property-decorator';
-      import {IOptions, InteractPath} from '../types';
+      import * as types from "../types";
       import accountHelper from '../helper/accountHelper';
       import constant from '../constant/constant';
       import DataVisibilitySettingTree from '../components/DataVisibilitySettingTree.vue';
@@ -189,8 +189,8 @@
             }
       })
       export default class AssetAdd extends Vue {
-            private options: IOptions[] = [];
-            private serviceList: IOptions[] = [];
+            private options: types.IOptions[] = [];
+            private serviceList: types.IOptions[] = [];
             private dataInteract: any[] = [];
             private checkDataList: any[] = [];
             private treeData: any[] = [];
@@ -279,8 +279,8 @@
                               let data: string[] = keys.map((item: string) => {
                                     return item.replace(/#/g, '$').replace(/\/properties\//g, '.').replace(/\/items/, '[*]')
                               });
-                              let tempInteractList : InteractPath[] = [];
-                              let currentInteractList : InteractPath[] = data.map((item: string) => {
+                              let tempInteractList : types.InteractPath[] = [];
+                              let currentInteractList : types.InteractPath[] = data.map((item: string) => {
                                     return {
                                           xPath: item,
                                           interactType: this.service,
@@ -290,8 +290,8 @@
                                     tempInteractList = [...tempInteractList, ...item.interact]
                               });
                               let isRepeat: boolean = false;
-                              tempInteractList.forEach((t: InteractPath)=>{
-                                    currentInteractList.forEach((c: InteractPath)=>{
+                              tempInteractList.forEach((t: types.InteractPath)=>{
+                                    currentInteractList.forEach((c: types.InteractPath)=>{
                                           if(c.xPath === t.xPath && c.interactType === t.interactType){
                                                 isRepeat = true;
                                           }

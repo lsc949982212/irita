@@ -174,7 +174,7 @@
       import cfg from '../config/config.json';
       import {Message} from 'element-ui';
       import {Component, Vue} from 'vue-property-decorator';
-      import {IOptions, ICfg} from "../types";
+      import * as types from "../types";
 
       @Component
       export default class DataAuthShared extends Vue {
@@ -184,7 +184,7 @@
             private totalAssets: number = 0;
             private totalTxCount: number = 1;
             private txListCurrentPage: number = 1;
-            private authStatus: IOptions[] = [{
+            private authStatus: types.IOptions[] = [{
                   value: constant.AUTH_STATUS.ALL,
                   label: '全部授权状态'
             }, {
@@ -204,7 +204,7 @@
                   label: '已过期'
             },];
 
-            private relevantStatus: IOptions[] = [{
+            private relevantStatus: types.IOptions[] = [{
                   value: constant.RELEVANT.ALL,
                   label: '和我有关的全部记录'
             }, {
@@ -224,7 +224,7 @@
             private consumer: string = '';
             private nftId: string = '';
             private dialogType: number = 0;//0 授权, 1 拒绝;
-            private cfg: ICfg = JSON.parse(JSON.stringify(cfg));
+            private cfg: types.ICfg = JSON.parse(JSON.stringify(cfg));
 
             private beforeMount(): void {
                   this.authStatusValue = this.$route.query.auth_status_value ? Number(this.$route.query.auth_status_value) : constant.AUTH_STATUS.ALL;

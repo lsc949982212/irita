@@ -21,15 +21,15 @@
 
 <script lang="ts">
     import {Component, Vue, Prop} from 'vue-property-decorator';
-    import {IOptions} from "../types";
+    import * as types from "../types";
 
     @Component
     export default class Select extends Vue{
-          @Prop() private options: IOptions[];
+          @Prop() private options: types.IOptions[];
           @Prop() private index: number;
           @Prop() private value?: string;
 
-          private info: IOptions[];
+          private info: types.IOptions[];
           private optionsShow: boolean = false;
           private label: string;
 
@@ -42,7 +42,7 @@
           private beforeMount():void{
                 console.log(this.value)
                 if(this.value){
-                      const op: IOptions | undefined = this.options.find((o:any)=>o.value === this.value);
+                      const op: types.IOptions | undefined = this.options.find((o:any)=>o.value === this.value);
                       this.label = op ? op.label :this.options[0].label
                 }else{
                       this.label = this.options[0].label;
@@ -55,7 +55,7 @@
                 this.$emit('closeOtherOps',this.index)
           }
           
-          private handleOpsClick(auth: IOptions): void{
+          private handleOpsClick(auth: types.IOptions): void{
                 this.label = auth.label;
                 this.$emit('changeAuth',{
                       index:this.index,

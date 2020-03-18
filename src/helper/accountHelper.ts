@@ -1,9 +1,9 @@
 import cfg from '../config/config.json';
-import { IParams, IConfig, ICfg, IAccount } from '../types';
+import * as types from '../types';
 
 export default {
       getAccountList<T>(): Array<T> {
-            const config: ICfg = JSON.parse(JSON.stringify(cfg));
+            const config: types.ICfg = JSON.parse(JSON.stringify(cfg));
             const accountList: Array<T> = [];
             for (const key of Object.keys(config.account)) {
                   accountList.push(config.account[key]);

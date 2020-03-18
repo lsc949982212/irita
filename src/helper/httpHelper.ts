@@ -2,10 +2,10 @@ import axios from 'axios';
 import constant from '../constant/constant';
 import LoginHelper from '../helper/LoginHelper';
 import accountHelper from '../helper/accountHelper';
-import {IHttpGetParams, IHttpPostParams, IHttpPutParams} from '../types';
+import * as types from '../types';
 
 export default {
-      get(params: IHttpGetParams): Promise<any> {
+      get(params: types.IHttpGetParams): Promise<any> {
             const {url, ctx} = params;
             if (LoginHelper.checkLoginStatus(ctx) !== constant.SUCCESS.code) {
                   LoginHelper.exit(ctx);
@@ -18,7 +18,7 @@ export default {
             })
 
       },
-      post(params: IHttpPostParams): Promise<any> {
+      post(params: types.IHttpPostParams): Promise<any> {
             const {url, body, ctx} = params;
             if (LoginHelper.checkLoginStatus(ctx) !== constant.SUCCESS.code) {
                   LoginHelper.exit(ctx);
@@ -35,7 +35,7 @@ export default {
             })
 
       },
-      put(params: IHttpPutParams) {
+      put(params: types.IHttpPutParams) {
             const {url, body, ctx} = params;
             if (LoginHelper.checkLoginStatus(ctx) !== constant.SUCCESS.code) {
                   LoginHelper.exit(ctx);

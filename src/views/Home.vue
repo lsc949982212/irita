@@ -144,11 +144,11 @@
       import {dynamic} from "../constant/dictionary";
       import {getFormatAddress, formatDuring} from "../util/util";
       import {Component, Prop, Vue} from "vue-property-decorator";
-      import {IDynamic, ICfg} from "../types";
+      import * as types from "../types";
 
       @Component
       export default class Home extends Vue {
-            private dynamicList: IDynamic[] = [];
+            private dynamicList: types.IDynamic[] = [];
             private totalAssets: number = 0;
             private authApplyWaitDeal: number = 0;
             private transOutWait: number = 0;
@@ -301,7 +301,7 @@
                   window.open(`${cfg.app.explorer}/#/address/${address}`);
             }
 
-            private handleNameClick(item: IDynamic): void {
+            private handleNameClick(item: types.IDynamic): void {
                   if (constant.DYNAMIC.ASSETS.includes(item.type)) {
                         window.open(`${cfg.app.explorer}/#/nftAsset`);
                   } else if (constant.DYNAMIC.SERVICE.includes(item.type)) {
@@ -315,7 +315,7 @@
                   window.open(`${cfg.app.explorer}/#/txs`);
             }
 
-            private handleTimeClick(item: IDynamic): void {
+            private handleTimeClick(item: types.IDynamic): void {
                   window.open(`${cfg.app.explorer}/#/tx?txHash=${item.hash}`);
             }
       }

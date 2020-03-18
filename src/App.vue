@@ -156,7 +156,7 @@
                   }
                   if (this.expired) {
                         this.$router.push('/login');
-                  }\
+                  }
             }
 
             private handleTabClick(tab: number): void {

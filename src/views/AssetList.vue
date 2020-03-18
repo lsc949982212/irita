@@ -152,7 +152,7 @@
       import cfg from '../config/config.json';
       import schemaConfig from '../schema/config.json';
       import {Component, Vue} from 'vue-property-decorator';
-      import {IOptions} from '../types';
+      import * as types from "../types";
 
       @Component
       export default class AssetList extends Vue {
@@ -167,7 +167,7 @@
             private assetTypeValue: string = '';
             private input: string = '';
             private loading: boolean = true;
-            private assetStatus: IOptions[] = [
+            private assetStatus: types.IOptions[] = [
                   {
                         value: constant.ASSET_STATUS_OPTIONS.ALL,
                         label: '全部资产状态'
@@ -182,7 +182,7 @@
                         label: '已接受待转让'
                   }
             ];
-            private checkStatus: IOptions[] = [{
+            private checkStatus: types.IOptions[] = [{
                   value: constant.CHECK_STATUS_OPTIONS.ALL,
                   label: '全部查验状态'
             }, {
@@ -195,7 +195,7 @@
                   value: constant.CHECK_STATUS_OPTIONS.CHECK_FAILED,
                   label: '未通过'
             }];
-            private userAccount: IOptions[] = [{
+            private userAccount: types.IOptions[] = [{
                   value: constant.ASSETS_BELONG.ALL,
                   label: '全部用户资产'
             }, {

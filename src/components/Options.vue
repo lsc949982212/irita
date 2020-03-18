@@ -15,7 +15,7 @@
 
 <script lang="ts">
       import {Component, Prop, Vue} from 'vue-property-decorator';
-      import {IOptions} from "../types";
+      import * as types from "../types";
       import constant from '../constant/constant';
 
       @Component
@@ -25,7 +25,7 @@
 
             private value: number = this.defaultValue ? this.defaultValue : constant.DATA_VISIBILITY.PUBLIC;
 
-            private options: IOptions[] = [{
+            private options: types.IOptions[] = [{
                   value: constant.DATA_VISIBILITY.PUBLIC,
                   label: '公开信息'
             }, {

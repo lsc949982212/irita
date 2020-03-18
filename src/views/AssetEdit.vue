@@ -124,7 +124,6 @@
 <script lang="ts">
     import Select from '../components/Select.vue';
     import { dictionary } from '../constant/dictionary';
-    import JsonSchema from '../helper/JsonDataHelper';
     import JsonSchemaHelper from '../helper/JsonSchemaHelper';
     import axios from '../helper/httpHelper';
     import { Message } from 'element-ui';
@@ -133,7 +132,7 @@
     import accountHelper from '../helper/accountHelper';
     import DataVisibilitySettingTree from '../components/DataVisibilitySettingTree.vue';
     import constant from '../constant/constant';
-    import {IOptions} from '../types';
+    import * as types from "../types";
     let $:any=(<any>window).$;
     
     @Component({
@@ -154,7 +153,7 @@
           private treeData: any[] = [];
           private defaultChoosed: any = null;
           private service: number = constant.SERVICE.CHECK;
-          private serviceList: IOptions[] = [];
+          private serviceList: types.IOptions[] = [];
           private checkDataList: any[] = [];
           
           private beforeMount(): void{
