@@ -76,7 +76,7 @@
                                         </template>
                                     </el-table-column>
                                     <el-table-column
-                                            prop="displayService"
+                                            prop="serviceName"
                                             label="对应的服务"
                                             min-width="80">
                                     </el-table-column>
@@ -133,6 +133,7 @@
     import DataVisibilitySettingTree from '../components/DataVisibilitySettingTree.vue';
     import constant from '../constant/constant';
     import * as types from "../types";
+    import * as dic from '../constant';
     let $:any=(<any>window).$;
     
     @Component({
@@ -152,9 +153,9 @@
           private transferHistories: any[] = [];
           private treeData: any[] = [];
           private defaultChoosed: any = null;
-          private service: number = constant.SERVICE.CHECK;
+          private service: number = types.Service.check;
           private serviceList: types.IOptions[] = [];
-          private checkDataList: any[] = [];
+          private checkDataList: types.InteractItem[] = [];
           
           private beforeMount(): void{
                 this.assetType = this.$route.query.asset_type;
@@ -195,31 +196,53 @@
                 let jsonData:any = $("#edit_json_schema_node").alpaca().getValue();
                 jsonData.authorizationProperties = this.authorizationProperties;
                 jsonData.secretProperties = this.secretProperties;
-                jsonData.dataInteract = this.dataInteract;
+                let dataInteract: any[] = [];
+                this.checkDataList.forEach((item) => dataInteract = dataInteract.concat(item.interact));
+                jsonData.dataInteract = dataInteract;
                 jsonData.transferHistories = this.transferHistories;
                 this.jsonData = jsonData;
                 this.postData();
           }
 
           private addServiceItem(): void {
-
                 const treeNode: Element | Element[] | Vue | Vue[] = this.$refs.tree;
                 if (<Vue>treeNode) {
                       const keys: string[] = (treeNode as any).getCheckedKeys();
                       if (keys instanceof Array) {
-                            //console.error(this.$refs.tree.getCheckedKeys())
-                            let data = keys.map((item: string) => {
+                            if(keys.length === 0){
+                                  this.$message.error('请选择需要添加服务项');
+                                  return;
+                            }
+                            let data: string[] = keys.map((item: string) => {
                                   return item.replace(/#/g, '$').replace(/\/properties\//g, '.').replace(/\/items/, '[*]')
                             });
+                            let tempInteractList : types.InteractPath[] = [];
+                            let currentInteractList : types.InteractPath[] = data.map((item: string) => {
+                                  return {
+                                        xPath: item,
+                                        interactType: this.service,
+                                  }
+                            });
+                            this.checkDataList.forEach((item: types.InteractItem)=>{
+                                  tempInteractList = tempInteractList.concat(item.interact);
+                            });
+                            let isRepeat: boolean = false;
+                            tempInteractList.forEach((t: types.InteractPath)=>{
+                                  currentInteractList.forEach((c: types.InteractPath)=>{
+                                        if(c.xPath === t.xPath && c.interactType === t.interactType){
+                                              isRepeat = true;
+                                        }
+                                  })
+                            });
+                            if(isRepeat){
+                                  this.$message.error('新增数据重复,请重新选择');
+                                  return;
+                            }
                             this.checkDataList.push({
                                   timestamp: new Date().getTime(),
                                   service: this.service,
-                                  interact: data.map((item: string) => {
-                                        return {
-                                              xPath: item,
-                                              interactType: this.service,
-                                        }
-                                  })
+                                  interact: currentInteractList,
+                                  serviceName:dic.service.get(this.service),
                             });
                             this.resetChecked();
                             console.error(data)
@@ -314,9 +337,34 @@
                 console.log('detail data', data)
                 if(data.asset_info){
                       this.jsonData =  JSON.parse(data.asset_info);
-                      //查验数据需要加上
                       if(this.jsonData.dataInteract){
-                            this.dataInteract = this.jsonData.dataInteract
+                            //this.checkDataList = this.jsonData.dataInteract;
+                            //不同类型的服务分开在不同项
+                            let dataInteract: types.InteractPath[] = this.jsonData.dataInteract;
+                            let serviceList: types.Service[] = [];
+                            dataInteract.forEach((item: types.InteractPath)=>{
+                                  if(!serviceList.includes(item.interactType)){
+                                        serviceList.push(item.interactType)
+                                  }
+                            });
+                            let checkDataList: types.InteractItem[] = [];
+                            if(serviceList.length > 0){
+                                  serviceList.forEach((s: types.Service)=>{
+                                        let checkItem: types.InteractItem = {
+                                              timestamp: new Date().getTime(),
+                                              service: s,
+                                              interact:[],
+                                              serviceName:dic.service.get(s),
+                                        };
+                                        dataInteract.forEach((i: types.InteractPath)=>{
+                                              if(i.interactType === s){
+                                                    checkItem.interact.push(i)
+                                              }
+                                        });
+                                        checkDataList.push(checkItem);
+                                  })
+                            }
+                            this.checkDataList = checkDataList;
                       }
                       if(this.jsonData.transferHistories){
                             this.transferHistories = this.jsonData.transferHistories

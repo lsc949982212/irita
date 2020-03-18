@@ -108,7 +108,7 @@
                                         </template>
                                     </el-table-column>
                                     <el-table-column
-                                            prop="displayService"
+                                            prop="serviceName"
                                             label="对应的服务"
                                             min-width="80">
                                     </el-table-column>
@@ -176,6 +176,7 @@
       import schemaConfig from '../schema/config.json';
       import {Component, Vue} from 'vue-property-decorator';
       import * as types from "../types";
+      import * as dic from "../constant";
       import accountHelper from '../helper/accountHelper';
       import constant from '../constant/constant';
       import DataVisibilitySettingTree from '../components/DataVisibilitySettingTree.vue';
@@ -192,13 +193,13 @@
             private options: types.IOptions[] = [];
             private serviceList: types.IOptions[] = [];
             private dataInteract: any[] = [];
-            private checkDataList: any[] = [];
+            private checkDataList: types.InteractItem[] = [];
             private treeData: any[] = [];
             private value: string = '';
             private step: number = 1;
             private jsonData: any = null;
             private downloadUrl: any = null;
-            private service: number = constant.SERVICE.CHECK;
+            private service: number = types.Service.check;
             private authorizationProperties: string[] = [];
             private secretProperties: string[] = [];
 
@@ -286,8 +287,8 @@
                                           interactType: this.service,
                                     }
                               });
-                              this.checkDataList.forEach((item: any)=>{
-                                    tempInteractList = [...tempInteractList, ...item.interact]
+                              this.checkDataList.forEach((item: types.InteractItem)=>{
+                                    tempInteractList = tempInteractList.concat(item.interact)
                               });
                               let isRepeat: boolean = false;
                               tempInteractList.forEach((t: types.InteractPath)=>{
@@ -305,6 +306,7 @@
                                     timestamp: new Date().getTime(),
                                     service: this.service,
                                     interact: currentInteractList,
+                                    serviceName: dic.service.get(this.service),
                               });
                               this.resetChecked();
                               console.error(data)
@@ -511,8 +513,8 @@
             private save(): void {
                   this.jsonData.authorizationProperties = this.authorizationProperties;
                   this.jsonData.secretProperties = this.secretProperties;
-                  let dataInteract: any[] = [];
-                  this.checkDataList.forEach((item) => dataInteract = [...dataInteract, ...item.interact]);
+                  let dataInteract: types.InteractPath[] = [];
+                  this.checkDataList.forEach((item) => dataInteract = dataInteract.concat(item.interact));
                   console.error(this.authorizationProperties)
                   console.error(this.secretProperties)
                   console.error(this.checkDataList)

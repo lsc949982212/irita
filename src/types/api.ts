@@ -60,7 +60,4 @@ export type IChainInfo = {
       token_id?: string;
 }
 
-export type InteractPath = {
-      xPath: string;
-      interactType: number;
-}
+

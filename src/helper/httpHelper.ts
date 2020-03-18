@@ -14,7 +14,9 @@ export default {
             }
             return new Promise((res: any, rej: any) => {
                   console.log('url', `${accountHelper.getAccount().domain}${url}`);
-                  axios.get(`${accountHelper.getAccount().domain}${url}`, {timeout: constant.TIME_OUT}).then(result => res(result.data)).catch((e) => rej(e));
+                  axios.get(`${accountHelper.getAccount().domain}${url}`, {
+                        timeout: constant.TIME_OUT
+                  }).then(result => res(result.data)).catch((e) => rej(e));
             })
 
       },
