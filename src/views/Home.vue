@@ -139,26 +139,27 @@
 
 <script lang="ts">
       import cfg from '../config/config.json';
-      import axios from "../helper/httpHelper";
       import {getFormatAddress, formatDuring} from "../util/util";
       import {Component, Vue} from "vue-property-decorator";
       import * as types from "../types";
       import * as constant from "../constant";
+      import AxiosHelper from '../helper/AxiosHelper';
 
       @Component
       export default class Home extends Vue {
-            private dynamicList: types.IDynamic[] = [];
-            private totalAssets: number = 0;
-            private authApplyWaitDeal: number = 0;
-            private transOutWait: number = 0;
-            private getedSecretAuth: number = 0;
-            private authApplying: number = 0;
-            private confirmWaitAccept: number = 0;
+            private dynamicList: types.IDisplayDynamic[] = [];
+            private totalAssets: number | undefined = 0;
+            private authApplyWaitDeal: number | undefined = 0;
+            private transOutWait: number | undefined = 0;
+            private getedSecretAuth: number | undefined = 0;
+            private authApplying: number | undefined = 0;
+            private confirmWaitAccept: number | undefined = 0;
 
             private mounted(): void {
                   this.getDetail();
                   this.getDynamicList();
             }
+
 
             private get expired(): boolean {
                   return this.$store.state.expired;
@@ -219,66 +220,59 @@
                   this.$router.replace("/auth_share");
             }
 
-            private getDetail(): void {
-                  axios
-                      .get({url: `/assets/caculate_info`, ctx: this})
-                      .then((data: any) => {
-                            if (data && data.data) {
-                                  this.handleData(data.data);
-                            }
-                      })
-                      .catch((e: any) => {
-                            console.error(e);
-                      });
-            }
-
-            private handleData(data: any): void {
-                  this.totalAssets = data.ownerasset_caculateinfo.total;
-                  this.authApplyWaitDeal = data.ownerasset_caculateinfo.apply;
-                  this.transOutWait = data.ownerasset_caculateinfo.wait_transfer;
-                  this.getedSecretAuth = data.otherasset_caculateinfo.authok;
-                  this.authApplying = data.otherasset_caculateinfo.applying;
-                  this.confirmWaitAccept = data.otherasset_caculateinfo.wait_accept;
-            }
-
-            private getDynamicList(): void {
-                  axios
-                      .get({url: `/txs?pageNum=1&pageSize=6`, ctx: this})
-                      .then((data: any) => {
-                            if (data && data.data) {
-                                  this.handleDynamicData(data.data);
-                            }
-                      })
-                      .catch((e: any) => {
-                            console.error(e);
-                      });
-            }
-
-            private handleDynamicData(data: any): void {
-                  console.log(data);
-                  this.dynamicList = data.map((item: any) => {
-                        let name = "";
-                        if (constant.DYNAMIC.ASSETS.includes(item.type)) {
-                              name = item.assetname;
-                        } else if (constant.DYNAMIC.SERVICE.includes(item.type)) {
-                              name = item.servicename;
+            private async getDetail() {
+                  let data: types.IResponse<types.CalculateInfo>;
+                  try {
+                        data = await AxiosHelper.get({url: `/assets/caculate_info`, ctx: this});
+                        if (data.data) {
+                              this.totalAssets = data.data.ownerasset_caculateinfo.total;
+                              this.authApplyWaitDeal = data.data.ownerasset_caculateinfo.apply;
+                              this.transOutWait = data.data.ownerasset_caculateinfo.wait_transfer;
+                              this.getedSecretAuth = data.data.otherasset_caculateinfo.authok;
+                              this.authApplying = data.data.otherasset_caculateinfo.applying;
+                              this.confirmWaitAccept = data.data.otherasset_caculateinfo.wait_accept;
                         }
+                  } catch (e) {
+                        console.error(e)
+                  }
 
-                        return {
-                              address: item.address,
-                              displayAddress: getFormatAddress(item.address),
-                              displayContent: constant.dynamic.get(item.type),
-                              name,
-                              type: item.type,
-                              displayTimePassed: this.formatTime(
-                                  new Date().getTime() - item.time * 1000
-                              ),
-                              assetname: item.assetname,
-                              servicename: item.servicename,
-                              hash: item.tx_hash
-                        };
-                  });
             }
+
+            private async getDynamicList() {
+                  let data: types.IResponse<types.IRecently[]>;
+                  try {
+                        data = await AxiosHelper.get({url: `/txs?pageNum=1&pageSize=6`, ctx: this});
+                        if (data.data) {
+                              console.log(data.data);
+                              this.dynamicList = data.data.map((item: types.IRecently) => {
+                                    let name: string = "";
+                                    if (constant.DYNAMIC.ASSETS.includes(item.type)) {
+                                          name = item.assetname;
+                                    } else if (constant.DYNAMIC.SERVICE.includes(item.type)) {
+                                          name = item.servicename;
+                                    }
+
+                                    return {
+                                          address: item.address,
+                                          displayAddress: getFormatAddress(item.address),
+                                          displayContent: constant.dynamic.get(item.type),
+                                          name,
+                                          type: item.type,
+                                          displayTimePassed: this.formatTime(
+                                              new Date().getTime() - item.time * 1000
+                                          ),
+                                          assetname: item.assetname,
+                                          servicename: item.servicename,
+                                          hash: item.tx_hash
+                                    };
+                              });
+                        }
+                  } catch (e) {
+                        console.error(e)
+                  }
+
+            }
+
 
             private formatTime(time: number): string {
                   let obj = formatDuring(time);
@@ -300,7 +294,7 @@
                   window.open(`${cfg.app.explorer}/#/address/${address}`);
             }
 
-            private handleNameClick(item: types.IDynamic): void {
+            private handleNameClick(item: types.IDisplayDynamic): void {
                   if (constant.DYNAMIC.ASSETS.includes(item.type)) {
                         window.open(`${cfg.app.explorer}/#/nftAsset`);
                   } else if (constant.DYNAMIC.SERVICE.includes(item.type)) {
@@ -314,7 +308,7 @@
                   window.open(`${cfg.app.explorer}/#/txs`);
             }
 
-            private handleTimeClick(item: types.IDynamic): void {
+            private handleTimeClick(item: types.IDisplayDynamic): void {
                   window.open(`${cfg.app.explorer}/#/tx?txHash=${item.hash}`);
             }
       }

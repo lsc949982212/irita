@@ -122,291 +122,298 @@
 </template>
 
 <script lang="ts">
-    import Select from '../components/Select.vue';
-    import JsonSchemaHelper from '../helper/JsonSchemaHelper';
-    import axios from '../helper/httpHelper';
-    import { Message } from 'element-ui';
-    import getErrorMsgByErrorCode  from '../helper/errorCodeHelper';
-    import {Component, Vue} from 'vue-property-decorator';
-    import accountHelper from '../helper/accountHelper';
-    import DataVisibilitySettingTree from '../components/DataVisibilitySettingTree.vue';
-    import * as types from "../types";
-    import * as constant from "../constant";
-    let $:any=(<any>window).$;
-    
-    @Component({
-          components:{
-                Select, DataVisibilitySettingTree
-          }
-    })
-    export default class AssetEdit extends Vue{
-          private step : number = 1;
-          private authList : any[] = [];
-          private jsonData : any = null;
-          private authorizationProperties: string[] = [];
-          private secretProperties: string[] = [];
-          private assetType: string | (string | null)[];
-          private dataInteract: types.InteractPath[] = [];
-          private transferHistories: any[] = [];
-          private treeData: any[] = [];
-          private defaultChoosed: any = null;
-          private service: number = types.Service.check;
-          private serviceList: types.IOptions[] = [];
-          private checkDataList: types.InteractItem[] = [];
-          
-          private beforeMount(): void{
-                this.assetType = this.$route.query.asset_type;
-                this.serviceList.push({
-                      value: types.Service.check,
-                      label: '查验'
-                })
-          }
-          private mounted(): void{
-                this.getDetails();
-          }
-          
-          private handleCancelClick(): void{
-                this.$router.go(-1);
-          }
-          private previous(): void{
-                if(this.step === 2){
-                      this.step = 1;
-                }else if(this.step === 3){
-                      this.step = 2;
-                }
-          }
-          private next(): void{
-                if(this.step === 1){
-                      this.step = 2;
-                      let schema: any = require(`../schema/${this.assetType}`);
-                      JsonSchemaHelper.resetArrayToObject(schema);
-                      JsonSchemaHelper.formatJsonSchemaToTreeData(schema);
-                      this.treeData = schema.children;
-                      console.error(schema)
-                }else if(this.step === 2){
-                      this.step = 3;
+      import JsonSchemaHelper from '../helper/JsonSchemaHelper';
+      import axios from '../helper/httpHelper';
+      import {Message} from 'element-ui';
+      import getErrorMsgByErrorCode from '../helper/errorCodeHelper';
+      import {Component, Vue} from 'vue-property-decorator';
+      import accountHelper from '../helper/accountHelper';
+      import DataVisibilitySettingTree from '../components/DataVisibilitySettingTree.vue';
+      import AxiosHelper from '../helper/AxiosHelper';
+      import * as types from "../types";
+      import * as constant from "../constant";
 
-                }
+      let $: any = (<any>window).$;
 
-          }
-          private save(): void{
-                let jsonData:any = $("#edit_json_schema_node").alpaca().getValue();
-                jsonData.authorizationProperties = this.authorizationProperties;
-                jsonData.secretProperties = this.secretProperties;
-                let dataInteract: types.InteractPath[] = [];
-                this.checkDataList.forEach((item) => dataInteract = dataInteract.concat(item.interact));
-                jsonData.dataInteract = this.dataInteract;
-                jsonData.transferHistories = this.transferHistories;
-                this.jsonData = jsonData;
-                this.postData();
-          }
+      @Component({
+            components: {
+                  DataVisibilitySettingTree
+            }
+      })
+      export default class AssetEdit extends Vue {
+            private step: number = 1;
+            private authList: any[] = [];
+            private jsonData: any = null;
+            private authorizationProperties: string[] = [];
+            private secretProperties: string[] = [];
+            private assetType: string | (string | null)[];
+            private dataInteract: types.InteractPath[] = [];
+            private transferHistories: any[] = [];
+            private treeData: any[] = [];
+            private defaultChoosed: any = null;
+            private service: number = types.Service.check;
+            private serviceList: types.IOptions[] = [];
+            private checkDataList: types.InteractItem[] = [];
 
-          private addServiceItem(): void {
-                const treeNode: Element | Element[] | Vue | Vue[] = this.$refs.tree;
-                if (<Vue>treeNode) {
-                      const keys: string[] = (treeNode as any).getCheckedKeys();
-                      if (keys instanceof Array) {
-                            if(keys.length === 0){
-                                  this.$message.error('请选择需要添加服务项');
-                                  return;
-                            }
-                            let data: string[] = keys.map((item: string) => {
-                                  return item.replace(/#/g, '$').replace(/\/properties\//g, '.').replace(/\/items/, '[*]')
-                            });
-                            let tempInteractList : types.InteractPath[] = [];
-                            let currentInteractList : types.InteractPath[] = data.map((item: string) => {
-                                  return {
-                                        xPath: item,
-                                        interactType: this.service,
-                                  }
-                            });
-                            this.checkDataList.forEach((item: types.InteractItem)=>{
-                                  tempInteractList = tempInteractList.concat(item.interact);
-                            });
-                            let isRepeat: boolean = false;
-                            tempInteractList.forEach((t: types.InteractPath)=>{
-                                  currentInteractList.forEach((c: types.InteractPath)=>{
-                                        if(c.xPath === t.xPath && c.interactType === t.interactType){
-                                              isRepeat = true;
-                                        }
-                                  })
-                            });
-                            if(isRepeat){
-                                  this.$message.error('新增数据重复,请重新选择');
-                                  return;
-                            }
-                            this.checkDataList.push({
-                                  timestamp: new Date().getTime(),
-                                  service: this.service,
-                                  interact: currentInteractList,
-                                  serviceName:constant.service.get(this.service),
-                            });
-                            this.resetChecked();
-                            console.error(data)
-                      }
-                }
-          }
+            private beforeMount(): void {
+                  this.assetType = this.$route.query.asset_type;
+                  this.serviceList.push({
+                        value: types.Service.check,
+                        label: '查验'
+                  })
+            }
 
-          private resetChecked(): void {
-                const treeNode: Element | Element[] | Vue | Vue[] = this.$refs.tree;
-                if (<Vue>treeNode) {
-                      (treeNode as any).setCheckedKeys([]);
-                }
-          }
+            private mounted(): void {
+                  this.getDetails();
+            }
 
-          private handleDeleteClick(row: any): void {
-                console.log(row.timestamp)
-                for (let i = 0; i < this.checkDataList.length; i++) {
-                      if (this.checkDataList[i].timestamp === row.timestamp) {
-                            this.checkDataList.splice(i, 1);
-                            break;
-                      }
-                }
-          }
+            private handleCancelClick(): void {
+                  this.$router.go(-1);
+            }
 
-          private handleSelect(id: string, value:number): void{
-                console.log(id, value)
-                if(value === constant.DataVisibility.Public){
-                      this.removeExistAuthItem(id);
-                      this.removeExistSecItem(id);
-                }else if(value === constant.DataVisibility.Authorization){
-                      this.removeExistSecItem(id);
-                      this.authorizationProperties.push(id);
-                }else if(value === constant.DataVisibility.Secret){
-                      this.removeExistAuthItem(id);
-                      this.secretProperties.push(id);
-                }
+            private previous(): void {
+                  if (this.step === 2) {
+                        this.step = 1;
+                  } else if (this.step === 3) {
+                        this.step = 2;
+                  }
+            }
 
-          }
+            private next(): void {
+                  if (this.step === 1) {
+                        this.step = 2;
+                        let schema: any = require(`../schema/${this.assetType}`);
+                        JsonSchemaHelper.resetArrayToObject(schema);
+                        JsonSchemaHelper.formatJsonSchemaToTreeData(schema);
+                        this.treeData = schema.children;
+                        console.error(schema)
+                  } else if (this.step === 2) {
+                        this.step = 3;
 
-          private removeExistAuthItem(id: string): void{
-                const existAuthItem: string | undefined = this.authorizationProperties.find((i: string)=> i === id);
-                if(existAuthItem){
-                      this.authorizationProperties.splice(this.authorizationProperties.findIndex((i: string)=> i === id),1)
-                }
-          }
+                  }
 
-          private removeExistSecItem(id: string): void{
-                const existSecItem: string | undefined = this.secretProperties.find((i: string)=> i === id);
+            }
 
-                if(existSecItem){
-                      this.secretProperties.splice(this.secretProperties.findIndex((i: string)=> i === id),1)
-                }
-          }
-          
-          private postData(): void{
-                console.log('要发送的数据',this.jsonData);
-                const body: any = {
-                      asset_data:this.jsonData,
-                };
-                axios.put({url:`/assets/${this.$route.query.nft_id}`,body,ctx:this}).then((data: any)=>{
-                      console.log('response after submit json data',data)
-                      if(data && data.data && data.data.status === 'success'){
-                            Message({
-                                  message : '编辑资产成功',
-                                  type : 'success'
-                            });
-                            this.$router.go(-1);
-                      } else if(data && data.data && data.data.status === 'fail'){
-                            this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
-                      } else{
-                            this.$message.error('编辑资产失败');
-                      }
+            private save(): void {
+                  let jsonData: any = $("#edit_json_schema_node").alpaca().getValue();
+                  jsonData.authorizationProperties = this.authorizationProperties;
+                  jsonData.secretProperties = this.secretProperties;
+                  let dataInteract: types.InteractPath[] = [];
+                  this.checkDataList.forEach((item) => dataInteract = dataInteract.concat(item.interact));
+                  jsonData.dataInteract = this.dataInteract;
+                  jsonData.transferHistories = this.transferHistories;
+                  this.jsonData = jsonData;
+                  this.postData();
+            }
 
-                }).catch((e: any)=>{
-                      console.error('submit json data failed',e);
-                      this.$message.error('编辑资产失败');
-                });
-          }
-          
-          private getDetails(): void{
-                axios.get({url:`/assets/detail/${this.$route.query.nft_id}?address=${accountHelper.getAccount().address}`,ctx:this}).then((data:any)=>{
-                      if(data){
-                            this.handleDetailData(data.data);
-                      }
+            private addServiceItem(): void {
+                  const treeNode: Element | Element[] | Vue | Vue[] = this.$refs.tree;
+                  if (<Vue>treeNode) {
+                        const keys: string[] = (treeNode as any).getCheckedKeys();
+                        if (keys instanceof Array) {
+                              if (keys.length === 0) {
+                                    this.$message.error('请选择需要添加服务项');
+                                    return;
+                              }
+                              let data: string[] = keys.map((item: string) => {
+                                    return item.replace(/#/g, '$').replace(/\/properties\//g, '.').replace(/\/items/, '[*]')
+                              });
+                              let tempInteractList: types.InteractPath[] = [];
+                              let currentInteractList: types.InteractPath[] = data.map((item: string) => {
+                                    return {
+                                          xPath: item,
+                                          interactType: this.service,
+                                    }
+                              });
+                              this.checkDataList.forEach((item: types.InteractItem) => {
+                                    tempInteractList = tempInteractList.concat(item.interact);
+                              });
+                              let isRepeat: boolean = false;
+                              tempInteractList.forEach((t: types.InteractPath) => {
+                                    currentInteractList.forEach((c: types.InteractPath) => {
+                                          if (c.xPath === t.xPath && c.interactType === t.interactType) {
+                                                isRepeat = true;
+                                          }
+                                    })
+                              });
+                              if (isRepeat) {
+                                    this.$message.error('新增数据重复,请重新选择');
+                                    return;
+                              }
+                              this.checkDataList.push({
+                                    timestamp: new Date().getTime(),
+                                    service: this.service,
+                                    interact: currentInteractList,
+                                    serviceName: constant.service.get(this.service),
+                              });
+                              this.resetChecked();
+                              console.error(data)
+                        }
+                  }
+            }
 
-                }).catch((e:any)=>{
-                      console.error('get asset detail failed',e)
-                });
-          }
-          
-          private handleDetailData(data: any): void{
-                console.log('detail data', data)
-                if(data.asset_info){
-                      this.jsonData =  JSON.parse(data.asset_info);
-                      if(this.jsonData.dataInteract){
-                            //this.checkDataList = this.jsonData.dataInteract;
-                            //不同类型的服务分开在不同项
-                            let dataInteract: types.InteractPath[] = this.jsonData.dataInteract;
-                            this.dataInteract = this.jsonData.dataInteract;;
-                            let serviceList: types.Service[] = [];
-                            dataInteract.forEach((item: types.InteractPath)=>{
-                                  if(!serviceList.includes(item.interactType)){
-                                        serviceList.push(item.interactType)
-                                  }
-                            });
-                            let checkDataList: types.InteractItem[] = [];
-                            if(serviceList.length > 0){
-                                  serviceList.forEach((s: types.Service)=>{
-                                        let checkItem: types.InteractItem = {
-                                              timestamp: new Date().getTime(),
-                                              service: s,
-                                              interact:[],
-                                              serviceName:constant.service.get(s),
-                                        };
-                                        dataInteract.forEach((i: types.InteractPath)=>{
-                                              if(i.interactType === s){
-                                                    checkItem.interact.push(i)
-                                              }
-                                        });
-                                        checkDataList.push(checkItem);
-                                  })
-                            }
-                            this.checkDataList = checkDataList;
-                      }
-                      if(this.jsonData.transferHistories){
-                            this.transferHistories = this.jsonData.transferHistories
-                      }
+            private resetChecked(): void {
+                  const treeNode: Element | Element[] | Vue | Vue[] = this.$refs.tree;
+                  if (<Vue>treeNode) {
+                        (treeNode as any).setCheckedKeys([]);
+                  }
+            }
 
-                      this.authorizationProperties = this.jsonData.authorizationProperties;
-                      this.secretProperties = this.jsonData.secretProperties;
-                      this.defaultChoosed = {
-                            authorizationProperties: this.authorizationProperties.map((item: string)=>item.replace(/\$/g, '#').replace(/\./g, '\/properties\/').replace(/\[\*\]/, '\/items')),
-                            secretProperties: this.secretProperties.map((item: string)=>item.replace(/\$/g, '#').replace(/\./g, '\/properties\/').replace(/\[\*\]/, '\/items')),
-                      };
-                      this.renderUI();
-                }
+            private handleDeleteClick(row: any): void {
+                  console.log(row.timestamp)
+                  for (let i = 0; i < this.checkDataList.length; i++) {
+                        if (this.checkDataList[i].timestamp === row.timestamp) {
+                              this.checkDataList.splice(i, 1);
+                              break;
+                        }
+                  }
+            }
 
-          }
-          
-          private renderUI(): void{
-                $("#edit_json_schema_node").alpaca({
-                      "schemaSource" : JsonSchemaHelper.getFormatSchemaFile(require(`../schema/${this.assetType}`)),
-                      "dataSource" : this.jsonData
-                });
-                setTimeout(() =>{
-                      const node: any = document.getElementsByClassName('alpaca-required-indicator');
-                      for(const item of node){
-                            item.innerHTML = '(必填)';
-                      }
-                      let assetNode: any = document.getElementsByName('basicInfo_assetType');
-                      let ownerNode: any = document.getElementsByName('basicInfo_assetType');
-                      if(assetNode && assetNode.length){
-                            document.getElementsByName('basicInfo_assetType')[0].setAttribute('disabled','true')
-                      }
-                      if(ownerNode && ownerNode.length){
-                            document.getElementsByName('basicInfo_assetOwner')[0].setAttribute('disabled','true')
-                      }
+            private handleSelect(id: string, value: number): void {
+                  console.log(id, value)
+                  if (value === constant.DataVisibility.Public) {
+                        this.removeExistAuthItem(id);
+                        this.removeExistSecItem(id);
+                  } else if (value === constant.DataVisibility.Authorization) {
+                        this.removeExistSecItem(id);
+                        this.authorizationProperties.push(id);
+                  } else if (value === constant.DataVisibility.Secret) {
+                        this.removeExistAuthItem(id);
+                        this.secretProperties.push(id);
+                  }
 
-                }, 300)
-          }
-          
-          private setAuthListUI(): void{
+            }
 
-          }
-          
-    }
-    
+            private removeExistAuthItem(id: string): void {
+                  const existAuthItem: string | undefined = this.authorizationProperties.find((i: string) => i === id);
+                  if (existAuthItem) {
+                        this.authorizationProperties.splice(this.authorizationProperties.findIndex((i: string) => i === id), 1)
+                  }
+            }
+
+            private removeExistSecItem(id: string): void {
+                  const existSecItem: string | undefined = this.secretProperties.find((i: string) => i === id);
+
+                  if (existSecItem) {
+                        this.secretProperties.splice(this.secretProperties.findIndex((i: string) => i === id), 1)
+                  }
+            }
+
+            private postData(): void {
+                  console.log('要发送的数据', this.jsonData);
+                  const body: any = {
+                        asset_data: this.jsonData,
+                  };
+                  axios.put({url: `/assets/${this.$route.query.nft_id}`, body, ctx: this}).then((data: any) => {
+                        console.log('response after submit json data', data)
+                        if (data && data.data && data.data.status === 'success') {
+                              Message({
+                                    message: '编辑资产成功',
+                                    type: 'success'
+                              });
+                              this.$router.go(-1);
+                        } else if (data && data.data && data.data.status === 'fail') {
+                              this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
+                        } else {
+                              this.$message.error('编辑资产失败');
+                        }
+
+                  }).catch((e: any) => {
+                        console.error('submit json data failed', e);
+                        this.$message.error('编辑资产失败');
+                  });
+            }
+
+            private async getDetails() {
+                  let data: types.IResponse<types.IAssetDetails>;
+                  try {
+                        const url: string = `/assets/detail/${this.$route.query.nft_id}?address=${accountHelper.getAccount().address}`;
+                        data = await AxiosHelper.get({url, ctx: this});
+                        if (data.data) {
+                              this.handleDetailData(data.data);
+                        }
+                  } catch (e) {
+                        console.error(e)
+                  }
+            }
+
+            private handleDetailData(data: any): void {
+                  console.log('detail data', data)
+                  if (data.asset_info) {
+                        this.jsonData = JSON.parse(data.asset_info);
+                        if (this.jsonData.dataInteract) {
+                              //this.checkDataList = this.jsonData.dataInteract;
+                              //不同类型的服务分开在不同项
+                              let dataInteract: types.InteractPath[] = this.jsonData.dataInteract;
+                              this.dataInteract = this.jsonData.dataInteract;
+                              let serviceList: types.Service[] = [];
+                              dataInteract.forEach((item: types.InteractPath) => {
+                                    if (!serviceList.includes(item.interactType)) {
+                                          serviceList.push(item.interactType)
+                                    }
+                              });
+                              let checkDataList: types.InteractItem[] = [];
+                              if (serviceList.length > 0) {
+                                    serviceList.forEach((s: types.Service) => {
+                                          let checkItem: types.InteractItem = {
+                                                timestamp: new Date().getTime(),
+                                                service: s,
+                                                interact: [],
+                                                serviceName: constant.service.get(s),
+                                          };
+                                          dataInteract.forEach((i: types.InteractPath) => {
+                                                if (i.interactType === s) {
+                                                      checkItem.interact.push(i)
+                                                }
+                                          });
+                                          checkDataList.push(checkItem);
+                                    })
+                              }
+                              this.checkDataList = checkDataList;
+                        }
+                        if (this.jsonData.transferHistories) {
+                              this.transferHistories = this.jsonData.transferHistories
+                        }
+
+                        this.authorizationProperties = this.jsonData.authorizationProperties;
+                        this.secretProperties = this.jsonData.secretProperties;
+                        this.defaultChoosed = {
+                              authorizationProperties: this.authorizationProperties.map((item: string) => item.replace(/\$/g, '#').replace(/\./g, '\/properties\/').replace(/\[\*\]/, '\/items')),
+                              secretProperties: this.secretProperties.map((item: string) => item.replace(/\$/g, '#').replace(/\./g, '\/properties\/').replace(/\[\*\]/, '\/items')),
+                        };
+                        this.renderUI();
+                  }
+
+            }
+
+            private renderUI(): void {
+                  $("#edit_json_schema_node").alpaca({
+                        "schemaSource": JsonSchemaHelper.getFormatSchemaFile(require(`../schema/${this.assetType}`)),
+                        "dataSource": this.jsonData
+                  });
+                  setTimeout(() => {
+                        const node: any = document.getElementsByClassName('alpaca-required-indicator');
+                        for (const item of node) {
+                              item.innerHTML = '(必填)';
+                        }
+                        let assetNode: any = document.getElementsByName('basicInfo_assetType');
+                        let ownerNode: any = document.getElementsByName('basicInfo_assetType');
+                        if (assetNode && assetNode.length) {
+                              document.getElementsByName('basicInfo_assetType')[0].setAttribute('disabled', 'true')
+                        }
+                        if (ownerNode && ownerNode.length) {
+                              document.getElementsByName('basicInfo_assetOwner')[0].setAttribute('disabled', 'true')
+                        }
+
+                  }, 300)
+            }
+
+            private setAuthListUI(): void {
+
+            }
+
+      }
+
 </script>
 <style lang="scss">
     @import "../style/mixin";
@@ -433,7 +440,6 @@
                     color: $mainFontColor;
                 }
             }
-            
 
             .content_container {
                 background: rgba(248, 248, 248, 1);
@@ -463,7 +469,7 @@
                     .step_third_wrap {
                         padding-top: 12px;
                         .content_visibility_item {
-                            
+
                             width: 400px;
                             justify-content: space-between;
                             margin-bottom: 10px;
@@ -543,8 +549,8 @@
                     border-color: #EDEDED;
                 }
                 .form-group {
-                    display:flex;
-                    flex-direction:row;
+                    display: flex;
+                    flex-direction: row;
                     align-items: center;
                     .alpaca-control-label {
                         font-size: 14px;
@@ -565,8 +571,8 @@
                         height: 26px;
 
                     }
-                    .help-block{
-                        display:none;
+                    .help-block {
+                        display: none;
                     }
                     .radio {
                         width: 150px;
@@ -578,8 +584,8 @@
                             display: inline-block;
                         }
                     }
-                    .form-control{
-                        padding:0 0 0 12px;
+                    .form-control {
+                        padding: 0 0 0 12px;
                     }
                     .form-control:focus {
                         box-shadow: 0 0 3px $themeColor;

@@ -52,7 +52,7 @@
                         设置数据可见范围
                     </p>
                     <div class="content_item_wrap step_third_wrap">
-                        <data-visibility-setting-tree :treeData="treeData"  @handleSelect="handleSelect"/>
+                        <data-visibility-setting-tree :treeData="treeData" @handleSelect="handleSelect"/>
                     </div>
                 </div>
             </div>
@@ -170,9 +170,7 @@
 </template>
 
 <script lang="ts">
-      import Select from '../components/Select.vue';
       import JsonSchemaHelper from '../helper/JsonSchemaHelper';
-      import axios from '../helper/httpHelper';
       import {Message} from 'element-ui';
       import getErrorMsgByErrorCode from '../helper/errorCodeHelper';
       import {isJson} from '../util/util';
@@ -183,13 +181,15 @@
       import accountHelper from '../helper/accountHelper';
       import * as constant from "../constant";
       import DataVisibilitySettingTree from '../components/DataVisibilitySettingTree.vue';
+      import AxiosHelper from '../helper/AxiosHelper';
+
       let $: any = (window as any).$;
 
       let tempData: any = JSON.parse(JSON.stringify(data));
 
       @Component({
             components: {
-                  Select,DataVisibilitySettingTree
+                  DataVisibilitySettingTree
             }
       })
       export default class AssetAdd extends Vue {
@@ -218,36 +218,35 @@
                   })
             }
 
-            private handleSelect(id: string, value:number): void{
+            private handleSelect(id: string, value: number): void {
                   console.log(id, value)
-                  if(value === constant.DataVisibility.Public){
+                  if (value === constant.DataVisibility.Public) {
                         this.removeExistAuthItem(id);
                         this.removeExistSecItem(id);
-                  }else if(value === constant.DataVisibility.Authorization){
+                  } else if (value === constant.DataVisibility.Authorization) {
                         this.removeExistSecItem(id);
                         this.authorizationProperties.push(id);
-                  }else if(value === constant.DataVisibility.Secret){
+                  } else if (value === constant.DataVisibility.Secret) {
                         this.removeExistAuthItem(id);
                         this.secretProperties.push(id);
                   }
 
             }
 
-            private removeExistAuthItem(id: string): void{
-                  const existAuthItem: string | undefined = this.authorizationProperties.find((i: string)=> i === id);
-                  if(existAuthItem){
-                        this.authorizationProperties.splice(this.authorizationProperties.findIndex((i: string)=> i === id),1)
+            private removeExistAuthItem(id: string): void {
+                  const existAuthItem: string | undefined = this.authorizationProperties.find((i: string) => i === id);
+                  if (existAuthItem) {
+                        this.authorizationProperties.splice(this.authorizationProperties.findIndex((i: string) => i === id), 1)
                   }
             }
 
-            private removeExistSecItem(id: string): void{
-                  const existSecItem: string | undefined = this.secretProperties.find((i: string)=> i === id);
+            private removeExistSecItem(id: string): void {
+                  const existSecItem: string | undefined = this.secretProperties.find((i: string) => i === id);
 
-                  if(existSecItem){
-                        this.secretProperties.splice(this.secretProperties.findIndex((i: string)=> i === id),1)
+                  if (existSecItem) {
+                        this.secretProperties.splice(this.secretProperties.findIndex((i: string) => i === id), 1)
                   }
             }
-
 
 
             private get schemaDownloadUrl(): string {
@@ -276,32 +275,32 @@
                   if (<Vue>treeNode) {
                         const keys: string[] = (treeNode as any).getCheckedKeys();
                         if (keys instanceof Array) {
-                              if(keys.length === 0){
+                              if (keys.length === 0) {
                                     this.$message.error('请选择需要添加服务项');
                                     return;
                               }
                               let data: string[] = keys.map((item: string) => {
                                     return item.replace(/#/g, '$').replace(/\/properties\//g, '.').replace(/\/items/, '[*]')
                               });
-                              let tempInteractList : types.InteractPath[] = [];
-                              let currentInteractList : types.InteractPath[] = data.map((item: string) => {
+                              let tempInteractList: types.InteractPath[] = [];
+                              let currentInteractList: types.InteractPath[] = data.map((item: string) => {
                                     return {
                                           xPath: item,
                                           interactType: this.service,
                                     }
                               });
-                              this.checkDataList.forEach((item: types.InteractItem)=>{
+                              this.checkDataList.forEach((item: types.InteractItem) => {
                                     tempInteractList = tempInteractList.concat(item.interact)
                               });
                               let isRepeat: boolean = false;
-                              tempInteractList.forEach((t: types.InteractPath)=>{
-                                    currentInteractList.forEach((c: types.InteractPath)=>{
-                                          if(c.xPath === t.xPath && c.interactType === t.interactType){
+                              tempInteractList.forEach((t: types.InteractPath) => {
+                                    currentInteractList.forEach((c: types.InteractPath) => {
+                                          if (c.xPath === t.xPath && c.interactType === t.interactType) {
                                                 isRepeat = true;
                                           }
                                     })
                               });
-                              if(isRepeat){
+                              if (isRepeat) {
                                     this.$message.error('新增数据重复,请重新选择');
                                     return;
                               }
@@ -419,40 +418,34 @@
                   this.$router.go(-1);
             }
 
-            private getAssetType(): void {
+            private async getAssetType() {
                   const url: string = `/assets/denoms`;
-                  axios.get({url, ctx: this}).then((data: any) => {
-                        console.log(data);
-                        if (data && data.status === 'success') {
-                              if (data && data.data && data.data.denoms) {
-                                    data.data.denoms.forEach((item: string, index: number) => {
-                                          if (schemaConfig.denoms.includes(item)) {
-                                                this.options.push({
-                                                      value: item,
-                                                      label: item
-                                                })
-                                          }
-                                    });
-                                    this.downloadUrl = data.data.download_url;
-                                    if (data.data.denoms.length > 0) {
-                                          this.value = data.data.denoms[0]
-                                          //this.value = 'car'
+                  try {
+                        let data: types.IResponse<types.IDenoms> = await AxiosHelper.get({url, ctx: this});
+                        if (data.data) {
+                              data.data.denoms.forEach((item: string, index: number) => {
+                                    if (schemaConfig.denoms.includes(item)) {
+                                          this.options.push({
+                                                value: item,
+                                                label: item
+                                          })
                                     }
-
-                                    let schema: any = require(`../schema/${this.value}`);
-                                    JsonSchemaHelper.resetArrayToObject(schema);
-                                    JsonSchemaHelper.formatJsonSchemaToTreeData(schema);
-                                    this.treeData = schema.children;
-
-
+                              });
+                              this.downloadUrl = data.data.download_url;
+                              if (data.data.denoms.length > 0) {
+                                    this.value = data.data.denoms[0]
                               }
-                        } else {
-                              this.$message.error('请求数据错误');
+
+                              let schema: any = require(`../schema/${this.value}`);
+                              JsonSchemaHelper.resetArrayToObject(schema);
+                              JsonSchemaHelper.formatJsonSchemaToTreeData(schema);
+                              this.treeData = schema.children;
                         }
-                  }).catch((e: any) => {
+                  } catch (e) {
                         console.error(e);
                         this.$message.error('请求数据错误');
-                  });
+                  }
+
             }
 
             private changeStep(step: number): void {
@@ -526,31 +519,37 @@
                   this.postData();
             }
 
-            private postData(): void {
-                  const body: any = {
+            private async postData() {
+                  const body: types.ISaveAssets = {
                         asset_data: this.jsonData,
                         owner: accountHelper.getAccount().address,
                         owner_pubkey: accountHelper.getAccount().publicKey,
                   };
 
-                  console.log('save asset', this.jsonData);
-                  axios.post({url: `/assets`, body, ctx: this}).then((data: any) => {
-                        console.log(data);
-                        if (data && data.data && data.data.status === 'success') {
+                  try {
+                        let data: types.IResponse<string> = await AxiosHelper.post({
+                              url: `/assets`,
+                              body,
+                              ctx: this
+                        });
+                        if (data && data.status === 'success') {
                               Message({
                                     message: '新增资产成功',
                                     type: 'success'
                               });
                               this.$router.replace('/asset_list');
-                        } else if (data && data.data && data.data.status === 'fail') {
-                              this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
+                        } else if (data && data.status === 'fail') {
+                              this.$message.error(getErrorMsgByErrorCode(data.errCode));
                         } else {
                               this.$message.error('新增资产失败');
                         }
-                  }).catch((e: any) => {
+                  } catch (e) {
                         console.error(e);
                         this.$message.error('新增资产失败');
-                  });
+                  }
+
+                  console.log('save asset', this.jsonData);
+
             }
       }
 

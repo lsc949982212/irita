@@ -12,7 +12,7 @@ const error = new Map<string, string>([
 
 const DEFAULT_ERROR_MSG = '请求出错';
 
-export default function getErrorMsgByErrorCode(code: string | undefined | null): string{
+export default function getErrorMsgByErrorCode(code: string): string{
       if(!code) return DEFAULT_ERROR_MSG;
       if(error.has(code)){
             const ErrMsg: string | undefined = error.get(code);

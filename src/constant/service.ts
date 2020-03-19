@@ -4,7 +4,7 @@ export const service = new Map<types.Service, string>([
     [types.Service.check, '查验']
 ]);
 
-export const dynamic = new Map<types.Dynamic, string>([
+export const dynamic = new Map<string, string>([
       [types.Dynamic.NftMint,'发布了新资产'],
       [types.Dynamic.NftEdit,'编辑了资产'],
       [types.Dynamic.NftTransfer,'转让了资产'],
