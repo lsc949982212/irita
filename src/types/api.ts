@@ -7,7 +7,7 @@ export interface IResponse<T> {
       total: number;
       pageNum: number;
       pageSize: number;
-      data: T;
+      data?: T;
 }
 
 interface IHttpParams {

@@ -5,22 +5,22 @@ import * as types from '../types';
 import * as constant from '../constant';
 
 export default {
-      get(params: types.IHttpGetParams): Promise<any> {
+      get<T>(params: types.IHttpGetParams): Promise<T> {
             const {url, ctx} = params;
             if (LoginHelper.checkLoginStatus(ctx) !== constant.LoginCode.LoginSuccess) {
                   LoginHelper.exit(ctx);
                   return new Promise(() => {
                   });
             }
-            return new Promise((res: any, rej: any) => {
+            return new Promise((res) => {
                   console.log('url', `${accountHelper.getAccount().domain}${url}`);
                   axios.get(`${accountHelper.getAccount().domain}${url}`, {
                         timeout: constant.TIME_OUT
-                  }).then(result => res(result.data)).catch((e) => rej(e));
+                  }).then((result) => res(result.data));
             })
 
       },
-      post(params: types.IHttpPostParams): Promise<any> {
+      post<T>(params: types.IHttpPostParams): Promise<T> {
             const {url, body, ctx} = params;
             if (LoginHelper.checkLoginStatus(ctx) !== constant.LoginCode.LoginSuccess) {
                   LoginHelper.exit(ctx);
@@ -30,34 +30,30 @@ export default {
             return new Promise((res: any, rej: any) => {
                   console.log('url', `${accountHelper.getAccount().domain}${url}`)
                   axios.post(`${accountHelper.getAccount().domain}${url}`, body, {timeout: constant.TIME_OUT}).then((result: any) => {
-                            res(result);
-                      }).catch((e: any) => {
-                        rej(e);
+                        res(result);
                   });
             })
 
       },
-      put(params: types.IHttpPutParams) {
+      put<T>(params: types.IHttpPutParams): Promise<T> {
             const {url, body, ctx} = params;
             if (LoginHelper.checkLoginStatus(ctx) !== constant.LoginCode.LoginSuccess) {
                   LoginHelper.exit(ctx);
                   return new Promise(() => {
                   });
             }
-            return new Promise((res: any, rej: any) => {
-                  axios.put(`${accountHelper.getAccount().domain}${url}`, body, {timeout: constant.TIME_OUT}).then((result: any) => {
-                            res(result);
-                      }).catch((e: any) => {
-                        rej(e)
+            return new Promise((res: any) => {
+                  axios.put(`${accountHelper.getAccount().domain}${url}`, body, {timeout: constant.TIME_OUT}).then((result) => {
+                        res(result);
                   });
             })
       },
-      withinPrefixGet(params: any) {
+      withinPrefixGet<T>(params: types.IHttpGetParams): Promise<T> {
             const {url} = params;
-            return new Promise((res: any, rej: any) => {
-                  axios.get(url, {timeout: constant.TIME_OUT}).then((result: any) =>
+            return new Promise((res) => {
+                  axios.get(url, {timeout: constant.TIME_OUT}).then((result) =>
                       res(result.data)
-                  ).catch((e: any) => rej(e));
+                  );
             })
       }
 

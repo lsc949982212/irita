@@ -814,7 +814,6 @@
             private authorizationList: any[] = [];
             private secretList: any[] = [];
             private showJsonData: boolean = false;
-            private needSavedData: any = null;
             private authLatestUpdateTime: string = '';
             private transLatestUpdateTime: string = '';
             private checkData: any = null;
@@ -823,7 +822,6 @@
             private fileList: any[] = [];
             private evidenceCount: number = 0;
             private recordIds: any[] = [];
-            private superviseShow: boolean = false;
             private evidenceLatestUpdateTime: string = '';
             private currentRecordId: string = '';
             private transAssetOwnerAddr: string = '';
