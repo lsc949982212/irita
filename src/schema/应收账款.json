@@ -117,11 +117,11 @@
             },
             "overdueInterestRate":{
               "$id":"#/properties/detailedInfo/properties/receivable/properties/overdueInterestRate",
-              "type":"number",
+              "type":"string",
               "title":"逾期利率",
               "default":"",
               "examples":[
-                0.05
+                "string"
               ]
             },
             "payerCode":{
@@ -180,11 +180,11 @@
             },
             "receivableTotalAmount":{
               "$id":"#/properties/detailedInfo/properties/receivable/properties/receivableTotalAmount",
-              "type":"number",
+              "type":"string",
               "title":"应收款总额",
               "default":"",
               "examples":[
-                1234.45
+                "string"
               ]
             },
             "currency":{
@@ -245,11 +245,11 @@
               },
               "amount":{
                 "$id":"#/properties/detailedInfo/properties/payments/items/properties/amount",
-                "type":"number",
+                "type":"string",
                 "title":"金额",
                 "default":"",
                 "examples":[
-                  1234.45
+                  "string"
                 ]
               },
               "currency":{
@@ -432,11 +432,11 @@
               },
               "contractAmount":{
                 "$id":"#/properties/detailedInfo/properties/contracts/items/properties/contractAmount",
-                "type":"number",
+                "type":"string",
                 "title":"合同金额",
                 "default":"",
                 "examples":[
-                  12345.12
+                  "string"
                 ]
               },
               "currency":{
@@ -518,11 +518,11 @@
               },
               "invoiceAmount":{
                 "$id":"#/properties/detailedInfo/properties/invoices/items/properties/invoiceAmount",
-                "type":"number",
+                "type":"string",
                 "title":"发票金额",
                 "default":"",
                 "examples":[
-                  1234.12
+                  "string"
                 ]
               },
               "currency":{

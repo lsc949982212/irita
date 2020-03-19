@@ -7,7 +7,7 @@
         <div class="data_visibility_setting_tree_container flexRow"
              slot-scope="{ node, data }">
             <span class="data_visibility_setting_tree_label">{{ node.label }}</span>
-            <Options :id="data.$id" v-show="node.isLeaf"
+            <Options :id="data.$id" v-show="node.isLeaf && !data.$id.includes('basicInfo')"
                      :defaultValue="defaultValue(data.$id)"
                      @handleSelect="(id, value)=>$emit('handleSelect',id, value)"/>
         </div>

@@ -35,6 +35,9 @@
                   value: constant.DataVisibility.Secret,
                   label: '仅自己可见',
             }];
+            private mounted(){
+                  console.log(this.id)
+            }
 
             private handleChange(value: any): void{
                   this.$emit('handleSelect', this.id.replace(/#/g, '$').replace(/\/properties\//g, '.').replace(/\/items/, '[*]'), value);
