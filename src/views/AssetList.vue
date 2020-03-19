@@ -258,11 +258,11 @@
             }
 
             private handleCheckClick(row: any): void {
-                  this.$router.push(`/asset_detail?type=check&nft_id=${row.id}&owner=${row.owner}&transStatus=${row.transStatus}&query_type=${row.type}&number=${row.number}`);
+                  this.$router.push(`/asset_detail?type=check&nft_id=${row.id}&query_type=${row.type}`);
             }
 
             private handleTransClick(row: any): void {
-                  this.$router.push(`/asset_detail?type=trans&nft_id=${row.id}&owner=${row.owner}&transStatus=${row.transStatus}&query_type=${row.type}&number=${row.number}`);
+                  this.$router.push(`/asset_detail?type=trans&nft_id=${row.id}&query_type=${row.type}`);
             }
 
             private onPageChange(page: number): void {

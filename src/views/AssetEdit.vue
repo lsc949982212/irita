@@ -106,12 +106,12 @@
                 </el-button>
                 <el-button size="medium"
                            @click="next"
-                           v-show="step === 1 || step === 2"
+                           v-show="step === 1"
                            class="btn" type="primary">下一步
                 </el-button>
                 <el-button size="medium"
                            @click="save"
-                           v-show="step === 3"
+                           v-show="step === 2"
                            class="btn" type="primary">保存
                 </el-button>
                 <el-button class="btn" size="medium" @click="handleCancelClick">取消</el-button>
@@ -146,7 +146,7 @@
           private authorizationProperties: string[] = [];
           private secretProperties: string[] = [];
           private assetType: string | (string | null)[];
-          private dataInteract: any[] = [];
+          private dataInteract: types.InteractPath[] = [];
           private transferHistories: any[] = [];
           private treeData: any[] = [];
           private defaultChoosed: any = null;
@@ -193,9 +193,9 @@
                 let jsonData:any = $("#edit_json_schema_node").alpaca().getValue();
                 jsonData.authorizationProperties = this.authorizationProperties;
                 jsonData.secretProperties = this.secretProperties;
-                let dataInteract: any[] = [];
+                let dataInteract: types.InteractPath[] = [];
                 this.checkDataList.forEach((item) => dataInteract = dataInteract.concat(item.interact));
-                jsonData.dataInteract = dataInteract;
+                jsonData.dataInteract = this.dataInteract;
                 jsonData.transferHistories = this.transferHistories;
                 this.jsonData = jsonData;
                 this.postData();
@@ -338,6 +338,7 @@
                             //this.checkDataList = this.jsonData.dataInteract;
                             //不同类型的服务分开在不同项
                             let dataInteract: types.InteractPath[] = this.jsonData.dataInteract;
+                            this.dataInteract = this.jsonData.dataInteract;;
                             let serviceList: types.Service[] = [];
                             dataInteract.forEach((item: types.InteractPath)=>{
                                   if(!serviceList.includes(item.interactType)){

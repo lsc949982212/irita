@@ -147,9 +147,13 @@
             </div>
             <div class="btn_container flexRow" v-show="step === 3">
                 <el-button class="btn" size="medium" @click="changeStep(2)" type="default">上一步</el-button>
-                <el-button size="medium"
+                <!--<el-button size="medium"
                            @click="changeStep(4)"
                            class="btn" type="primary">下一步
+                </el-button>-->
+                <el-button size="medium"
+                           @click="save"
+                           class="btn" type="primary">保存
                 </el-button>
                 <el-button class="btn" size="medium" @click="handleCancelClick">取消</el-button>
             </div>
@@ -191,7 +195,7 @@
       export default class AssetAdd extends Vue {
             private options: types.IOptions[] = [];
             private serviceList: types.IOptions[] = [];
-            private dataInteract: any[] = [];
+            private dataInteract: types.InteractPath[] = [];
             private checkDataList: types.InteractItem[] = [];
             private treeData: any[] = [];
             private value: string = '';
@@ -512,13 +516,13 @@
             private save(): void {
                   this.jsonData.authorizationProperties = this.authorizationProperties;
                   this.jsonData.secretProperties = this.secretProperties;
-                  let dataInteract: types.InteractPath[] = [];
-                  this.checkDataList.forEach((item) => dataInteract = dataInteract.concat(item.interact));
+                  /*let dataInteract: types.InteractPath[] = [];
+                  this.checkDataList.forEach((item) => dataInteract = dataInteract.concat(item.interact));*/
                   console.error(this.authorizationProperties)
                   console.error(this.secretProperties)
                   console.error(this.checkDataList)
-                  console.error(dataInteract)
-                  this.jsonData.dataInteract = dataInteract;
+                  console.error(this.dataInteract)
+                  this.jsonData.dataInteract = this.dataInteract;
                   this.postData();
             }
 

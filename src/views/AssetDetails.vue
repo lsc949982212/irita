@@ -834,7 +834,6 @@
             private serviceLoading: boolean = true;
             private evidenceListLoading: boolean = true;
             private chainInfo: types.IChainInfo = {};
-            private assetType: string = '';
             private assetOwner: string = '';
             private currentTfs: any[] = [];
             private smallPageSize: number = 5;
@@ -852,12 +851,6 @@
                               })
                         }
                   }
-                  if(this.$route.query.query_type && typeof this.$route.query.query_type === 'string'){
-                        this.assetType = this.$route.query.query_type;
-                  }
-                  if(this.$route.query.owner && typeof this.$route.query.owner === 'string'){
-                        this.assetOwner = this.$route.query.owner;
-                  }
 
             }
 
@@ -867,8 +860,7 @@
 
             private get editBtnShow(): boolean {
                   //资产拥有者,并且状态是正常
-                  const {type, transStatus} = this.$route.query;
-                  return type === 'check' && this.isOwner && Number(transStatus) === constant.AssetsStatus.Normal && (this.accountApplyTransStatus === constant.AssetsListStatus.Transfered || this.accountApplyTransStatus === constant.AssetsListStatus.Refused || this.accountApplyTransStatus === constant.AssetsListStatus.Invalid || this.accountApplyTransStatus === 5);
+                  return this.$route.query.type === 'check' && this.isOwner && (this.accountApplyTransStatus === constant.AssetsListStatus.Transfered || this.accountApplyTransStatus === constant.AssetsListStatus.Refused || this.accountApplyTransStatus === constant.AssetsListStatus.Invalid || this.accountApplyTransStatus === constant.AssetsListStatus.RefusedTransfer || this.accountApplyTransStatus === 5);
             }
 
             private get applyAuthShow(): boolean {
@@ -877,8 +869,8 @@
             }
 
             private get applyTransShow(): boolean {//展示申请转让按钮
-                  //资产拥有者 && (转让状态是: 已拒绝 || 已失效 || 已转让)
-                  return this.$route.query.type === 'trans' && this.isOwner && (this.accountApplyTransStatus === constant.AssetsListStatus.Transfered || this.accountApplyTransStatus === constant.AssetsListStatus.Refused || this.accountApplyTransStatus === constant.AssetsListStatus.Invalid || this.accountApplyTransStatus === 5);
+                  //资产拥有者 && (转让状态是: 已拒绝 || 已失效 || 已转让 || 转让方拒绝)
+                  return this.$route.query.type === 'trans' && this.isOwner && (this.accountApplyTransStatus === constant.AssetsListStatus.Transfered || this.accountApplyTransStatus === constant.AssetsListStatus.Refused || this.accountApplyTransStatus === constant.AssetsListStatus.Invalid || this.accountApplyTransStatus === constant.AssetsListStatus.RefusedTransfer || this.accountApplyTransStatus === 5);
             }
 
             private get unlockShow(): boolean {
@@ -1086,7 +1078,7 @@
             }
 
             private edit(): void {
-                  this.$router.push(`/asset_edit?nft_id=${this.$route.query.nft_id}&asset_type=${this.assetType}`);
+                  this.$router.push(`/asset_edit?nft_id=${this.$route.query.nft_id}&asset_type=${this.$route.query.query_type}`);
             }
 
             private applyCheck(): void {
@@ -1661,11 +1653,13 @@
                         this.jsonData = jsonData;
                         this.authorizationList = jsonData.authorizationProperties;
                         this.secretList = jsonData.secretProperties;
+                        this.assetOwner = data.chain_info.nft_owner;
+
                         if(accountHelper.isSupervise()){
                               //监管账户可以申请查看仅自己可见项, 非监管只能在有授权可见的项时才可以展示申请查看按钮
-                              this.hasSecret = (this.jsonData.authorizationProperties.length > 0 || this.jsonData.secretProperties.length > 0) && !accountHelper.isOwner(data.chain_info.owner);
+                              this.hasSecret = (this.jsonData.authorizationProperties.length > 0 || this.jsonData.secretProperties.length > 0) && !accountHelper.isOwner(this.assetOwner);
                         }else{
-                              this.hasSecret = this.jsonData.authorizationProperties.length > 0 && !accountHelper.isOwner(data.chain_info.owner);
+                              this.hasSecret = this.jsonData.authorizationProperties.length > 0 && !accountHelper.isOwner(this.assetOwner);
                         }
                         this.recordIds = jsonData.transferHistories;
                         this.renderUI();
@@ -1675,14 +1669,12 @@
                         this.onEvidenceTxPaginationClick(1);
                         if (data.chain_info.record_id) {
                               this.currentRecordId = data.chain_info.record_id;
-                              if(this.currentRecordId){
-                                    this.getEvidenceDetail()
-                              }else{
-                                    this.evidenceLoading = false;
-                                    this.evidenceCount = 0;
-                                    this.evidenceLatestUpdateTime = '';
-                                    this.evidenceDetailListData = [];
-                              }
+                              this.getEvidenceDetail();
+                        }else{
+                              this.evidenceLoading = false;
+                              this.evidenceCount = 0;
+                              this.evidenceLatestUpdateTime = '';
+                              this.evidenceDetailListData = [];
                         }
 
                   }
@@ -1951,7 +1943,7 @@
             }
 
             private getAssetTxList(page: number): void {
-                  const {query_type, number} = this.$route.query;
+                  const {query_type} = this.$route.query;
                   this.txTransferLoading = true;
                   axios.get({
                         url: `/assets_tx?pageNum=${page}&pageSize=10&used_count=true&token_id=${this.chainInfo.token_id}&asset_type=${query_type}`,
