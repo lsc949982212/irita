@@ -1,6 +1,6 @@
 import cfg from '../config/config.json';
-import constant from '../constant/constant';
 import * as types from '../types';
+import * as constant from '../constant';
 
 
 export default class LoginHelper {
@@ -29,9 +29,9 @@ export default class LoginHelper {
       public static checkLoginStatus(ctx: any): number {
             const token = sessionStorage.getItem('token');
             if (!token) {
-                  return constant.ERROR.NOT_LOGIN.code;
+                  return constant.LoginCode.LoginFailed;
             } else {
-                  return constant.SUCCESS.code;
+                  return constant.LoginCode.LoginSuccess;
             }
       }
 

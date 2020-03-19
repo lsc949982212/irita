@@ -1,13 +1,13 @@
 import axios from 'axios';
-import constant from '../constant/constant';
 import LoginHelper from '../helper/LoginHelper';
 import accountHelper from '../helper/accountHelper';
 import * as types from '../types';
+import * as constant from '../constant';
 
 export default {
       get(params: types.IHttpGetParams): Promise<any> {
             const {url, ctx} = params;
-            if (LoginHelper.checkLoginStatus(ctx) !== constant.SUCCESS.code) {
+            if (LoginHelper.checkLoginStatus(ctx) !== constant.LoginCode.LoginSuccess) {
                   LoginHelper.exit(ctx);
                   return new Promise(() => {
                   });
@@ -22,7 +22,7 @@ export default {
       },
       post(params: types.IHttpPostParams): Promise<any> {
             const {url, body, ctx} = params;
-            if (LoginHelper.checkLoginStatus(ctx) !== constant.SUCCESS.code) {
+            if (LoginHelper.checkLoginStatus(ctx) !== constant.LoginCode.LoginSuccess) {
                   LoginHelper.exit(ctx);
                   return new Promise(() => {
                   });
@@ -39,7 +39,7 @@ export default {
       },
       put(params: types.IHttpPutParams) {
             const {url, body, ctx} = params;
-            if (LoginHelper.checkLoginStatus(ctx) !== constant.SUCCESS.code) {
+            if (LoginHelper.checkLoginStatus(ctx) !== constant.LoginCode.LoginSuccess) {
                   LoginHelper.exit(ctx);
                   return new Promise(() => {
                   });

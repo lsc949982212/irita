@@ -90,7 +90,7 @@
                         <template slot-scope="scope">
                             <a :href="scope.row.resp_resource_url"
                                target="_blank"
-                               v-if="scope.row.status === constant1.AuthStatus.Authorized"
+                               v-if="scope.row.status === constant.AuthStatus.Authorized"
                                class="data_auth_link">
                                 已授权
                             </a>
@@ -167,7 +167,6 @@
 
 <script lang="ts">
       import axios from '../helper/httpHelper';
-      import constant from '../constant/constant';
       import accountHelper from '../helper/accountHelper';
       import {getFormatAddress, formatTimestamp} from '../util/util';
       import getErrorMsgByErrorCode from '../helper/errorCodeHelper';
@@ -175,48 +174,47 @@
       import {Message} from 'element-ui';
       import {Component, Vue} from 'vue-property-decorator';
       import * as types from "../types";
-      import * as constant1 from "../constant";
+      import * as constant from "../constant";
 
       @Component
       export default class DataAuthShared extends Vue {
-            private authStatusValue: number = constant1.AuthStatus.All;
-            private relevantStatusValue: number = constant1.Relevant.All;
+            private authStatusValue: number = constant.AuthStatus.All;
+            private relevantStatusValue: number = constant.Relevant.All;
             private tableData: any[] = [];
             private totalAssets: number = 0;
             private totalTxCount: number = 1;
             private txListCurrentPage: number = 1;
             private authStatus: types.IOptions[] = [{
-                  value: constant1.AuthStatus.All,
-                  label: '全部授权状态'
+                  value: constant.AuthStatus.All,
+                  label: constant.AuthStatusMap.get(constant.AuthStatus.All)
             }, {
-                  value: constant1.AuthStatus.Applying,
-                  label: '申请中'
+                  value: constant.AuthStatus.Applying,
+                  label: constant.AuthStatusMap.get(constant.AuthStatus.Applying)
             }, {
-                  value: constant1.AuthStatus.Authorized,
-                  label: '已授权'
+                  value: constant.AuthStatus.Authorized,
+                  label: constant.AuthStatusMap.get(constant.AuthStatus.Authorized)
             }, {
-                  value: constant1.AuthStatus.Refused,
-                  label: '已拒绝'
+                  value: constant.AuthStatus.Refused,
+                  label: constant.AuthStatusMap.get(constant.AuthStatus.Refused)
             }, {
-                  value: constant1.AuthStatus.Invalid,
-                  label: '已失效'
+                  value: constant.AuthStatus.Invalid,
+                  label: constant.AuthStatusMap.get(constant.AuthStatus.Invalid)
             }, {
-                  value: constant1.AuthStatus.Expired,
-                  label: '已过期'
+                  value: constant.AuthStatus.Expired,
+                  label: constant.AuthStatusMap.get(constant.AuthStatus.Expired)
             },];
 
             private relevantStatus: types.IOptions[] = [{
-                  value: constant1.Relevant.All,
-                  label: constant1.RelevantMap.get(constant1.Relevant.All)
+                  value: constant.Relevant.All,
+                  label: constant.RelevantMap.get(constant.Relevant.All)
             }, {
-                  value: constant1.Relevant.MyPost,
-                  label: constant1.RelevantMap.get(constant1.Relevant.MyPost)
+                  value: constant.Relevant.MyPost,
+                  label: constant.RelevantMap.get(constant.Relevant.MyPost)
             }, {
-                  value: constant1.Relevant.MyReceive,
-                  label: constant1.RelevantMap.get(constant1.Relevant.MyReceive)
+                  value: constant.Relevant.MyReceive,
+                  label: constant.RelevantMap.get(constant.Relevant.MyReceive)
             }];
             private constant: any = constant;
-            private constant1: any = constant1;
             private input: string = '';
             private consumer_pubkey: string = '';
             private request_id: string = '';
@@ -229,8 +227,8 @@
             private cfg: types.ICfg = JSON.parse(JSON.stringify(cfg));
 
             private beforeMount(): void {
-                  this.authStatusValue = this.$route.query.auth_status_value ? Number(this.$route.query.auth_status_value) : constant1.AuthStatus.All;
-                  this.relevantStatusValue = this.$route.query.relevant_status_value ? Number(this.$route.query.relevant_status_value) : constant1.Relevant.All;
+                  this.authStatusValue = this.$route.query.auth_status_value ? Number(this.$route.query.auth_status_value) : constant.AuthStatus.All;
+                  this.relevantStatusValue = this.$route.query.relevant_status_value ? Number(this.$route.query.relevant_status_value) : constant.Relevant.All;
             }
 
             private mounted(): void {
@@ -304,7 +302,7 @@
             }
 
             private getTransShow(row: any): boolean {
-                  return accountHelper.isOwner(row.owner) && row.transStatus === constant.ASSET_STATUS.NORMAL
+                  return accountHelper.isOwner(row.owner) && row.transStatus === constant.AssetsStatus.Normal
             }
 
             private handleCheckClick(row: any): void {
@@ -374,7 +372,7 @@
                               lastUpdateTime: formatTimestamp(asset.update_at),
                               applyer: getFormatAddress(asset.consumer),
                               responser: getFormatAddress(asset.provider),
-                              authStatus: constant1.AuthStatusMap.get(asset.status),
+                              authStatus: constant.AuthStatusMap.get(asset.status),
                               type: asset.type,
                               owner: asset.nft_owner,
                               provider: asset.provider,
@@ -383,7 +381,7 @@
                               request_id: asset.request_id,
                               consumer: asset.consumer,
                               resp_resource_url: asset.resp_resource_url,
-                              showBtn:asset.status === constant1.AuthStatus.Applying && asset.provider === accountHelper.getAccount().address && isNotSupervise
+                              showBtn:asset.status === constant.AuthStatus.Applying && asset.provider === accountHelper.getAccount().address && isNotSupervise
                         };
                   })
             }

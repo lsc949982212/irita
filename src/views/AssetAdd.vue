@@ -177,8 +177,7 @@
       import {Component, Vue} from 'vue-property-decorator';
       import * as types from "../types";
       import accountHelper from '../helper/accountHelper';
-      import constant from '../constant/constant';
-      import * as constant1 from "../constant";
+      import * as constant from "../constant";
       import DataVisibilitySettingTree from '../components/DataVisibilitySettingTree.vue';
       let $: any = (window as any).$;
 
@@ -217,13 +216,13 @@
 
             private handleSelect(id: string, value:number): void{
                   console.log(id, value)
-                  if(value === constant1.DataVisibility.Public){
+                  if(value === constant.DataVisibility.Public){
                         this.removeExistAuthItem(id);
                         this.removeExistSecItem(id);
-                  }else if(value === constant1.DataVisibility.Authorization){
+                  }else if(value === constant.DataVisibility.Authorization){
                         this.removeExistSecItem(id);
                         this.authorizationProperties.push(id);
-                  }else if(value === constant1.DataVisibility.Secret){
+                  }else if(value === constant.DataVisibility.Secret){
                         this.removeExistAuthItem(id);
                         this.secretProperties.push(id);
                   }
@@ -306,7 +305,7 @@
                                     timestamp: new Date().getTime(),
                                     service: this.service,
                                     interact: currentInteractList,
-                                    serviceName: constant1.service.get(this.service),
+                                    serviceName: constant.service.get(this.service),
                               });
                               this.resetChecked();
                               console.error(data)

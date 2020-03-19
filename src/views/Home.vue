@@ -138,13 +138,12 @@
 </template>
 
 <script lang="ts">
-      import constant from "../constant/constant";
       import cfg from '../config/config.json';
       import axios from "../helper/httpHelper";
       import {getFormatAddress, formatDuring} from "../util/util";
       import {Component, Vue} from "vue-property-decorator";
       import * as types from "../types";
-      import * as constant1 from "../constant";
+      import * as constant from "../constant";
 
       @Component
       export default class Home extends Vue {
@@ -166,34 +165,34 @@
             }
 
             private toAssetsList(type: string, pageType: string): void {
-                  let assetStatusValue: number = constant.ASSET_STATUS_OPTIONS.ALL,
-                      userAccountValue: number = constant.ASSETS_BELONG.ALL,
-                      authStatusValue: number = constant1.AuthStatus.All,
-                      relevantStatusValue: number = constant1.Relevant.All;
+                  let assetStatusValue: number = constant.AssetsStatusOptions.All,
+                      userAccountValue: number = constant.AssetsBelong.All,
+                      authStatusValue: number = constant.AuthStatus.All,
+                      relevantStatusValue: number = constant.Relevant.All;
 
                   switch (type) {
                         case "totalAsset":
-                              userAccountValue = constant.ASSETS_BELONG.MINE;
+                              userAccountValue = constant.AssetsBelong.Mine;
                               break;
                         case "auth":
-                              authStatusValue = constant1.AuthStatus.Applying;
-                              relevantStatusValue = constant1.Relevant.MyReceive;
+                              authStatusValue = constant.AuthStatus.Applying;
+                              relevantStatusValue = constant.Relevant.MyReceive;
                               break;
                         case "trans":
-                              userAccountValue = constant.ASSETS_BELONG.MINE;
-                              assetStatusValue = constant.ASSET_STATUS_OPTIONS.ACCEPT;
+                              userAccountValue = constant.AssetsBelong.Mine;
+                              assetStatusValue = constant.AssetsStatusOptions.Accept;
                               break;
                         case "secret":
-                              authStatusValue = constant1.AuthStatus.Authorized;
-                              relevantStatusValue = constant1.Relevant.MyPost;
+                              authStatusValue = constant.AuthStatus.Authorized;
+                              relevantStatusValue = constant.Relevant.MyPost;
                               break;
                         case "applying":
-                              authStatusValue = constant1.AuthStatus.Applying;
-                              relevantStatusValue = constant1.Relevant.MyPost;
+                              authStatusValue = constant.AuthStatus.Applying;
+                              relevantStatusValue = constant.Relevant.MyPost;
                               break;
                         case "accept":
-                              userAccountValue = constant.ASSETS_BELONG.OTHERS;
-                              assetStatusValue = constant.ASSET_STATUS_OPTIONS.APPLYING;
+                              userAccountValue = constant.AssetsBelong.Others;
+                              assetStatusValue = constant.AssetsStatusOptions.Applying;
                               break;
                   }
                   console.error(assetStatusValue, userAccountValue);
@@ -268,7 +267,7 @@
                         return {
                               address: item.address,
                               displayAddress: getFormatAddress(item.address),
-                              displayContent: constant1.dynamic.get(item.type),
+                              displayContent: constant.dynamic.get(item.type),
                               name,
                               type: item.type,
                               displayTimePassed: this.formatTime(

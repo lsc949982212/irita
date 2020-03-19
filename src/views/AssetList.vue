@@ -146,87 +146,74 @@
 
 <script lang="ts">
       import axios from '../helper/httpHelper';
-      import constant from '../constant/constant';
       import accountHelper from '../helper/accountHelper';
       import {getFormatAddress} from '../util/util';
       import cfg from '../config/config.json';
       import schemaConfig from '../schema/config.json';
       import {Component, Vue} from 'vue-property-decorator';
       import * as types from "../types";
+      import * as constant from "../constant";
 
       @Component
       export default class AssetList extends Vue {
-            private assetStatusValue: number = constant.ASSET_STATUS_OPTIONS.ALL;
-            private userAccountValue: number = constant.ASSETS_BELONG.ALL;
+            private assetStatusValue: number = constant.AssetsStatusOptions.All;
+            private userAccountValue: number = constant.AssetsBelong.All;
             private tableData: any[] = [];
             private assetType: any[] = [];
             private totalAssets: number = 0;
             private totalTxCount: number = 1;
             private txListCurrentPage: number = 1;
-            private checkStatusValue: number = constant.CHECK_STATUS_OPTIONS.ALL;
+            private checkStatusValue: number = constant.CheckStatusOptions.All;
             private assetTypeValue: string = '';
             private input: string = '';
             private loading: boolean = true;
             private assetStatus: types.IOptions[] = [
                   {
-                        value: constant.ASSET_STATUS_OPTIONS.ALL,
-                        label: '全部资产状态'
+                        value: constant.AssetsStatusOptions.All,
+                        label: constant.AssetsStatusOptionsMap.get(constant.AssetsStatusOptions.All)
                   }, {
-                        value: constant.ASSET_STATUS_OPTIONS.NORMAL,
-                        label: '正常'
+                        value: constant.AssetsStatusOptions.Normal,
+                        label: constant.AssetsStatusOptionsMap.get(constant.AssetsStatusOptions.Normal)
                   }, {
-                        value: constant.ASSET_STATUS_OPTIONS.APPLYING,
-                        label: '转让申请中'
+                        value: constant.AssetsStatusOptions.Applying,
+                        label: constant.AssetsStatusOptionsMap.get(constant.AssetsStatusOptions.Applying)
                   }, {
-                        value: constant.ASSET_STATUS_OPTIONS.ACCEPT,
-                        label: '已接受待转让'
+                        value: constant.AssetsStatusOptions.Accept,
+                        label: constant.AssetsStatusOptionsMap.get(constant.AssetsStatusOptions.Accept)
                   }
             ];
             private checkStatus: types.IOptions[] = [{
-                  value: constant.CHECK_STATUS_OPTIONS.ALL,
-                  label: '全部查验状态'
+                  value: constant.CheckStatusOptions.All,
+                  label: constant.CheckStatusOptionsMap.get(constant.CheckStatusOptions.All)
             }, {
-                  value: constant.CHECK_STATUS_OPTIONS.CHECKED,
-                  label: '已通过'
+                  value: constant.CheckStatusOptions.Checked,
+                  label: constant.CheckStatusOptionsMap.get(constant.CheckStatusOptions.Checked)
             }, {
-                  value: constant.CHECK_STATUS_OPTIONS.NOT_CHECK,
-                  label: '未查验'
+                  value: constant.CheckStatusOptions.NotCheck,
+                  label: constant.CheckStatusOptionsMap.get(constant.CheckStatusOptions.NotCheck)
             },{
-                  value: constant.CHECK_STATUS_OPTIONS.CHECK_FAILED,
-                  label: '未通过'
+                  value: constant.CheckStatusOptions.CheckFailed,
+                  label: constant.CheckStatusOptionsMap.get(constant.CheckStatusOptions.CheckFailed)
             }];
             private userAccount: types.IOptions[] = [{
-                  value: constant.ASSETS_BELONG.ALL,
-                  label: '全部用户资产'
+                  value: constant.AssetsBelong.All,
+                  label: constant.AssetsBelongMap.get(constant.AssetsBelong.All)
             }, {
-                  value: constant.ASSETS_BELONG.MINE,
-                  label: '我的资产'
+                  value: constant.AssetsBelong.Mine,
+                  label: constant.AssetsBelongMap.get(constant.AssetsBelong.Mine)
             }, {
-                  value: constant.ASSETS_BELONG.OTHERS,
-                  label: '其他用户资产'
+                  value: constant.AssetsBelong.Others,
+                  label: constant.AssetsBelongMap.get(constant.AssetsBelong.Others)
             }];
 
             private beforeMount(): void {
-                  this.assetStatusValue = this.$route.query.asset_status_value ? Number(this.$route.query.asset_status_value) : constant.ASSET_STATUS_OPTIONS.ALL;
-                  this.userAccountValue = this.$route.query.user_account_value ? Number(this.$route.query.user_account_value) : constant.ASSETS_BELONG.ALL;
+                  this.assetStatusValue = this.$route.query.asset_status_value ? Number(this.$route.query.asset_status_value) : constant.AssetsStatusOptions.All;
+                  this.userAccountValue = this.$route.query.user_account_value ? Number(this.$route.query.user_account_value) : constant.AssetsBelong.All;
             }
 
             private mounted(): void {
                   this.onPageChange(1);
                   this.getAssetType();
-            }
-
-            private getDisplayAssetTransStatus(status: number): string {
-                  switch (status) {
-                        case constant.ASSET_STATUS.NORMAL:
-                              return '正常';
-                        case constant.ASSET_STATUS.APPLyING:
-                              return '转让申请中';
-                        case constant.ASSET_STATUS.ACCEPT:
-                              return '已接受待转让';
-                        default:
-                              return '';
-                  }
             }
 
             private getAssetType(): void {
@@ -259,18 +246,7 @@
             }
 
             private getTransShow(row: any): boolean {
-                  return accountHelper.isOwner(row.owner) && row.transStatus === constant.ASSET_STATUS.NORMAL;
-            }
-
-            private getDisplayCheckStatus(status: number) {
-                  switch (status) {
-                        case constant.CHECK_RESULT.NOT_CHECK:
-                              return '未查验';
-                        case constant.CHECK_RESULT.CHECKED:
-                              return '已通过';
-                        case constant.CHECK_RESULT.CHECK_FAILED:
-                              return '未通过';
-                  }
+                  return accountHelper.isOwner(row.owner) && row.transStatus === constant.AssetsStatus.Normal;
             }
 
             private toExplorer(type: string, param: string): void {
@@ -329,8 +305,8 @@
                               displayOwnerAddress: getFormatAddress(asset.nft_owner),
                               transStatus: asset.transfer_status,
                               displayOwner: owner ? owner.name : '',
-                              displayCheckStatus: this.getDisplayCheckStatus(asset.check_status),
-                              displayTransStatus: this.getDisplayAssetTransStatus(asset.transfer_status),
+                              displayCheckStatus: constant.CheckResultMap.get(asset.check_status),
+                              displayTransStatus: constant.AssetsStatusMap.get(asset.transfer_status),
                               isApply: asset.is_apply
                         };
                   })

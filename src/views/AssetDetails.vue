@@ -752,7 +752,6 @@
 
 <script lang="ts">
 
-      import constant from '../constant/constant';
       import axios from '../helper/httpHelper';
       import JsonSchemaHelper from '../helper/JsonSchemaHelper';
       import cfg from '../config/config.json';
@@ -763,6 +762,7 @@
       import accountHelper from '../helper/accountHelper';
       import {Component, Vue} from 'vue-property-decorator';
       import * as types from "../types";
+      import * as constant from "../constant";
       let $:any=(<any>window).$;
 
       @Component
@@ -870,22 +870,22 @@
             private get editBtnShow(): boolean {
                   //资产拥有者,并且状态是正常
                   const {type, transStatus} = this.$route.query;
-                  return type === 'check' && this.isOwner && Number(transStatus) === constant.ASSET_STATUS.NORMAL && (this.accountApplyTransStatus === constant.ASSET_LIST_STATUS.TRANSFERED || this.accountApplyTransStatus === constant.ASSET_LIST_STATUS.REFUSED || this.accountApplyTransStatus === constant.ASSET_LIST_STATUS.INVALID || this.accountApplyTransStatus === 5);
+                  return type === 'check' && this.isOwner && Number(transStatus) === constant.AssetsStatus.Normal && (this.accountApplyTransStatus === constant.AssetsListStatus.Transfered || this.accountApplyTransStatus === constant.AssetsListStatus.Refused || this.accountApplyTransStatus === constant.AssetsListStatus.Invalid || this.accountApplyTransStatus === 5);
             }
 
             private get applyAuthShow(): boolean {
                   //非资产拥有者  &&  有授权查看的数据 && (授权状态是: 已拒绝 || 已失效 || 已过期)
-                  return this.$route.query.type === 'check' && !this.isOwner && this.hasSecret && (this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.REFUSED || this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.INVALID || this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.EXPIRED || this.accountApplyAuthorizeStatus === 5);
+                  return this.$route.query.type === 'check' && !this.isOwner && this.hasSecret && (this.accountApplyAuthorizeStatus === constant.AuthorizationStatus.Refused || this.accountApplyAuthorizeStatus === constant.AuthorizationStatus.Invalid || this.accountApplyAuthorizeStatus === constant.AuthorizationStatus.Expired || this.accountApplyAuthorizeStatus === 5);
             }
 
             private get applyTransShow(): boolean {//展示申请转让按钮
                   //资产拥有者 && (转让状态是: 已拒绝 || 已失效 || 已转让)
-                  return this.$route.query.type === 'trans' && this.isOwner && (this.accountApplyTransStatus === constant.ASSET_LIST_STATUS.TRANSFERED || this.accountApplyTransStatus === constant.ASSET_LIST_STATUS.REFUSED || this.accountApplyTransStatus === constant.ASSET_LIST_STATUS.INVALID || this.accountApplyTransStatus === 5);
+                  return this.$route.query.type === 'trans' && this.isOwner && (this.accountApplyTransStatus === constant.AssetsListStatus.Transfered || this.accountApplyTransStatus === constant.AssetsListStatus.Refused || this.accountApplyTransStatus === constant.AssetsListStatus.Invalid || this.accountApplyTransStatus === 5);
             }
 
             private get unlockShow(): boolean {
                   //非资产拥有者 && 有加密的数据 && 展示点击解密 && (授权状态是: 已授权)
-                  return this.$route.query.type === 'check' && !this.isOwner && this.hasSecret && this.accountApplyAuthorizeStatus === constant.AUTHORIZATION_STATUS.AUTH;
+                  return this.$route.query.type === 'check' && !this.isOwner && this.hasSecret && this.accountApplyAuthorizeStatus === constant.AuthorizationStatus.Auth;
             }
 
             private get isOwner(): boolean {
@@ -950,7 +950,7 @@
                   if (fileList) {
                         this.fileList = Array.from(fileList);
                         if(this.fileList.some((item: any)=>{
-                              return (item.size/1024).toFixed(0) > constant.MAX_FILE_UPLOAD_SIZE
+                              return Number((item.size/1024).toFixed(0)) > constant.MAX_FILE_UPLOAD_SIZE
                         })){
                               this.uploadFileTooLarge = true;
                         }else{
@@ -1084,42 +1084,6 @@
                         case 'evi':
                               this.getDetails();
                               break;
-                  }
-            }
-
-            private getDisplayAssetTransStatus(status: number): string {
-                  switch (status) {
-                        case constant.ASSET_LIST_STATUS.APPLYING:
-                              return '转让申请中';
-                        case constant.ASSET_LIST_STATUS.ACCEPT:
-                              return '已接受待转让';
-                        case constant.ASSET_LIST_STATUS.TRANSFERED:
-                              return '已转让';
-                        case constant.ASSET_LIST_STATUS.REFUSED:
-                              return '已拒绝';
-                        case constant.ASSET_LIST_STATUS.INVALID:
-                              return '已失效';
-                        case constant.ASSET_LIST_STATUS.REFUSED_TRANS:
-                              return '转让方拒绝';
-                        default:
-                              return '';
-                  }
-            }
-
-            private getDisplayAssetAuthStatus(status: number): string {
-                  switch (status) {
-                        case constant.AUTHORIZATION_STATUS.APPLYING:
-                              return '申请中';
-                        case constant.AUTHORIZATION_STATUS.AUTH:
-                              return '已授权';
-                        case constant.AUTHORIZATION_STATUS.REFUSED:
-                              return '已拒绝';
-                        case constant.AUTHORIZATION_STATUS.INVALID:
-                              return '已失效';
-                        case constant.AUTHORIZATION_STATUS.EXPIRED:
-                              return '已过期';
-                        default:
-                              return '';
                   }
             }
 
@@ -1670,20 +1634,9 @@
                         console.error(this.jsonData)
                         if (data && data.data && data.data.length) {
                               this.checkDataList = data.data.map((item: any) => {
-                                    let displayStatus = '', displayResult = '';
-                                    if (item.status === constant.CHECK_STATUS.NOT_CALL) {
-                                          displayStatus = '未查验';
-                                    } else if (item.status === constant.CHECK_STATUS.CALLING) {
-                                          displayStatus = '查验中';
-                                    } else if (item.status === constant.CHECK_STATUS.RESPONSED) {
-                                          displayStatus = '已查验';
-                                          displayResult = item.check_result ? '通过' : '不通过'
-                                    } else if (item.status === constant.CHECK_STATUS.EXPIRED) {
-                                          displayStatus = '已失效';
-                                    }
                                     return {
-                                          displayStatus,
-                                          displayResult,
+                                          displayStatus:constant.CheckStatusMap.get(item.status),
+                                          displayResult:item.status === constant.CheckStatus.Responsed ? (item.check_result ? '通过' : '不通过') : '',
                                           path: item.req_data_path,
                                           interactType: item.interact_type,
                                           expandData: jp.query(this.jsonData, item.req_data_path),
@@ -1884,7 +1837,7 @@
                         this.accountApplyTransStatus = data.data[0].status;
                         //如果最新的转让状态是  转让申请中,并且当前账户是受让方, 使用直接调用解密接口 (useUnlock)
                         //当前账户是受让者
-                        if (data.data[0].status === constant.ASSET_LIST_STATUS.APPLYING && accountHelper.getAccount().address === data.data[0].provider) {
+                        if (data.data[0].status === constant.AssetsListStatus.Applying && accountHelper.getAccount().address === data.data[0].provider) {
                               this.useUnlock = true;
                               this.transRequestId = data.data[0].request_id;
                               console.log('trans request id:', this.transRequestId)
@@ -1893,7 +1846,7 @@
                         }
 
                         //当前账户是owner
-                        if (data.data[0].status === constant.ASSET_LIST_STATUS.ACCEPT && accountHelper.getAccount().address === data.data[0].consumer) {
+                        if (data.data[0].status === constant.AssetsListStatus.Accept && accountHelper.getAccount().address === data.data[0].consumer) {
                               console.log('current trans status is:已接受', data.data[0].request_id);
                               this.postTransRequestId = data.data[0].request_id;
                               this.postTransNftId = data.data[0].nft_id;
@@ -1928,14 +1881,14 @@
                               time: formatTimestamp(t.time),
                               receiver: t.provider,
                               txStatus: t.status,
-                              displayStatus: this.getDisplayAssetTransStatus(t.status),
+                              displayStatus: constant.AssetsListStatusMap.get(t.status),
                               displayReceiver: accountHelper.getUserNameByAddress(t.provider),
                               displayPoster: accountHelper.getUserNameByAddress(t.consumer),
                               consumer: t.consumer,
                               provider: t.provider,
-                              showAcceptBtn: t.status === constant.ASSET_LIST_STATUS.APPLYING && t.provider === accountHelper.getAccount().address,
-                              showTransBtn: t.status === constant.ASSET_LIST_STATUS.ACCEPT && t.consumer === accountHelper.getAccount().address && t.hashok,
-                              showRefusedBtn: t.status === constant.ASSET_LIST_STATUS.ACCEPT && t.consumer === accountHelper.getAccount().address && t.hashok,
+                              showAcceptBtn: t.status === constant.AssetsListStatus.Applying && t.provider === accountHelper.getAccount().address,
+                              showTransBtn: t.status === constant.AssetsListStatus.Accept && t.consumer === accountHelper.getAccount().address && t.hashok,
+                              showRefusedBtn: t.status === constant.AssetsListStatus.Accept && t.consumer === accountHelper.getAccount().address && t.hashok,
                               tfs: t.tfs,
                               hashok: t.hashok,
                               displayHashOk
@@ -1991,8 +1944,8 @@
                               requestId: a.request_id,
                               time: formatTimestamp(a.create_at),
                               applicant: accountHelper.getUserNameByAddress(a.consumer),
-                              applyStatus: this.getDisplayAssetAuthStatus(a.status),
-                              showAuthBtn: a.status === constant.AUTHORIZATION_STATUS.APPLYING && a.provider === accountHelper.getAccount().address && isNotSupervise,
+                              applyStatus: constant.AuthorizationStatusMap.get(a.status),
+                              showAuthBtn: a.status === constant.AuthorizationStatus.Applying && a.provider === accountHelper.getAccount().address && isNotSupervise,
                               provider: a.provider,
                               consumer: a.consumer,
                         }
