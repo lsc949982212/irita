@@ -423,7 +423,7 @@
                   try {
                         let data: types.IResponse<types.IDenoms> = await AxiosHelper.get({url, ctx: this});
                         if (data.data) {
-                              data.data.denoms.forEach((item: string, index: number) => {
+                              data.data.denoms.forEach((item: string) => {
                                     if (schemaConfig.denoms.includes(item)) {
                                           this.options.push({
                                                 value: item,
@@ -547,8 +547,6 @@
                         console.error(e);
                         this.$message.error('新增资产失败');
                   }
-
-                  console.log('save asset', this.jsonData);
 
             }
       }

@@ -109,4 +109,34 @@ export type IAssetDetails = {
       asset_info: object,
 }
 
+export type IAssetsListItem = {
+      nft_id: string,
+      token_id: string,
+      number: string,
+      asset_name: string,
+      type: string,
+      owner: string,
+      nft_owner: string,
+      nft_uri: string,
+      check_status: number,
+      transfer_status:number,
+      is_apply: boolean,
+      mint_time: number,
+      record_id: string,
+}
+
+export type IAssetAuthorization = {
+      request_id: string,
+      nft_id: string,
+      asset_no: string,
+      asset_name: string,
+      resp_resource_url: string,
+      provider: string,
+      consumer: string,
+      status: number,
+      time: number,
+      create_at:number,
+      update_at: number,
+}
+
 

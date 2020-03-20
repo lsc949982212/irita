@@ -123,7 +123,6 @@
 
 <script lang="ts">
       import JsonSchemaHelper from '../helper/JsonSchemaHelper';
-      import axios from '../helper/httpHelper';
       import {Message} from 'element-ui';
       import getErrorMsgByErrorCode from '../helper/errorCodeHelper';
       import {Component, Vue} from 'vue-property-decorator';
@@ -299,29 +298,28 @@
                   }
             }
 
-            private postData(): void {
-                  console.log('要发送的数据', this.jsonData);
-                  const body: any = {
-                        asset_data: this.jsonData,
-                  };
-                  axios.put({url: `/assets/${this.$route.query.nft_id}`, body, ctx: this}).then((data: any) => {
-                        console.log('response after submit json data', data)
-                        if (data && data.data && data.data.status === 'success') {
+            private async postData() {
+                  //console.log('要发送的数据', this.jsonData);
+                  try {
+                        const body: object = {
+                              asset_data: this.jsonData,
+                        };
+                        const url: string = `/assets/${this.$route.query.nft_id}`;
+                        let data: types.IResponse<string> = await AxiosHelper.put({url, body, ctx: this});
+                        if (data && data.status === 'success') {
                               Message({
                                     message: '编辑资产成功',
                                     type: 'success'
                               });
                               this.$router.go(-1);
-                        } else if (data && data.data && data.data.status === 'fail') {
-                              this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
+                        } else if (data && data.status === 'fail') {
+                              this.$message.error(getErrorMsgByErrorCode(data.errCode));
                         } else {
                               this.$message.error('编辑资产失败');
                         }
-
-                  }).catch((e: any) => {
-                        console.error('submit json data failed', e);
-                        this.$message.error('编辑资产失败');
-                  });
+                  } catch (e) {
+                        console.error(e)
+                  }
             }
 
             private async getDetails() {

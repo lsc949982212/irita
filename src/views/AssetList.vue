@@ -145,7 +145,6 @@
 </template>
 
 <script lang="ts">
-      import axios from '../helper/httpHelper';
       import accountHelper from '../helper/accountHelper';
       import {getFormatAddress} from '../util/util';
       import cfg from '../config/config.json';
@@ -153,6 +152,7 @@
       import {Component, Vue} from 'vue-property-decorator';
       import * as types from "../types";
       import * as constant from "../constant";
+      import AxiosHelper from '../helper/AxiosHelper';
 
       @Component
       export default class AssetList extends Vue {
@@ -216,13 +216,13 @@
                   this.getAssetType();
             }
 
-            private getAssetType(): void {
-                  const url = `/assets/denoms`;
-                  axios.get({url, ctx: this}).then((data: any) => {
-                        console.log(data);
+            private async getAssetType() {
+                  try {
+                        const url: string = `/assets/denoms`;
+                        const data: types.IResponse<types.IDenoms> = await AxiosHelper.get({url, ctx: this});
                         if (data && data.status === 'success') {
                               if (data && data.data && data.data.denoms) {
-                                    data.data.denoms.forEach((item: any, index: number) => {
+                                    data.data.denoms.forEach((item: string) => {
                                           if (schemaConfig.denoms.includes(item)) {
                                                 this.assetType.push({
                                                       value: item,
@@ -239,10 +239,10 @@
                         } else {
                               this.$message.error('请求数据错误');
                         }
-                  }).catch((e: any) => {
+                  } catch (e) {
                         console.error(e);
                         this.$message.error('请求数据错误');
-                  });
+                  }
             }
 
             private getTransShow(row: any): boolean {
@@ -270,46 +270,43 @@
                   this.getDataList(page);
             }
 
-            private getDataList(page: number): void {
+            private async getDataList(page: number) {
                   const {assetTypeValue, assetStatusValue, checkStatusValue, userAccountValue, input} = this;
-                  console.log(assetTypeValue, assetStatusValue, checkStatusValue, userAccountValue, input);
-
-                  let url = `/assets/search?pageNum=${page}&pageSize=10&used_count=true&asset_type=${assetTypeValue}&transfer_status=${assetStatusValue}&check_status=${checkStatusValue}&owner=${userAccountValue}`;
+                  let url: string = `/assets/search?pageNum=${page}&pageSize=10&used_count=true&asset_type=${assetTypeValue}&transfer_status=${assetStatusValue}&check_status=${checkStatusValue}&owner=${userAccountValue}`;
                   this.loading = true;
                   if (this.input) {
                         url += `&query_data=${input}`
                   }
-                  axios.get({url, ctx: this}).then((data: any) => {
-                        if (data && data.data) {
-                              this.handleData(data);
+                  try {
+                        const data: types.IResponse<types.IAssetsListItem[]> = await AxiosHelper.get({url, ctx: this});
+                        if (data && data.status === 'success' && data.data) {
+                              console.log(data)
+                              this.totalTxCount = data.total;
+                              this.totalAssets = data.total;
+                              this.tableData = data.data.map((asset: types.IAssetsListItem) => {
+                                    const owner: types.IAccount | undefined = accountHelper.getAccountList().find((a: types.IAccount) => a.address === asset.nft_owner);
+                                    return {
+                                          number: asset.number,
+                                          id: asset.nft_id,
+                                          name: asset.asset_name,
+                                          type: asset.type,
+                                          owner: asset.nft_owner,
+                                          displayOwnerAddress: getFormatAddress(asset.nft_owner),
+                                          transStatus: asset.transfer_status,
+                                          displayOwner: owner ? owner.name : '',
+                                          displayCheckStatus: constant.CheckResultMap.get(asset.check_status),
+                                          displayTransStatus: constant.AssetsStatusMap.get(asset.transfer_status),
+                                          isApply: asset.is_apply
+                                    };
+                              })
                         }
                         this.loading = false;
-                  }).catch((e: any) => {
+                  } catch (e) {
+                        console.error(e);
                         this.loading = false;
-                        console.error(e)
-                  });
-            }
+                        this.$message.error('请求数据错误');
+                  }
 
-            private handleData(data: any): void {
-                  console.log(data)
-                  this.totalTxCount = data.total;
-                  this.totalAssets = data.total;
-                  this.tableData = data.data.map((asset: any) => {
-                        const owner: any = accountHelper.getAccountList().find((a: any) => a.address === asset.nft_owner);
-                        return {
-                              number: asset.number,
-                              id: asset.nft_id,
-                              name: asset.asset_name,
-                              type: asset.type,
-                              owner: asset.nft_owner,
-                              displayOwnerAddress: getFormatAddress(asset.nft_owner),
-                              transStatus: asset.transfer_status,
-                              displayOwner: owner ? owner.name : '',
-                              displayCheckStatus: constant.CheckResultMap.get(asset.check_status),
-                              displayTransStatus: constant.AssetsStatusMap.get(asset.transfer_status),
-                              isApply: asset.is_apply
-                        };
-                  })
             }
 
       }

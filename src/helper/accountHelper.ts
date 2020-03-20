@@ -2,9 +2,9 @@ import cfg from '../config/config.json';
 import * as types from '../types';
 
 export default {
-      getAccountList<T>(): Array<T> {
+      getAccountList(): types.IAccount[] {
             const config: types.ICfg = JSON.parse(JSON.stringify(cfg));
-            const accountList: Array<T> = [];
+            const accountList: types.IAccount[] = [];
             for (const key of Object.keys(config.account)) {
                   accountList.push(config.account[key]);
             }
@@ -18,12 +18,18 @@ export default {
                   return false;
             }
       },
-      getAccount(): any {
+      getAccount(): types.IConfig {
             const token: string | null = sessionStorage.getItem('token');
             if (token) {
                   return JSON.parse(token);
             } else {
-                  return null;
+                  return {
+                        address: '',
+                        publicKey: '',
+                        name: '',
+                        domain: '',
+                        isSupervise: '',
+                  };
             }
       },
       getUserNameByAddress(address: string): string {

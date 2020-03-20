@@ -24,7 +24,7 @@ class AxiosHelper {
                   axios.post(`${(this as any).path}${params.url}`,
                       params.body,
                       {timeout: constant.TIME_OUT}).then((result: any) => {
-                        res(result);
+                        res(result.data);
                   }).catch(e => {
                         rej(e)
                   });
@@ -37,7 +37,7 @@ class AxiosHelper {
                   axios.put(`${(this as any).path}${url}`, 
                   body, 
                   {timeout: constant.TIME_OUT}).then((result: any) => {
-                        res(result);
+                        res(result.data);
                   }).catch(e => {
                         rej(e)
                   });

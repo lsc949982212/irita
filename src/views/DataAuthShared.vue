@@ -45,6 +45,7 @@
             <div class="table_container">
                 <el-table
                         :data="tableData"
+                        v-loading="tableLoading"
                         style="width: 100%">
                     <el-table-column
                             fixed
@@ -166,7 +167,6 @@
 </template>
 
 <script lang="ts">
-      import axios from '../helper/httpHelper';
       import accountHelper from '../helper/accountHelper';
       import {getFormatAddress, formatTimestamp} from '../util/util';
       import getErrorMsgByErrorCode from '../helper/errorCodeHelper';
@@ -175,6 +175,7 @@
       import {Component, Vue} from 'vue-property-decorator';
       import * as types from "../types";
       import * as constant from "../constant";
+      import AxiosHelper from '../helper/AxiosHelper';
 
       @Component
       export default class DataAuthShared extends Vue {
@@ -214,7 +215,7 @@
                   value: constant.Relevant.MyReceive,
                   label: constant.RelevantMap.get(constant.Relevant.MyReceive)
             }];
-            private constant: any = constant;
+            private constant: object = constant;
             private input: string = '';
             private consumer_pubkey: string = '';
             private request_id: string = '';
@@ -225,6 +226,7 @@
             private nftId: string = '';
             private dialogType: number = 0;//0 授权, 1 拒绝;
             private cfg: types.ICfg = JSON.parse(JSON.stringify(cfg));
+            private tableLoading: boolean = false;
 
             private beforeMount(): void {
                   this.authStatusValue = this.$route.query.auth_status_value ? Number(this.$route.query.auth_status_value) : constant.AuthStatus.All;
@@ -256,10 +258,9 @@
                   this.dialogTitle = '确认要拒绝吗';
             }
 
-            private handleConfirmBtnClick(): void {
+            private async handleConfirmBtnClick() {
                   const {request_id, dialogType, consumer} = this;
-                  console.error(request_id, dialogType, consumer);
-                  let body: any = null, url: string = '', str: string = '';
+                  let body: object = {}, url: string = '', str: string = '';
                   if (dialogType === 0) {
                         body = {
                               "consumer_pubkey": accountHelper.getPublicKeyByAddress(consumer),
@@ -275,29 +276,31 @@
                         str = '拒绝'
                   }
                   this.loading = true;
-                  axios.post({url, body, ctx: this}).then((data: any) => {
-                        console.log(data);
+                  try {
+                        const data: types.IResponse<string> = await AxiosHelper.post({
+                              url,
+                              body,
+                              ctx: this
+                        });
+                        this.centerDialogVisible = false;
                         this.loading = false;
-                        if (data && data.data && data.data.status === 'success') {
+                        if (data && data.status === 'success') {
                               Message({
                                     message: `${str}成功`,
                                     type: 'success'
                               });
-                              this.centerDialogVisible = false;
                               this.onPageChange(1);
-                        } else if (data && data.data && data.data.status === 'fail') {
-                              this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
-                              this.centerDialogVisible = false;
+                        } else if (data && data.status === 'fail') {
+                              this.$message.error(getErrorMsgByErrorCode(data.errCode));
                         } else {
                               this.$message.error(`${str}失败`);
-                              this.centerDialogVisible = false;
                         }
-                  }).catch((e: any) => {
+                  } catch (e) {
                         console.error(e);
                         this.loading = false;
                         this.$message.error(`${str}失败`);
                         this.centerDialogVisible = false;
-                  });
+                  }
 
             }
 
@@ -309,30 +312,23 @@
                   this.getDetails(row)
             }
 
-            private getDetails(row: any) {
-                  let url = `/assets/detail/${row.id}?address=${accountHelper.getAccount().address}`;
-                  axios.get({
-                        url,
-                        ctx: this
-                  }).then((data: any) => {
-                        if (data) {
-                              this.handleDetailData(data.data, row);
+            private async getDetails(row: any) {
+                  try {
+                        const url: string = `/assets/detail/${row.id}?address=${accountHelper.getAccount().address}`;
+                        let data: types.IResponse<types.IAssetDetails> = await AxiosHelper.get({url, ctx: this});
+                        if (data && data.data && data.data.chain_info) {
+                              this.$router.push(`/asset_detail?type=check&nft_id=${row.id}&query_type=${data.data.chain_info.type}`);
                         }
-                  }).catch((e: any) => {
+                  } catch (e) {
                         console.error(e);
-                        this.$message.error('获取数据失败');
-                  });
+                        this.$message.error(`获取数据失败`);
+                  }
+
             }
 
-            private handleDetailData(data:any, row:any):void {
-                  console.log('detail data', data.chain_info);
-                  if (data && data.chain_info) {
-                        this.$router.push(`/asset_detail?type=check&nft_id=${row.id}&owner=${data.chain_info.nft_owner}&transStatus=${data.chain_info.transfer_status}&query_type=${data.chain_info.type}&number=${row.number}`);
-                  }
-            }
 
             private handleTransClick(row:any):void {
-                  this.$router.push(`/asset_detail?type=trans&nft_id=${row.id}&owner=${row.owner}&transStatus=${row.transStatus}&query_type=${row.type}&number=${row.number}`);
+                  this.$router.push(`/asset_detail?type=trans&nft_id=${row.id}&query_type=${row.type}`);
             }
 
             private onPageChange(page:number):void {
@@ -340,30 +336,36 @@
                   this.getDataList(page);
             }
 
-            private getDataList(page:number):void {
-
+            private async getDataList(page:number) {
                   const {relevantStatusValue, authStatusValue, input} = this;
-                  console.log(authStatusValue, relevantStatusValue, input);
-
                   let url: string = `/assets_authorization?pageNum=${page}&pageSize=10&used_count=true&auth_type=${relevantStatusValue}&status=${authStatusValue}`;
                   if (this.input) {
                         url += `&query_data=${input}`
                   }
-                  axios.get({url, ctx: this}).then((data:any) => {
-                        if (data && data.data) {
+                  this.tableLoading = true;
+                  try {
+                        const data: types.IResponse<types.IAssetAuthorization[]> = await AxiosHelper.get({url, ctx: this});
+                        if (data && data.status === 'success' && data.data) {
                               this.handleData(data);
                         }
-                  }).catch((e: any) => {
-                        console.error(e)
-                  });
+                        this.tableLoading = false;
+                  } catch (e) {
+                        console.error(e);
+                        this.tableLoading = false;
+                        this.$message.error('请求数据错误');
+                  }
+
+
             }
 
             private handleData(data: any):void {
                   console.log(data)
                   this.totalTxCount = data.total;
                   this.totalAssets = data.total;
-                  this.tableData = data.data.map((asset: any) => {
-                        const isNotSupervise: any = accountHelper.getAccountList().find((item: any)=>item.isSupervise === 'true') !== asset.consumer;
+                  let isNotSupervise: boolean =  false;
+                  const superviseAccount: types.IAccount | undefined = accountHelper.getAccountList().find((item: types.IAccount)=>item.isSupervise === 'true');
+                  this.tableData = data.data.map((asset: types.IAssetAuthorization) => {
+                        if(superviseAccount && superviseAccount.address !== asset.consumer) isNotSupervise = true;
                         return {
                               number: asset.asset_no,
                               id: asset.nft_id,
@@ -373,10 +375,7 @@
                               applyer: getFormatAddress(asset.consumer),
                               responser: getFormatAddress(asset.provider),
                               authStatus: constant.AuthStatusMap.get(asset.status),
-                              type: asset.type,
-                              owner: asset.nft_owner,
                               provider: asset.provider,
-                              transStatus: asset.transfer_status,
                               status: asset.status,
                               request_id: asset.request_id,
                               consumer: asset.consumer,
