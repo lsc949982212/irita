@@ -1,11 +1,11 @@
 import axios from 'axios';
-import accountHelper from '../helper/accountHelper';
+import AccountHelper from '../helper/AccountHelper';
 import * as types from '../types';
 import * as constant from '../constant';
 import * as decorators from '../decorators';
 
 
-@decorators.Path(accountHelper.getAccount().domain)
+@decorators.Path(AccountHelper.getAccount().domain)
 class AxiosHelper {
       public async get<T>(params: types.IHttpGetParams): Promise<T> {
             return new Promise((res, rej) => {
@@ -32,7 +32,7 @@ class AxiosHelper {
       }
 
       public async put<T>(params: types.IHttpPutParams): Promise<T> {
-            const {url, body, ctx} = params;
+            const {url, body} = params;
             return new Promise((res, rej) => {
                   axios.put(`${(this as any).path}${url}`, 
                   body, 
@@ -51,6 +51,21 @@ class AxiosHelper {
                   ).catch(e => {
                         rej(e)
                   });
+            })
+      }
+
+      public async upload<T>(params: types.IHttpPostParams): Promise<T> {
+            return new Promise((res, rej) => {
+                  fetch(`${(this as any).path}${params.url}`, {
+                        method: "POST",
+                        body: params.body
+                  }).then((response: any) => {
+                        return response.json();
+                  }).then((result: any) => {
+                        res(result);
+                  }).catch(e => {
+                        rej(e)
+                  })
             })
       }
 

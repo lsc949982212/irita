@@ -223,7 +223,7 @@
             private async getDetail() {
                   let data: types.IResponse<types.CalculateInfo>;
                   try {
-                        data = await AxiosHelper.get({url: `/assets/caculate_info`, ctx: this});
+                        data = await AxiosHelper.get({url: `/assets/caculate_info`});
                         if (data.data) {
                               this.totalAssets = data.data.ownerasset_caculateinfo.total;
                               this.authApplyWaitDeal = data.data.ownerasset_caculateinfo.apply;
@@ -241,7 +241,7 @@
             private async getDynamicList() {
                   let data: types.IResponse<types.IRecently[]>;
                   try {
-                        data = await AxiosHelper.get({url: `/txs?pageNum=1&pageSize=6`, ctx: this});
+                        data = await AxiosHelper.get({url: `/txs?pageNum=1&pageSize=6`});
                         if (data.data) {
                               console.log(data.data);
                               this.dynamicList = data.data.map((item: types.IRecently) => {

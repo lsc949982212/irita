@@ -751,19 +751,19 @@
 </template>
 
 <script lang="ts">
-
-      import axios from '../helper/httpHelper';
       import JsonSchemaHelper from '../helper/JsonSchemaHelper';
       import cfg from '../config/config.json';
       import {Message} from 'element-ui';
       import {formatTimestamp, getFormatAddress} from '../util/util';
       import getErrorMsgByErrorCode from '../helper/errorCodeHelper';
       import jp from 'jsonpath';
-      import accountHelper from '../helper/accountHelper';
+      import AccountHelper from '../helper/AccountHelper';
       import {Component, Vue} from 'vue-property-decorator';
       import * as types from "../types";
       import * as constant from "../constant";
-      let $:any=(<any>window).$;
+      import AxiosHelper from '../helper/AxiosHelper';
+
+      let $: any = (<any>window).$;
 
       @Component
       export default class AssetDetails extends Vue {
@@ -816,7 +816,11 @@
             private showJsonData: boolean = false;
             private authLatestUpdateTime: string = '';
             private transLatestUpdateTime: string = '';
-            private checkData: any = null;
+            private checkData: types.ICheckPost = {
+                  req_data_path: '',
+                  interact_type: '',
+                  checker_addr: '',
+            };
             private evidenceListData: any[] = [];
             private evidenceDetailListData: any[] = [];
             private fileList: any[] = [];
@@ -833,11 +837,25 @@
             private txTransferLoading: boolean = true;
             private serviceLoading: boolean = true;
             private evidenceListLoading: boolean = true;
-            private chainInfo: types.IChainInfo = {};
+            private chainInfo: types.IChainInfo = {
+                  nft_id: '',
+                  token_id: '',
+                  number: '',
+                  asset_name: '',
+                  type: '',
+                  owner: '',
+                  nft_uri: '',
+                  nft_owner: '',
+                  check_status: 0,
+                  transfer_status: 0,
+                  is_apply: false,
+                  mint_time: 0,
+                  record_id: '',
+            };
             private assetOwner: string = '';
             private currentTfs: any[] = [];
             private smallPageSize: number = 5;
-            private uploadFileTooLarge:boolean = false;
+            private uploadFileTooLarge: boolean = false;
 
             private beforeMount(): void {
                   const token: string | null = sessionStorage.getItem('token');
@@ -879,7 +897,7 @@
             }
 
             private get isOwner(): boolean {
-                  return this.assetOwner === accountHelper.getAccount().address
+                  return this.assetOwner === AccountHelper.getAccount().address
             }
 
             private get applyToCheck(): string {
@@ -907,9 +925,9 @@
 
             private get replaceSecretDataToStar(): boolean {
                   //判断仅自己可见数据是否展示***
-                  //!accountHelper.isSupervise()
+                  //!AccountHelper.isSupervise()
                   //资产拥有者 || 监管查看 || 直接调用解密接口正常展示
-                  return !(this.isOwner || (accountHelper.isSupervise() && this.isDecrypto) || this.useUnlock)
+                  return !(this.isOwner || (AccountHelper.isSupervise() && this.isDecrypto) || this.useUnlock)
 
             }
 
@@ -917,9 +935,9 @@
             private loadData(): void {
                   this.getAssetTransList(1);
                   this.getAssetAuthList(1);
-                  if(this.currentRecordId){
+                  if (this.currentRecordId) {
                         this.getEvidenceDetail()
-                  }else{
+                  } else {
                         this.evidenceLoading = false;
                         this.evidenceCount = 0;
                         this.evidenceLatestUpdateTime = '';
@@ -939,11 +957,11 @@
                   const fileList: any = document.getElementsByTagName('form')[0].file.files;
                   if (fileList) {
                         this.fileList = Array.from(fileList);
-                        if(this.fileList.some((item: any)=>{
-                              return Number((item.size/1024).toFixed(0)) > constant.MAX_FILE_UPLOAD_SIZE
-                        })){
+                        if (this.fileList.some((item: any) => {
+                              return Number((item.size / 1024).toFixed(0)) > constant.MAX_FILE_UPLOAD_SIZE
+                        })) {
                               this.uploadFileTooLarge = true;
-                        }else{
+                        } else {
                               this.uploadFileTooLarge = false;
                         }
                         console.error(this.fileList);
@@ -952,7 +970,7 @@
 
             private download(item: any): void {
                   console.log(item)
-                  let url: string = `${accountHelper.getAccount().domain}/common/decrypt_download_file?file_url=${item.uri}`;
+                  let url: string = `${AccountHelper.getAccount().domain}/common/decrypt_download_file?file_url=${item.uri}`;
                   if (item.meta) {
                         url += `&filename=${item.meta}`
                   }
@@ -971,13 +989,13 @@
             private decryptoFile(row: any): void {
                   console.error(row)
                   if (!row.decryptoUri) {
-                        let url = `${accountHelper.getAccount().domain}/common/decrypt_download_file?file_url=${row.uri}`;
+                        let url = `${AccountHelper.getAccount().domain}/common/decrypt_download_file?file_url=${row.uri}`;
                         if (row.meta) {
                               url += `&filename=${row.meta}`
                         }
                         window.open(url)
                   } else {
-                        let url = `${accountHelper.getAccount().domain}/common/decrypt_download_file?file_url=${row.decryptoUri}`;
+                        let url = `${AccountHelper.getAccount().domain}/common/decrypt_download_file?file_url=${row.decryptoUri}`;
                         if (row.meta) {
                               url += `&filename=${row.meta}`
                         }
@@ -985,65 +1003,64 @@
                   }
             }
 
-            private postCheckData(): void {
+            private async postCheckData() {
                   this.loading = true;
-                  axios.post({
-                        url: `/assets_check/${this.$route.query.nft_id}`,
-                        body: this.checkData,
-                        ctx: this
-                  }).then((data: any) => {
-                        console.log(data);
+                  try {
+                        const data: types.IResponse<any> = await AxiosHelper.post({
+                              url: `/assets_check/${this.$route.query.nft_id}`,
+                              body: this.checkData
+                        });
                         this.centerDialogVisible = false;
                         this.loading = false;
-                        if (data && data.data && data.data.status === 'success') {
+                        if (data && data.status === 'success') {
                               Message({
                                     message: '查验已提交成功,请耐心等待',
                                     type: 'success'
                               });
                               this.loadData();
                               this.getDetails();
-                        } else if (data && data.data && data.data.status === 'fail') {
-                              this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
+                        } else if (data && data.status === 'fail') {
+                              this.$message.error(getErrorMsgByErrorCode(data.errCode));
                         } else {
                               this.$message.error('查验提交失败');
                         }
-                  }).catch((e: any) => {
+                  } catch (e) {
+                        console.error(e);
                         this.applyBtnLoading = false;
                         this.loading = false;
-                        console.error(e);
                         this.$message.error('查验提交失败');
-                  });
+                        this.centerDialogVisible = false;
+                  }
             }
 
-            private handleRefuseTrans() {
-                  const body: any = {
-                        request_id: this.requestId,
-                  };
+            private async handleRefuseTrans() {
                   this.loading = true;
-                  axios.post({
-                        url: `/assets_transfer/${this.$route.query.nft_id}/transfer_refuse`,
-                        body,
-                        ctx: this
-                  }).then((data: any) => {
-                        console.log(data);
+                  try {
+                        const data: types.IResponse<string> = await AxiosHelper.post({
+                              url: `/assets_transfer/${this.$route.query.nft_id}/transfer_refuse`,
+                              body: {
+                                    request_id: this.requestId,
+                              }
+                        });
                         this.centerDialogVisible = false;
                         this.loading = false;
-                        if (data && data.data && data.data.status === 'success') {
+                        if (data && data.status === 'success') {
                               Message({
                                     message: '拒绝成功',
                                     type: 'success'
                               });
                               this.getAssetTransList(1);
-                        } else if (data && data.data && data.data.status === 'fail') {
-                              this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
+                        } else if (data && data.status === 'fail') {
+                              this.$message.error(getErrorMsgByErrorCode(data.errCode));
                         } else {
                               this.$message.error('拒绝失败');
                         }
-                  }).catch((e: any) => {
-                        this.loading = false;
+                  } catch (e) {
                         console.error(e);
-                        this.$message.error('拒绝失败');
-                  });
+                        this.loading = false;
+                        this.centerDialogVisible = false;
+                        this.$message.error('申请提交失败');
+                  }
             }
 
             private refreshList(type: string): void {
@@ -1081,31 +1098,31 @@
                   this.$router.push(`/asset_edit?nft_id=${this.$route.query.nft_id}&asset_type=${this.$route.query.query_type}`);
             }
 
-            private applyCheck(): void {
+            private async applyCheck() {
                   this.applyBtnLoading = true;
-                  axios.post({
-                        url: `/assets_authorization/${this.$route.query.nft_id}/authorization/apply`,
-                        body: {},
-                        ctx: this
-                  }).then((data: any) => {
-                        console.log(data);
+                  try {
+                        const data: types.IResponse<string> = await AxiosHelper.post({
+                              url: `/assets_authorization/${this.$route.query.nft_id}/authorization/apply`,
+                              body: {}
+                        });
                         this.applyBtnLoading = false;
-                        if (data && data.data && data.data.status === 'success') {
+                        if (data && data.status === 'success') {
                               Message({
                                     message: '申请已提交成功,请耐心等待',
                                     type: 'success'
                               });
                               this.loadData();
-                        } else if (data && data.data && data.data.status === 'fail') {
-                              this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
+                        } else if (data && data.status === 'fail') {
+                              this.$message.error(getErrorMsgByErrorCode(data.errCode));
                         } else {
                               this.$message.error('申请提交失败');
                         }
-                  }).catch((e: any) => {
-                        this.applyBtnLoading = false;
+                  } catch (e) {
                         console.error(e);
+                        this.applyBtnLoading = false;
                         this.$message.error('申请提交失败');
-                  });
+                  }
+
             }
 
             private handleTransBtnClick(): void {
@@ -1236,255 +1253,232 @@
                   this.getEvidenceDataList(page);
             }
 
-            private postAcceptTrans(): void {
-                  console.log('this asset owner address:', this.transAssetOwnerAddr);
-
-                  const body: any = {
-                        request_id: this.requestId,
-                        accepter_name: accountHelper.getUserNameByAddress(accountHelper.getAccount().address),
-                        assetowner_pubkey: accountHelper.getPublicKeyByAddress(this.transAssetOwnerAddr),
-                  };
+            private async postAcceptTrans() {
+                  //console.log('this asset owner address:', this.transAssetOwnerAddr);
                   this.loading = true;
-                  axios.post({
-                        url: `/assets_transfer/${this.operateNftId}/transfer_owner/accept`,
-                        body,
-                        ctx: this
-                  }).then((data: any) => {
-                        console.log(data);
-                        this.loading = false;
-                        if (data && data.data && data.data.status === 'success') {
+                  try {
+                        const data: types.IResponse<string> = await AxiosHelper.post({
+                              url: `/assets_transfer/${this.operateNftId}/transfer_owner/accept`,
+                              body: {
+                                    request_id: this.requestId,
+                                    accepter_name: AccountHelper.getUserNameByAddress(AccountHelper.getAccount().address),
+                                    assetowner_pubkey: AccountHelper.getPublicKeyByAddress(this.transAssetOwnerAddr),
+                              }
+                        });
+                        this.centerDialogVisible = false;
+                        if (data && data.status === 'success') {
                               Message({
                                     message: '接受申请成功',
                                     type: 'success'
                               });
                               this.loadData();
-                              this.centerDialogVisible = false;
-                        } else if (data && data.data && data.data.status === 'fail') {
-                              this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
-                              this.centerDialogVisible = false;
+                        } else if (data && data.status === 'fail') {
+                              this.$message.error(getErrorMsgByErrorCode(data.errCode));
                         } else {
                               this.$message.error('接受申请失败');
                               this.centerDialogVisible = false;
                               //接受失败以后重新请求转让状态,修改可操作按钮
                               this.getAssetTransList(1);
                         }
-                  }).catch((e: any) => {
+                  } catch (e) {
                         console.error(e);
                         this.loading = false;
                         this.$message.error('接受申请失败');
                         this.centerDialogVisible = false;
                         this.getAssetTransList(1);
-                  });
+                  }
 
             }
 
-            private postTransfer(): void {
-                  const body: any = {
-                        request_id: this.postTransRequestId
-                  };
+            private async postTransfer() {
                   this.loading = true;
-                  axios.post({
-                        url: `/assets_transfer/${this.postTransNftId}/transfer_handle`,
-                        body,
-                        ctx: this
-                  }).then((data: any) => {
+                  try {
+                        const data: types.IResponse<string> = await AxiosHelper.post({
+                              url: `/assets_transfer/${this.postTransNftId}/transfer_handle`,
+                              body: {
+                                    request_id: this.postTransRequestId
+                              }
+                        });
+                        this.centerDialogVisible = false;
                         this.loading = false;
-                        console.log(data);
-                        if (data && data.data && data.data.status === 'success') {
+                        if (data && data.status === 'success') {
                               Message({
                                     message: '转让成功',
                                     type: 'success'
                               });
                               this.loadData();
                               this.getDetails();
-                              //this.assetOwner = this.provider;
-                              this.centerDialogVisible = false;
-                        } else if (data && data.data && data.data.status === 'fail') {
-                              this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
-                              this.centerDialogVisible = false;
+                        } else if (data && data.status === 'fail') {
+                              this.$message.error(getErrorMsgByErrorCode(data.errCode));
                         } else {
                               this.$message.error('转让失败,请稍后重试');
-                              this.centerDialogVisible = false;
                         }
-                  }).catch((e: any) => {
-                        this.loading = false;
+                  } catch (e) {
                         console.error(e);
+                        this.loading = false;
                         this.$message.error('转让失败,请稍后重试');
                         this.centerDialogVisible = false;
-                  });
+                  }
             }
 
-            private postRefuseTrans(): void {
-                  const body: any = {
-                        request_id: this.requestId,
-                  };
+            private async postRefuseTrans() {
                   this.loading = true;
-                  axios.post({
-                        url: `/assets_transfer/${this.operateNftId}/transfer_owner/refuse`,
-                        body,
-                        ctx: this
-                  }).then((data: any) => {
-                        console.log(data);
+                  try {
+                        const data: types.IResponse<string> = await AxiosHelper.post({
+                              url: `/assets_transfer/${this.operateNftId}/transfer_owner/refuse`,
+                              body: {
+                                    request_id: this.requestId,
+                              }
+                        });
+                        this.centerDialogVisible = false;
                         this.loading = false;
-                        if (data && data.data && data.data.status === 'success') {
+                        if (data && data.status === 'success') {
                               Message({
-                                    message: '拒绝申请成功',
+                                    message: '拒绝转让成功',
                                     type: 'success'
                               });
                               this.loadData();
-                              this.centerDialogVisible = false;
-                        } else if (data && data.data && data.data.status === 'fail') {
-                              this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
-                              this.centerDialogVisible = false;
+                        } else if (data && data.status === 'fail') {
+                              this.$message.error(getErrorMsgByErrorCode(data.errCode));
                         } else {
-                              this.$message.error('拒绝申请失败');
-                              this.centerDialogVisible = false;
+                              this.$message.error('拒绝转让失败');
                         }
-                  }).catch((e: any) => {
-                        this.loading = false;
+                  } catch (e) {
                         console.error(e);
-                        this.$message.error('拒绝申请失败');
+                        this.loading = false;
+                        this.$message.error('拒绝转让失败');
                         this.centerDialogVisible = false;
-                  });
+                  }
 
             }
 
-            private refuseAuth(): void {
-                  const body: any = {
-                        request_id: this.requestId,
-                  };
+            private async refuseAuth() {
                   this.loading = true;
-                  axios.post({
-                        url: `/assets_authorization/${this.operateNftId}/authorization/refuse`,
-                        body,
-                        ctx: this
-                  }).then((data: any) => {
-                        console.log(data);
+                  try {
+                        const data: types.IResponse<string> = await AxiosHelper.post({
+                              url: `/assets_authorization/${this.operateNftId}/authorization/refuse`,
+                              body: {
+                                    request_id: this.requestId,
+                              }
+                        });
+                        this.centerDialogVisible = false;
                         this.loading = false;
-                        if (data && data.data && data.data.status === 'success') {
+                        if (data && data.status === 'success') {
                               Message({
                                     message: '拒绝成功',
                                     type: 'success'
                               });
                               this.loadData();
-                              this.centerDialogVisible = false;
-                        } else if (data && data.data && data.data.status === 'fail') {
-                              this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
-                              this.centerDialogVisible = false;
+                        } else if (data && data.status === 'fail') {
+                              this.$message.error(getErrorMsgByErrorCode(data.errCode));
                         } else {
                               this.$message.error('拒绝失败');
-                              this.centerDialogVisible = false;
                         }
-                  }).catch((e: any) => {
+                  } catch (e) {
                         console.error(e);
                         this.loading = false;
                         this.$message.error('拒绝失败');
                         this.centerDialogVisible = false;
-                  });
+                  }
             }
 
-            private acceptAuth(): void {
-                  const body: any = {
-                        "consumer_pubkey": accountHelper.getPublicKeyByAddress(this.consumer),
-                        "request_id": this.requestId,
-                  };
+            private async acceptAuth() {
                   this.loading = true;
-                  axios.post({
-                        url: `/assets_authorization/${this.operateNftId}/authorization/accept`,
-                        body,
-                        ctx: this
-                  }).then((data: any) => {
-                        console.log(data);
+                  try {
+                        const data: types.IResponse<string> = await AxiosHelper.post({
+                              url: `/assets_authorization/${this.operateNftId}/authorization/accept`,
+                              body: {
+                                    consumer_pubkey: AccountHelper.getPublicKeyByAddress(this.consumer),
+                                    request_id: this.requestId,
+                              }
+                        });
+                        this.centerDialogVisible = false;
                         this.loading = false;
-                        if (data && data.data && data.data.status === 'success') {
+                        if (data && data.status === 'success') {
                               Message({
                                     message: '授权成功',
                                     type: 'success'
                               });
                               this.loadData();
-                              this.centerDialogVisible = false;
-                        } else if (data && data.data && data.data.status === 'fail') {
-                              this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
-                              this.centerDialogVisible = false;
+                        } else if (data && data.status === 'fail') {
+                              this.$message.error(getErrorMsgByErrorCode(data.errCode));
                         } else {
                               this.$message.error('授权失败');
-                              this.centerDialogVisible = false;
                         }
-                  }).catch((e: any) => {
+                  } catch (e) {
                         console.error(e);
                         this.loading = false;
                         this.$message.error('授权失败');
                         this.centerDialogVisible = false;
-                  });
+                  }
             }
 
-            private transfer(): void {
+            private async transfer() {
                   if (!this.value) {
                         this.$message.error('请选择要转让的账户');
                         return;
                   }
-                  if(this.uploadFileTooLarge){
+                  if (this.uploadFileTooLarge) {
                         this.$message.error('存在大小超过4M的文件, 请重新上传');
                         return;
                   }
                   this.loading = true;
-                  const fm: FormData = new FormData(), fileList: any = document.getElementsByTagName('form')[0].file.files,
-                      url: string = `${accountHelper.getAccount().domain}/assets_transfer/${this.$route.query.nft_id}/transfer_owner`;
+                  const fm: FormData = new FormData(),
+                      fileList: any = document.getElementsByTagName('form')[0].file.files,
+                      url: string = `/assets_transfer/${this.$route.query.nft_id}/transfer_owner`;
                   for (let item of fileList) {
                         fm.append('files', item);
                   }
                   fm.append('provider', this.value);
-                  fm.append('provider_pubkey', accountHelper.getPublicKeyByAddress(this.value));
-                  fetch(url, {
-                        method: "POST",
-                        body: fm
-                  }).then((response: any) => {
-                        return response.json();
-                  }).then((data: any) => {
+                  fm.append('provider_pubkey', AccountHelper.getPublicKeyByAddress(this.value));
+
+                  try {
+                        const data: types.IResponse<string> = await AxiosHelper.upload({
+                              url,
+                              body: fm
+                        });
+                        this.centerDialogVisible = false;
                         this.loading = false;
-                        console.error(data)
                         if (data && data.status === 'success') {
                               Message({
                                     message: '申请转让成功',
                                     type: 'success'
                               });
                               this.centerDialogVisible = false;
-                              //this.$router.go(-1);
                               this.loadData();
                         } else if (data && data.status === 'fail') {
                               this.$message.error(getErrorMsgByErrorCode(data.errCode));
-                              this.centerDialogVisible = false;
                         } else {
                               this.$message.error('申请转让失败');
                         }
-                  }).catch((e: any) => {
+                  } catch (e) {
+                        console.error(e);
                         this.loading = false;
-                        console.error(e)
                         this.$message.error('申请转让失败');
                         this.centerDialogVisible = false;
-                  })
+                  }
             }
 
-            private unlock(): void {//点击解密
-                  const body: any = {
-                        "request_id": this.authRequestId,
-                  };
-                  axios.post({
-                        url: `/assets_authorization/${this.nftId}/authorization/lookup`,
-                        body,
-                        ctx: this
-                  }).then((data: any) => {
-                        console.log(data);
-                        if (data && data.data && data.data.status === 'success') {
+            private async unlock() {//点击解密
+                  try {
+                        const data: types.IResponse<types.IDecodeData> = await AxiosHelper.post({
+                              url: `/assets_authorization/${this.nftId}/authorization/lookup`,
+                              body: {
+                                    request_id: this.authRequestId,
+                              }
+                        });
+                        this.centerDialogVisible = false;
+                        this.loading = false;
+                        if (data && data.status === 'success' && data.data) {
                               Message({
                                     message: '解密成功',
                                     type: 'success'
                               });
-                              this.jsonData = JSON.parse(data.data.data.asset_content);
+                              this.jsonData = JSON.parse(data.data.asset_content);
                               this.getCheckStatus(1);
-                              this.secretList = JSON.parse(data.data.data.asset_content).secretProperties;
+                              this.secretList = JSON.parse(data.data.asset_content).secretProperties;
                               this.evidenceDetailListData.forEach((item) => {
-                                    const uri: any = data.data.data.record_files.find((f: any) => f.origin_file === item.uri);
+                                    const uri: types.IRecordFile | undefined = data.data.record_files.find((f: types.IRecordFile) => f.origin_file === item.uri);
                                     if (uri) {
                                           item.decryptoUri = uri.re_encrypted_file
                                     }
@@ -1500,7 +1494,7 @@
                                     if (node) {
                                           node.alpaca({
                                                 "schemaSource": JsonSchemaHelper.getFormatSchemaFile(require(`../schema/${this.$route.query.query_type}`)),
-                                                "dataSource": JSON.parse(data.data.data.asset_content),
+                                                "dataSource": JSON.parse(data.data.asset_content),
                                                 "view": "bootstrap-display"
                                           });
                                           this.drawNoteNode();
@@ -1508,20 +1502,18 @@
                                           this.setSecretFieldStyle(true);
                                     }
                               }, 100);
-
-                        } else if (data && data.data && data.data.status === 'fail') {
-                              this.$message.error(getErrorMsgByErrorCode(data.data.errCode));
+                        } else if (data && data.status === 'fail') {
+                              this.$message.error(getErrorMsgByErrorCode(data.errCode));
                               this.getAssetAuthList(1);
-                              this.centerDialogVisible = false;
                         } else {
                               this.$message.error('解密失败');
                               //失败以后重新请求授权状态,如果状态改变则修改按钮展示
                               this.getAssetAuthList(1);
                         }
-                  }).catch((e: any) => {
+                  } catch (e) {
                         console.error(e);
                         this.$message.error('解密失败');
-                  });
+                  }
             }
 
             private handleCancelBtnClick(): void {
@@ -1591,42 +1583,33 @@
                   return aEle;
             }
 
-            private getDetails(): void {
-                  let url = `/assets/detail/${this.$route.query.nft_id}`;
-                  if (this.useUnlock) {
-                        url += `?request_id=${this.transRequestId}`;
-                  }
-
-                  axios.get({
-                        url,
-                        ctx: this
-                  }).then((data: any) => {
+            private async getDetails() {
+                  try {
+                        let url: string = `/assets/detail/${this.$route.query.nft_id}`;
+                        if (this.useUnlock) {
+                              url += `?request_id=${this.transRequestId}`;
+                        }
+                        let data: types.IResponse<types.IAssetDetails> = await AxiosHelper.get({url});
                         if (data && data.data) {
                               this.handleDetailData(data.data);
-                        } else {
-                              this.$message.error('未获取到数据');
                         }
-
-                  }).catch((e: any) => {
-                        console.error(e)
-                        this.$message.error('未获取到数据');
-                  });
+                  } catch (e) {
+                        console.error(e);
+                        this.$message.error(`获取数据失败`);
+                  }
             }
 
-            private getCheckStatus(page: number): void {
+            private async getCheckStatus(page: number) {
                   this.checkLoading = true;
-                  let url = `/assets_check?pageNum=${page}&pageSize=5&used_count=true&nft_id=${this.$route.query.nft_id}`;
-                  axios.get({
-                        url,
-                        ctx: this
-                  }).then((data: any) => {
-                        console.error(data)
-                        console.error(this.jsonData)
-                        if (data && data.data && data.data.length) {
-                              this.checkDataList = data.data.map((item: any) => {
+                  try {
+                        const url: string = `/assets_check?pageNum=${page}&pageSize=5&used_count=true&nft_id=${this.$route.query.nft_id}`;
+                        const data: types.IResponse<types.ICheckData[]> = await AxiosHelper.get({url});
+                        this.checkLoading = false;
+                        if (data && data.data && data.status === 'success') {
+                              this.checkDataList = data.data.map((item: types.ICheckData) => {
                                     return {
-                                          displayStatus:constant.CheckStatusMap.get(item.status),
-                                          displayResult:item.status === constant.CheckStatus.Responsed ? (item.check_result ? '通过' : '不通过') : '',
+                                          displayStatus: constant.CheckStatusMap.get(item.status),
+                                          displayResult: item.status === constant.CheckStatus.Responsed ? (item.check_result ? '通过' : '不通过') : '',
                                           path: item.req_data_path,
                                           interactType: item.interact_type,
                                           expandData: jp.query(this.jsonData, item.req_data_path),
@@ -1635,15 +1618,14 @@
                                     }
                               })
                         }
-                        this.checkLoading = false;
-                  }).catch((e: any) => {
-                        this.checkLoading = false;
+                  } catch (e) {
                         console.error(e);
-
-                  });
+                        this.checkLoading = false;
+                        this.$message.error(`获取数据失败`);
+                  }
             }
 
-            private handleDetailData(data: any):void {
+            private handleDetailData(data: types.IAssetDetails): void {
                   console.log('detail data', data)
                   if (data && data.asset_info) {
                         let jsonData: any = JSON.parse(data.asset_info);
@@ -1655,11 +1637,11 @@
                         this.secretList = jsonData.secretProperties;
                         this.assetOwner = data.chain_info.nft_owner;
 
-                        if(accountHelper.isSupervise()){
+                        if (AccountHelper.isSupervise()) {
                               //监管账户可以申请查看仅自己可见项, 非监管只能在有授权可见的项时才可以展示申请查看按钮
-                              this.hasSecret = (this.jsonData.authorizationProperties.length > 0 || this.jsonData.secretProperties.length > 0) && !accountHelper.isOwner(this.assetOwner);
-                        }else{
-                              this.hasSecret = this.jsonData.authorizationProperties.length > 0 && !accountHelper.isOwner(this.assetOwner);
+                              this.hasSecret = (this.jsonData.authorizationProperties.length > 0 || this.jsonData.secretProperties.length > 0) && !AccountHelper.isOwner(this.assetOwner);
+                        } else {
+                              this.hasSecret = this.jsonData.authorizationProperties.length > 0 && !AccountHelper.isOwner(this.assetOwner);
                         }
                         this.recordIds = jsonData.transferHistories;
                         this.renderUI();
@@ -1670,7 +1652,7 @@
                         if (data.chain_info.record_id) {
                               this.currentRecordId = data.chain_info.record_id;
                               this.getEvidenceDetail();
-                        }else{
+                        } else {
                               this.evidenceLoading = false;
                               this.evidenceCount = 0;
                               this.evidenceLatestUpdateTime = '';
@@ -1684,7 +1666,7 @@
                   }
             }
 
-            private setSecretFieldStyle(showSecret?: boolean): void{
+            private setSecretFieldStyle(showSecret?: boolean): void {
                   setTimeout(() => {
                         const node: any = this.getCheckElement('div', 'data-alpaca-field-path', /^\//);
                         const pathMap = new Map<string, any>();
@@ -1720,7 +1702,7 @@
                                     pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].style.color = '#FF6200';
                                     //监管人员解密以后是可以查看所有数据
                                     if (showSecret) {
-                                          if (!accountHelper.isSupervise()) {
+                                          if (!AccountHelper.isSupervise()) {
                                                 pathMap.get(replaced).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
                                           }
 
@@ -1737,7 +1719,7 @@
                                                 if (p.replace(num, '*') === replaced) {
                                                       pathMap.get(p).getElementsByClassName('alpaca-control')[0].style.color = '#FF6200';
                                                       if (showSecret) {
-                                                            if (!accountHelper.isSupervise()) {
+                                                            if (!AccountHelper.isSupervise()) {
                                                                   pathMap.get(p).getElementsByClassName('alpaca-control')[0].innerHTML = '******';
                                                             }
                                                       } else {
@@ -1792,7 +1774,7 @@
                         el.removeChild(childs[i]);
                   }
                   const node: any = $("#detail_json_schema_node");
-                  if(node){
+                  if (node) {
                         node.alpaca({
                               "schemaSource": JsonSchemaHelper.getFormatSchemaFile(require(`../schema/${this.$route.query.query_type}`)),
                               "dataSource": this.jsonData,
@@ -1804,30 +1786,30 @@
                   }
             }
 
-            private getAssetTransList(page: number):void {
+            private async getAssetTransList(page: number) {
                   this.transLoading = true;
-                  axios.get({
-                        url: `/assets_transfer/${this.$route.query.nft_id}/transfer_records?pageNum=${page}&pageSize=5&used_count=true`,
-                        ctx: this
-                  }).then((data: any) => {
-                        if (data && data.data) {
+                  try {
+                        const url: string = `/assets_transfer/${this.$route.query.nft_id}/transfer_records?pageNum=${page}&pageSize=5&used_count=true`;
+                        let data: types.IResponse<types.ITransferData[]> = await AxiosHelper.get({url});
+                        this.transLoading = false;
+                        if (data && data.data && data.status === 'success') {
                               this.handleAssetTransData(data, page);
                         }
+                  } catch (e) {
+                        console.error(e);
                         this.transLoading = false;
-                  }).catch((e: any) => {
-                        this.transLoading = false;
-                        console.error(e)
-                  });
+                        this.$message.error(`获取转让信息失败`);
+                  }
             }
 
-            private handleAssetTransData(data: any, page: number):void {
+            private handleAssetTransData(data: types.IResponse<types.ITransferData[]>, page: number): void {
                   console.log('transfer asset list data', data)
                   //判断是否展示'申请转让'按钮 accountApplyTransStatus
                   if (data.data.length > 0 && page === 1) {
                         this.accountApplyTransStatus = data.data[0].status;
                         //如果最新的转让状态是  转让申请中,并且当前账户是受让方, 使用直接调用解密接口 (useUnlock)
                         //当前账户是受让者
-                        if (data.data[0].status === constant.AssetsListStatus.Applying && accountHelper.getAccount().address === data.data[0].provider) {
+                        if (data.data[0].status === constant.AssetsListStatus.Applying && AccountHelper.getAccount().address === data.data[0].provider) {
                               this.useUnlock = true;
                               this.transRequestId = data.data[0].request_id;
                               console.log('trans request id:', this.transRequestId)
@@ -1836,7 +1818,7 @@
                         }
 
                         //当前账户是owner
-                        if (data.data[0].status === constant.AssetsListStatus.Accept && accountHelper.getAccount().address === data.data[0].consumer) {
+                        if (data.data[0].status === constant.AssetsListStatus.Accept && AccountHelper.getAccount().address === data.data[0].consumer) {
                               console.log('current trans status is:已接受', data.data[0].request_id);
                               this.postTransRequestId = data.data[0].request_id;
                               this.postTransNftId = data.data[0].nft_id;
@@ -1858,11 +1840,11 @@
                   }
                   this.transferData = data.data.map((t: any) => {
                         let displayHashOk: string = '';
-                        if(t.hashok === -1){
+                        if (t.hashok === -1) {
                               displayHashOk = '--';
-                        }else if(t.hashok){
+                        } else if (t.hashok) {
                               displayHashOk = '校验成功';
-                        }else if(!t.hashok){
+                        } else if (!t.hashok) {
                               displayHashOk = '校验失败';
                         }
                         return {
@@ -1872,13 +1854,13 @@
                               receiver: t.provider,
                               txStatus: t.status,
                               displayStatus: constant.AssetsListStatusMap.get(t.status),
-                              displayReceiver: accountHelper.getUserNameByAddress(t.provider),
-                              displayPoster: accountHelper.getUserNameByAddress(t.consumer),
+                              displayReceiver: AccountHelper.getUserNameByAddress(t.provider),
+                              displayPoster: AccountHelper.getUserNameByAddress(t.consumer),
                               consumer: t.consumer,
                               provider: t.provider,
-                              showAcceptBtn: t.status === constant.AssetsListStatus.Applying && t.provider === accountHelper.getAccount().address,
-                              showTransBtn: t.status === constant.AssetsListStatus.Accept && t.consumer === accountHelper.getAccount().address && t.hashok,
-                              showRefusedBtn: t.status === constant.AssetsListStatus.Accept && t.consumer === accountHelper.getAccount().address && t.hashok,
+                              showAcceptBtn: t.status === constant.AssetsListStatus.Applying && t.provider === AccountHelper.getAccount().address,
+                              showTransBtn: t.status === constant.AssetsListStatus.Accept && t.consumer === AccountHelper.getAccount().address && t.hashok,
+                              showRefusedBtn: t.status === constant.AssetsListStatus.Accept && t.consumer === AccountHelper.getAccount().address && t.hashok,
                               tfs: t.tfs,
                               hashok: t.hashok,
                               displayHashOk
@@ -1886,37 +1868,42 @@
                   })
             }
 
-            private getAssetAuthList(page: number): void {
+            private async getAssetAuthList(page: number) {
                   this.applyLoading = true;
-                  axios.get({
-                        url: `/assets_authorization/${this.$route.query.nft_id}/authorization_records?pageNum=${page}&pageSize=5&used_count=true`,
-                        ctx: this
-                  }).then((data: any) => {
-                        if (data && data.data) {
+
+                  try {
+                        const url: string = `/assets_authorization/${this.$route.query.nft_id}/authorization_records?pageNum=${page}&pageSize=5&used_count=true`;
+                        const data: types.IResponse<types.IAssetAuthorization[]> = await AxiosHelper.get({
+                              url
+                        });
+                        if (data && data.status === 'success' && data.data) {
                               this.handleAssetAuthData(data, page);
                         }
                         this.applyLoading = false;
-                  }).catch((e: any) => {
+                  } catch (e) {
+                        console.error(e);
                         this.applyLoading = false;
-                        console.error(e)
-                  });
+                        this.$message.error('获取数据失败, 请稍后重试');
+                  }
 
-                  axios.get({
-                        url : `/assets_authorization/${this.$route.query.nft_id}/authorization_records?pageNum=1&pageSize=1&used_count=true&consumer=${accountHelper.getAccount().address}`,
-                        ctx : this
-                  }).then((data: any) =>{
-                        if(data && data.data && data.data[0]){
+
+                  try {
+                        const url: string = `/assets_authorization/${this.$route.query.nft_id}/authorization_records?pageNum=${page}&pageSize=5&used_count=true&consumer=${AccountHelper.getAccount().address}`;
+                        const data: types.IResponse<types.IAssetAuthorization[]> = await AxiosHelper.get({
+                              url
+                        });
+                        if (data && data.status === 'success' && data.data[0]) {
                               this.accountApplyAuthorizeStatus = data.data[0].status;
                               this.authRequestId = data.data[0].request_id;
                         }
+                  } catch (e) {
+                        console.error(e);
+                        this.$message.error('获取数据失败, 请稍后重试');
+                  }
 
-                  }).catch((e: any) =>{
-                        console.error(e)
-                  });
             }
 
-            private handleAssetAuthData(data: any, page?: number):void {
-                  console.log('authorization asset list data', data);
+            private handleAssetAuthData(data: types.IResponse<types.IAssetAuthorization[]>, page?: number): void {
                   this.totalApplyCount = data.total;
                   //判断是否展示'点击解密'按钮和'申请查看'按钮;  accountApplyAuthorizeStatus
                   if (data.data.length > 0 && page === 1) {
@@ -1927,42 +1914,46 @@
                   if (data.data.length > 0) {
                         this.authLatestUpdateTime = formatTimestamp(data.data[0].update_at)
                   }
+                  let isNotSupervise: boolean = false;
+                  const superviseAccount: types.IAccount | undefined = AccountHelper.getAccountList().find((item: types.IAccount) => item.isSupervise === 'true');
                   this.applyAndAuthDataList = data.data.map((a: any) => {
-                        const isNotSupervise: any = accountHelper.getAccountList().find((item: any)=>item.isSupervise === 'true') !== a.consumer;
+                        if (superviseAccount && superviseAccount.address !== a.consumer) isNotSupervise = true;
                         return {
                               id: a.nft_id,
                               requestId: a.request_id,
                               time: formatTimestamp(a.create_at),
-                              applicant: accountHelper.getUserNameByAddress(a.consumer),
+                              applicant: AccountHelper.getUserNameByAddress(a.consumer),
                               applyStatus: constant.AuthorizationStatusMap.get(a.status),
-                              showAuthBtn: a.status === constant.AuthorizationStatus.Applying && a.provider === accountHelper.getAccount().address && isNotSupervise,
+                              showAuthBtn: a.status === constant.AuthorizationStatus.Applying && a.provider === AccountHelper.getAccount().address && isNotSupervise,
                               provider: a.provider,
                               consumer: a.consumer,
                         }
                   })
             }
 
-            private getAssetTxList(page: number): void {
+            private async getAssetTxList(page: number) {
                   const {query_type} = this.$route.query;
                   this.txTransferLoading = true;
-                  axios.get({
-                        url: `/assets_tx?pageNum=${page}&pageSize=10&used_count=true&token_id=${this.chainInfo.token_id}&asset_type=${query_type}`,
-                        ctx: this
-                  }).then((data: any) => {
-                        if (data && data.data) {
+
+                  try {
+                        const url: string = `/assets_tx?pageNum=${page}&pageSize=10&used_count=true&token_id=${this.chainInfo.token_id}&asset_type=${query_type}`;
+                        const data: types.IResponse<types.IAssetTxData[]> = await AxiosHelper.get({
+                              url
+                        });
+                        this.txTransferLoading = false;
+                        if (data && data.status === 'success' && data.data) {
                               this.handleTxListData(data);
                         }
+                  } catch (e) {
+                        console.error(e);
                         this.txTransferLoading = false;
-                  }).catch((e: any) => {
-                        this.txTransferLoading = false;
-                        console.error(e)
-                  });
+                        this.$message.error('获取数据失败, 请稍后重试');
+                  }
             }
 
-            private handleTxListData(data: any):void {
-                  console.log('asset list data', data);
+            private handleTxListData(data: types.IResponse<types.IAssetTxData[]>): void {
                   this.totalTxListCount = data.total;
-                  this.assetListData = data.data.map((item: any) => {
+                  this.assetListData = data.data.map((item: types.IAssetTxData) => {
                         return {
                               txType: item.type,
                               txHash: item.tx_hash,
@@ -1975,71 +1966,52 @@
                   })
             }
 
-            private getServiceDataList(page: number):void {
+            private async getServiceDataList(page: number) {
                   this.serviceLoading = true;
-                  axios.get({
-                        url: `/assets_tx/service_tx?pageNum=${page}&pageSize=10&used_count=true&nft_id=${this.$route.query.nft_id}`,
-                        ctx: this
-                  }).then((data: any) => {
-                        if (data && data.data) {
+                  try {
+                        const url: string = `/assets_tx/service_tx?pageNum=${page}&pageSize=10&used_count=true&nft_id=${this.$route.query.nft_id}`;
+                        const data: types.IResponse<types.IServiceData[]> = await AxiosHelper.get({
+                              url
+                        });
+                        this.serviceLoading = false;
+                        if (data && data.status === 'success' && data.data) {
                               this.handleServiceDataData(data);
                         }
+                  } catch (e) {
+                        console.error(e);
                         this.serviceLoading = false;
-                  }).catch((e: any) => {
-                        this.serviceLoading = false;
-                        console.error(e)
-                  });
+                        this.$message.error('获取数据失败, 请稍后重试');
+                  }
             }
 
-            private getEvidenceDataList(page: number): void {
-                  console.log(this.recordIds)
+            private async getEvidenceDataList(page: number) {
                   this.evidenceListLoading = true;
                   if (this.recordIds && this.recordIds.length) {
                         let recordIdStr = this.recordIds.join();
-                        axios.get({
-                              url: `/assets_record?pageNum=${page}&pageSize=10&used_count=true&record_ids=${recordIdStr}`,
-                              ctx: this
-                        }).then((data: any) => {
-                              if (data && data.data) {
+                        try {
+                              const url: string = `/assets_record?pageNum=${page}&pageSize=10&used_count=true&record_ids=${recordIdStr}`;
+                              const data: types.IResponse<types.IEvicenceData[]> = await AxiosHelper.get({
+                                    url
+                              });
+                              this.evidenceListLoading = false;
+                              if (data && data.status === 'success' && data.data) {
                                     this.handleEvidenceDataData(data);
                               }
+                        } catch (e) {
+                              console.error(e);
                               this.evidenceListLoading = false;
-                        }).catch((e: any) => {
-                              this.evidenceListLoading = false;
-                              console.error(e)
-                        });
+                              this.$message.error('获取数据失败, 请稍后重试');
+                        }
+
                   } else {
                         this.evidenceListLoading = false;
                   }
 
             }
 
-            private getEvidenceDetail(): void {
-                  this.evidenceLoading = true;
-                  axios.get({
-                        url: `/assets_record/detail/${this.currentRecordId}`,
-                        ctx: this
-                  }).then((data: any) => {
-                        if (data && data.data) {
-                              this.evidenceCount = data.data.file_nums;
-                              this.evidenceLatestUpdateTime = formatTimestamp(data.data.time);
-                              this.evidenceDetailListData = data.data.contents;
-                              this.evidenceDetailListData.forEach((item) => {
-                                    item.tx_hash = data.data.tx_hash
-                              })
-                        }
-                        this.evidenceLoading = false;
-                  }).catch((e: any) => {
-                        this.evidenceLoading = false;
-                        console.error(e)
-                  });
-
-            }
-
-            private handleServiceDataData(data: any): void {
-                  console.log('service list data', data);
+            private handleServiceDataData(data: types.IResponse<types.IServiceData[]>): void {
                   this.totalServiceListCount = data.total;
-                  this.serviceListData = data.data.map((item: any) => {
+                  this.serviceListData = data.data.map((item: types.IServiceData) => {
                         return {
                               serviceName: item.service_name,
                               serviceType: item.type,
@@ -2052,8 +2024,7 @@
                   })
             }
 
-            private handleEvidenceDataData(data: any):void {
-                  console.log('evidence list data', data);
+            private handleEvidenceDataData(data: types.IResponse<types.IEvicenceData[]>): void {
                   this.totalServiceListCount = data.total;
                   this.evidenceListData = data.data;
                   this.evidenceListData.forEach((item) => {
@@ -2061,6 +2032,31 @@
                   })
 
             }
+
+            private async getEvidenceDetail() {
+                  this.evidenceLoading = true;
+                  try {
+                        const url: string = `/assets_record/detail/${this.currentRecordId}`;
+                        const data: types.IResponse<types.IEvidenceData> = await AxiosHelper.get({
+                              url
+                        });
+                        this.evidenceLoading = false;
+                        if (data && data.status === 'success' && data.data) {
+                              this.evidenceCount = data.data.file_nums;
+                              this.evidenceLatestUpdateTime = formatTimestamp(data.data.time);
+                              this.evidenceDetailListData = data.data.contents;
+                              this.evidenceDetailListData.forEach((item) => {
+                                    item.tx_hash = data.data.tx_hash
+                              })
+                        }
+                  } catch (e) {
+                        console.error(e);
+                        this.evidenceLoading = false;
+                        this.$message.error('获取数据失败, 请稍后重试');
+                  }
+
+            }
+
 
       }
 
@@ -2071,7 +2067,7 @@
     .asset_details_container {
         width: 100%;
         height: 100%;
-        
+
         align-items: center;
         background: rgba(250, 250, 250, 1);
         .asset_details_wrap {
@@ -2084,7 +2080,7 @@
             background: #ffffff;
             box-sizing: border-box;
             .asset_details_title_container {
-                
+
                 justify-content: space-between;
                 margin-bottom: 30px;
                 .asset_details_title {
@@ -2096,7 +2092,7 @@
                     height: 34px;
                 }
                 .edit_btn_container {
-                    
+
                     justify-content: flex-end;
                 }
             }
@@ -2156,7 +2152,7 @@
                     cursor: pointer;
                     text-align: center;
                     font-size: 12px;
-                    font-weight:400;
+                    font-weight: 400;
                 }
             }
             .schema_container {
@@ -2170,8 +2166,8 @@
                     position: absolute;
                     right: 40px;
                     top: 13px;
-                    display:flex;
-                    flex-direction:row;
+                    display: flex;
+                    flex-direction: row;
                     align-items: center;
                     .auth_title {
                         font-size: 12px;
@@ -2211,8 +2207,8 @@
                     border-color: #EDEDED;
                 }
                 .form-group {
-                    display:flex;
-                    flex-direction:row;
+                    display: flex;
+                    flex-direction: row;
                     .alpaca-control-label {
                         font-size: 14px;
                         font-weight: 400;
@@ -2377,8 +2373,8 @@
                 width: 100%;
             }
             .dialog-footer {
-                display:flex;
-                flex-direction:row;
+                display: flex;
+                flex-direction: row;
                 justify-content: center;
                 .asset_details_cancel_btn {
                     width: 136px;

@@ -126,7 +126,7 @@
       import {Message} from 'element-ui';
       import getErrorMsgByErrorCode from '../helper/errorCodeHelper';
       import {Component, Vue} from 'vue-property-decorator';
-      import accountHelper from '../helper/accountHelper';
+      import AccountHelper from '../helper/AccountHelper';
       import DataVisibilitySettingTree from '../components/DataVisibilitySettingTree.vue';
       import AxiosHelper from '../helper/AxiosHelper';
       import * as types from "../types";
@@ -305,7 +305,7 @@
                               asset_data: this.jsonData,
                         };
                         const url: string = `/assets/${this.$route.query.nft_id}`;
-                        let data: types.IResponse<string> = await AxiosHelper.put({url, body, ctx: this});
+                        let data: types.IResponse<string> = await AxiosHelper.put({url, body});
                         if (data && data.status === 'success') {
                               Message({
                                     message: '编辑资产成功',
@@ -325,8 +325,8 @@
             private async getDetails() {
                   let data: types.IResponse<types.IAssetDetails>;
                   try {
-                        const url: string = `/assets/detail/${this.$route.query.nft_id}?address=${accountHelper.getAccount().address}`;
-                        data = await AxiosHelper.get({url, ctx: this});
+                        const url: string = `/assets/detail/${this.$route.query.nft_id}?address=${AccountHelper.getAccount().address}`;
+                        data = await AxiosHelper.get({url});
                         if (data.data) {
                               this.handleDetailData(data.data);
                         }

@@ -167,7 +167,7 @@
 </template>
 
 <script lang="ts">
-      import accountHelper from '../helper/accountHelper';
+      import AccountHelper from '../helper/AccountHelper';
       import {getFormatAddress, formatTimestamp} from '../util/util';
       import getErrorMsgByErrorCode from '../helper/errorCodeHelper';
       import cfg from '../config/config.json';
@@ -263,7 +263,7 @@
                   let body: object = {}, url: string = '', str: string = '';
                   if (dialogType === 0) {
                         body = {
-                              "consumer_pubkey": accountHelper.getPublicKeyByAddress(consumer),
+                              "consumer_pubkey": AccountHelper.getPublicKeyByAddress(consumer),
                               "request_id": request_id,
                         };
                         url = `/assets_authorization/${this.nftId}/authorization/accept`;
@@ -279,8 +279,7 @@
                   try {
                         const data: types.IResponse<string> = await AxiosHelper.post({
                               url,
-                              body,
-                              ctx: this
+                              body
                         });
                         this.centerDialogVisible = false;
                         this.loading = false;
@@ -305,7 +304,7 @@
             }
 
             private getTransShow(row: any): boolean {
-                  return accountHelper.isOwner(row.owner) && row.transStatus === constant.AssetsStatus.Normal
+                  return AccountHelper.isOwner(row.owner) && row.transStatus === constant.AssetsStatus.Normal
             }
 
             private handleCheckClick(row: any): void {
@@ -314,8 +313,8 @@
 
             private async getDetails(row: any) {
                   try {
-                        const url: string = `/assets/detail/${row.id}?address=${accountHelper.getAccount().address}`;
-                        let data: types.IResponse<types.IAssetDetails> = await AxiosHelper.get({url, ctx: this});
+                        const url: string = `/assets/detail/${row.id}?address=${AccountHelper.getAccount().address}`;
+                        let data: types.IResponse<types.IAssetDetails> = await AxiosHelper.get({url});
                         if (data && data.data && data.data.chain_info) {
                               this.$router.push(`/asset_detail?type=check&nft_id=${row.id}&query_type=${data.data.chain_info.type}`);
                         }
@@ -344,7 +343,7 @@
                   }
                   this.tableLoading = true;
                   try {
-                        const data: types.IResponse<types.IAssetAuthorization[]> = await AxiosHelper.get({url, ctx: this});
+                        const data: types.IResponse<types.IAssetAuthorization[]> = await AxiosHelper.get({url});
                         if (data && data.status === 'success' && data.data) {
                               this.handleData(data);
                         }
@@ -352,7 +351,7 @@
                   } catch (e) {
                         console.error(e);
                         this.tableLoading = false;
-                        this.$message.error('请求数据错误');
+                        this.$message.error('获取数据失败, 请稍后重试');
                   }
 
 
@@ -363,7 +362,7 @@
                   this.totalTxCount = data.total;
                   this.totalAssets = data.total;
                   let isNotSupervise: boolean =  false;
-                  const superviseAccount: types.IAccount | undefined = accountHelper.getAccountList().find((item: types.IAccount)=>item.isSupervise === 'true');
+                  const superviseAccount: types.IAccount | undefined = AccountHelper.getAccountList().find((item: types.IAccount)=>item.isSupervise === 'true');
                   this.tableData = data.data.map((asset: types.IAssetAuthorization) => {
                         if(superviseAccount && superviseAccount.address !== asset.consumer) isNotSupervise = true;
                         return {
@@ -380,7 +379,7 @@
                               request_id: asset.request_id,
                               consumer: asset.consumer,
                               resp_resource_url: asset.resp_resource_url,
-                              showBtn:asset.status === constant.AuthStatus.Applying && asset.provider === accountHelper.getAccount().address && isNotSupervise
+                              showBtn:asset.status === constant.AuthStatus.Applying && asset.provider === AccountHelper.getAccount().address && isNotSupervise
                         };
                   })
             }

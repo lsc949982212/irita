@@ -178,7 +178,7 @@
       import schemaConfig from '../schema/config.json';
       import {Component, Vue} from 'vue-property-decorator';
       import * as types from "../types";
-      import accountHelper from '../helper/accountHelper';
+      import AccountHelper from '../helper/AccountHelper';
       import * as constant from "../constant";
       import DataVisibilitySettingTree from '../components/DataVisibilitySettingTree.vue';
       import AxiosHelper from '../helper/AxiosHelper';
@@ -421,7 +421,7 @@
             private async getAssetType() {
                   const url: string = `/assets/denoms`;
                   try {
-                        let data: types.IResponse<types.IDenoms> = await AxiosHelper.get({url, ctx: this});
+                        let data: types.IResponse<types.IDenoms> = await AxiosHelper.get({url});
                         if (data.data) {
                               data.data.denoms.forEach((item: string) => {
                                     if (schemaConfig.denoms.includes(item)) {
@@ -443,7 +443,7 @@
                         }
                   } catch (e) {
                         console.error(e);
-                        this.$message.error('请求数据错误');
+                        this.$message.error('获取数据失败, 请稍后重试');
                   }
 
             }
@@ -522,15 +522,14 @@
             private async postData() {
                   const body: types.ISaveAssets = {
                         asset_data: this.jsonData,
-                        owner: accountHelper.getAccount().address,
-                        owner_pubkey: accountHelper.getAccount().publicKey,
+                        owner: AccountHelper.getAccount().address,
+                        owner_pubkey: AccountHelper.getAccount().publicKey,
                   };
 
                   try {
                         let data: types.IResponse<string> = await AxiosHelper.post({
                               url: `/assets`,
-                              body,
-                              ctx: this
+                              body
                         });
                         if (data && data.status === 'success') {
                               Message({

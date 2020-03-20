@@ -145,7 +145,7 @@
 </template>
 
 <script lang="ts">
-      import accountHelper from '../helper/accountHelper';
+      import AccountHelper from '../helper/AccountHelper';
       import {getFormatAddress} from '../util/util';
       import cfg from '../config/config.json';
       import schemaConfig from '../schema/config.json';
@@ -219,7 +219,7 @@
             private async getAssetType() {
                   try {
                         const url: string = `/assets/denoms`;
-                        const data: types.IResponse<types.IDenoms> = await AxiosHelper.get({url, ctx: this});
+                        const data: types.IResponse<types.IDenoms> = await AxiosHelper.get({url});
                         if (data && data.status === 'success') {
                               if (data && data.data && data.data.denoms) {
                                     data.data.denoms.forEach((item: string) => {
@@ -237,16 +237,16 @@
 
                               }
                         } else {
-                              this.$message.error('请求数据错误');
+                              this.$message.error('获取数据失败, 请稍后重试');
                         }
                   } catch (e) {
                         console.error(e);
-                        this.$message.error('请求数据错误');
+                        this.$message.error('获取数据失败, 请稍后重试');
                   }
             }
 
             private getTransShow(row: any): boolean {
-                  return accountHelper.isOwner(row.owner) && row.transStatus === constant.AssetsStatus.Normal;
+                  return AccountHelper.isOwner(row.owner) && row.transStatus === constant.AssetsStatus.Normal;
             }
 
             private toExplorer(type: string, param: string): void {
@@ -278,13 +278,13 @@
                         url += `&query_data=${input}`
                   }
                   try {
-                        const data: types.IResponse<types.IAssetsListItem[]> = await AxiosHelper.get({url, ctx: this});
+                        const data: types.IResponse<types.IAssetsListItem[]> = await AxiosHelper.get({url});
                         if (data && data.status === 'success' && data.data) {
                               console.log(data)
                               this.totalTxCount = data.total;
                               this.totalAssets = data.total;
                               this.tableData = data.data.map((asset: types.IAssetsListItem) => {
-                                    const owner: types.IAccount | undefined = accountHelper.getAccountList().find((a: types.IAccount) => a.address === asset.nft_owner);
+                                    const owner: types.IAccount | undefined = AccountHelper.getAccountList().find((a: types.IAccount) => a.address === asset.nft_owner);
                                     return {
                                           number: asset.number,
                                           id: asset.nft_id,
@@ -304,7 +304,7 @@
                   } catch (e) {
                         console.error(e);
                         this.loading = false;
-                        this.$message.error('请求数据错误');
+                        this.$message.error('获取数据失败, 请稍后重试');
                   }
 
             }

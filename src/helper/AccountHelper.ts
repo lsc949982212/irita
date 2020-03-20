@@ -1,24 +1,27 @@
 import cfg from '../config/config.json';
 import * as types from '../types';
 
-export default {
-      getAccountList(): types.IAccount[] {
+
+export default class AccountHelper {
+      public static getAccountList(): types.IAccount[] {
             const config: types.ICfg = JSON.parse(JSON.stringify(cfg));
             const accountList: types.IAccount[] = [];
             for (const key of Object.keys(config.account)) {
                   accountList.push(config.account[key]);
             }
             return accountList;
-      },
-      isOwner(address: string): boolean {
+      }
+
+      public static isOwner(address: string): boolean {
             const token: string | null = sessionStorage.getItem('token');
             if (token) {
                   return JSON.parse(token).address === address;
             } else {
                   return false;
             }
-      },
-      getAccount(): types.IConfig {
+      }
+
+      public static getAccount(): types.IConfig {
             const token: string | null = sessionStorage.getItem('token');
             if (token) {
                   return JSON.parse(token);
@@ -31,16 +34,19 @@ export default {
                         isSupervise: '',
                   };
             }
-      },
-      getUserNameByAddress(address: string): string {
+      }
+
+      public static getUserNameByAddress(address: string): string {
             const a: any | undefined = this.getAccountList().find((item: any) => item.address === address);
             return a ? a.name : address;
-      },
-      getPublicKeyByAddress(address: string): string {
+      }
+
+      public static getPublicKeyByAddress(address: string): string {
             const a: any | undefined = this.getAccountList().find((item: any) => item.address === address);
             return a ? a.publicKey : '';
-      },
-      isSupervise(): boolean {
+      }
+
+      public static isSupervise(): boolean {
             let isSupervise = false;
             const token: string | null = sessionStorage.getItem('token');
             if (token) {
@@ -48,6 +54,5 @@ export default {
             } else {
                   return false;
             }
-      },
-
-};
+      }
+}
