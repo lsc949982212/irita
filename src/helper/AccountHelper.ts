@@ -47,10 +47,9 @@ export default class AccountHelper {
       }
 
       public static isSupervise(): boolean {
-            let isSupervise = false;
             const token: string | null = sessionStorage.getItem('token');
             if (token) {
-                  return isSupervise = JSON.parse(token).isSupervise === 'true';
+                  return JSON.parse(token).isSupervise === 'true';
             } else {
                   return false;
             }
